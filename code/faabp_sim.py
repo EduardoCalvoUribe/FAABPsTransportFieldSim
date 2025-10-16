@@ -7,7 +7,6 @@ import time
 import os
 import math
 from numba import njit, float64, int64
-from vector_fields import uniform_vector_field, radial_vector_field, limit_cycle_vector_field
 
 
 
@@ -199,37 +198,18 @@ def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion,
 
 
 @njit(fastmath=True)
-def discretize_position(pos, box_size, grid_size):
-    """Convert continuous position to discrete grid indices."""
-    # Map position [0, box_size) to grid index [0, grid_size)
-    x_idx = np.int64(pos[0] * grid_size / box_size)
-    y_idx = np.int64(pos[1] * grid_size / box_size)
-
-    # Clamp to valid range (in case of rounding errors at boundaries)
-    x_idx = min(max(x_idx, 0), grid_size - 1)
-    y_idx = min(max(y_idx, 0), grid_size - 1)
-
-    return x_idx, y_idx
-
-@njit(fastmath=True)
-def compute_curvity_from_vector_field(positions, orientations, vector_fields, box_size, grid_size, n_particles):
-    """Compute curvity for all particles based on their vector field memory.
+def compute_curvity_from_vectors(orientations, particle_vectors, n_particles):
+    """Compute curvity for all particles based on their extra vectors.
 
     Curvity = -(e · v), where:
     - e is the particle's heading direction (orientation)
-    - v is the vector at the particle's current location in its vector field
+    - v is the particle's extra vector
     """
     curvity = np.zeros(n_particles)
 
     for i in range(n_particles):
-        # Get discrete grid indices for particle's position
-        x_idx, y_idx = discretize_position(positions[i], box_size, grid_size)
-
-        # Get vector from particle's memory at this location
-        v = vector_fields[i, x_idx, y_idx]
-
         # Compute dot product: e · v
-        dot_product = orientations[i, 0] * v[0] + orientations[i, 1] * v[1]
+        dot_product = orientations[i, 0] * particle_vectors[i, 0] + orientations[i, 1] * particle_vectors[i, 1]
 
         # Curvity is negative dot product
         curvity[i] = -dot_product
@@ -238,7 +218,7 @@ def compute_curvity_from_vector_field(positions, orientations, vector_fields, bo
     
 @njit(fastmath=True)
 def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel,
-                         radii, v0s, mobilities, payload_mobility, vector_fields, grid_size,
+                         radii, v0s, mobilities, payload_mobility, particle_vectors,
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles, step):
     """Simulate a single time step"""
     # Compute forces on particles and payload
@@ -246,10 +226,8 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
         positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size
     )
 
-    # Compute curvity from vector fields
-    curvity = compute_curvity_from_vector_field(
-        positions, orientations, vector_fields, box_size, grid_size, n_particles
-    )
+    # Compute curvity from particle vectors
+    curvity = compute_curvity_from_vectors(orientations, particle_vectors, n_particles)
 
     # Update particle orientations
     orientations = update_orientation_vectors(
@@ -306,14 +284,13 @@ def run_payload_simulation(params):
         angle = np.random.uniform(0, 2*np.pi)
         orientations[i] = np.array([np.cos(angle), np.sin(angle)])
 
-    # Initialize vector fields for all particles (all pointing upward: (0, 1))
-    # vector_fields = np.zeros((n_particles, grid_size, grid_size, 2), dtype=np.float64)
-    # vector_fields[:, :, :, 1] = 1.0  # All vectors point upward (0, 1)
-
-    #single_field = limit_cycle_vector_field(grid_size, cycle_radius=grid_size / 4, rad_mult=6.0)
-    #single_field = uniform_vector_field(grid_size, np.pi / 4)
-    single_field = radial_vector_field(grid_size, np.array([grid_size / 2, grid_size / 2]))
-    vector_fields = np.tile(single_field, (n_particles, 1, 1, 1))
+    # Initialize scalar scores and extra vectors for all particles
+    particle_scores = np.zeros(n_particles, dtype=np.int64)
+    particle_vectors = np.zeros((n_particles, 2), dtype=np.float64)
+    # Initialize all vectors as unit vectors in direction π/4
+    angle = np.pi / 4
+    particle_vectors[:, 0] = np.cos(angle)
+    particle_vectors[:, 1] = np.sin(angle)
 
     # Initialize payload location. Bottom left corner for now
     payload_pos = np.array([box_size/4, box_size/4])
@@ -328,10 +305,8 @@ def run_payload_simulation(params):
     saved_payload_velocities = np.zeros((n_saves, 2))
     saved_curvity = np.zeros((n_saves, n_particles))
     
-    # Compute initial curvity from vector fields
-    initial_curvity = compute_curvity_from_vector_field(
-        positions, orientations, vector_fields, box_size, grid_size, n_particles
-    )
+    # Compute initial curvity from particle vectors
+    initial_curvity = compute_curvity_from_vectors(orientations, particle_vectors, n_particles)
 
     # Store initial state
     saved_positions[0] = positions.copy()
@@ -350,7 +325,7 @@ def run_payload_simulation(params):
         positions, orientations, velocities, payload_pos, payload_vel, curvity = simulate_single_step(
             positions, orientations, velocities, payload_pos, payload_vel,
             params['particle_radius'], params['v0'], params['mobility'], params['payload_mobility'],
-            vector_fields, grid_size, params['stiffness'],
+            particle_vectors, params['stiffness'],
             params['box_size'], params['payload_radius'], params['dt'], params['rot_diffusion'], n_particles, step
         )
 
@@ -384,15 +359,15 @@ def run_payload_simulation(params):
         saved_payload_positions,
         saved_payload_velocities,
         saved_curvity,
-        vector_fields,
+        particle_scores,
+        particle_vectors,
         end_time - start_time
     )
 
 def create_payload_animation(positions, orientations, velocities, payload_positions, params,
-                            curvity_values, output_file='visualizations/payload_animation_00.mp4',
-                            show_avg_vector_field=False, vector_field_step=20, vector_fields=None):
+                            curvity_values, output_file='visualizations/payload_animation_00.mp4'):
     """Create an animation of the payload transport simulation."""
-    
+
     print("Creating animation...")
 
     start_time = time.time()
@@ -401,7 +376,6 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     box_size = params['box_size']
     payload_radius = params['payload_radius']
     n_particles = params['n_particles']
-    grid_size = params['grid_size']
     
     # Create figure and axis
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -473,69 +447,34 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     time_text = ax.text(0.02, 0.98, 'Frame: 0', transform=ax.transAxes, fontsize=12,
                         verticalalignment='top')
 
-    # Initialize vector field visualization
-    quiver = None
-    if show_avg_vector_field:
-        if vector_fields is None:
-            raise ValueError("vector_fields must be provided when show_avg_vector_field is True")
-
-        # Compute average vector field across all particles
-        avg_field = np.mean(vector_fields, axis=0)
-
-        # Create coordinate grids with specified step
-        y_coords, x_coords = np.meshgrid(
-            np.arange(0, grid_size, vector_field_step),
-            np.arange(0, grid_size, vector_field_step),
-            indexing='ij'
-        )
-
-        # Scale coordinates to box_size
-        x_scaled = x_coords * (box_size / grid_size)
-        y_scaled = y_coords * (box_size / grid_size)
-
-        # Sample the average vector field at the specified step
-        u = avg_field[::vector_field_step, ::vector_field_step, 0]
-        v = avg_field[::vector_field_step, ::vector_field_step, 1]
-
-        # Create quiver plot with semi-transparent arrows
-        quiver = ax.quiver(x_scaled, y_scaled, u, v,
-                          angles='xy', scale_units='xy', scale=0.15,
-                          alpha=0.4, color='black', width=0.003)
-
     def init():
         """Initialize the animation."""
-        artists = [scatter, payload, trajectory, time_text, params_text, params_text_2]
-        if quiver is not None:
-            artists.append(quiver)
-        return artists
+        return [scatter, payload, trajectory, time_text, params_text, params_text_2]
     
     def update(frame):
         """Update the animation for each frame."""
         # Update time counter
         time_text.set_text(f'Frame: {frame}')
-        
+
         # Report progress periodically
         if frame % 50 == 0:
             print(f"Progress: Frame {frame}")
-        
+
         # Update payload
         payload.center = (payload_positions[frame, 0], payload_positions[frame, 1])
-        
+
         # Update payload trajectory
         trajectory_end = min(frame + 1, len(payload_positions))
         trajectory.set_data(
             payload_positions[:trajectory_end, 0],
             payload_positions[:trajectory_end, 1]
         )
-        
+
         # Particle positions & colors update
         scatter.set_offsets(positions[frame])
         scatter.set_color([get_particle_color(cv) for cv in curvity_values[frame]])
 
-        artists = [scatter, payload, trajectory, time_text]
-        if quiver is not None:
-            artists.append(quiver)
-        return artists
+        return [scatter, payload, trajectory, time_text]
     
     # Create animation
     n_frames = positions.shape[0]
@@ -655,7 +594,7 @@ if __name__ == "__main__":
 
 
     params = default_payload_params(n_particles=1000)
-    positions, orientations, velocities, payload_positions, payload_velocities, curvity_values, vector_fields, runtime = run_payload_simulation(params)
+    positions, orientations, velocities, payload_positions, payload_velocities, curvity_values, particle_scores, particle_vectors, runtime = run_payload_simulation(params)
 
     # Timestamp
     T = int(time.time())
@@ -668,8 +607,7 @@ if __name__ == "__main__":
 
     # Create animation
     create_payload_animation(positions, orientations, velocities, payload_positions, params,
-                                curvity_values, f'./visualizations/sim_animation_T_{T}.mp4', 
-                                show_avg_vector_field=True, vector_field_step=20, vector_fields=vector_fields)
+                                curvity_values, f'./visualizations/sim_animation_T_{T}.mp4')
 
     
 
