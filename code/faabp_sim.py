@@ -7,6 +7,7 @@ import time
 import os
 import math
 from numba import njit, float64, int64
+from vector_fields import uniform_vector_field, radial_vector_field, limit_cycle_vector_field
 
 
 
@@ -84,38 +85,8 @@ def create_cell_list(positions, box_size, cell_size, n_particles):
         cell_x = int(positions[i, 0] / cell_size) # , n_cells - 1
         cell_y = int(positions[i, 1] / cell_size) # , n_cells - 1
         
-        # cell_id = cell_y * n_cells + cell_x 
-        # Optionally, use row-major ordering; converts 2D grid coords into a 1D index.
-        # Every x, y pair maps to a different number, and it's reversible
-        # x = cell_id % n_cells
-        # y = cell_id // n_cells
-        
-        list_next[i] = head[cell_x, cell_y] # head[cell_id] if row-major ordering
-        head[cell_x, cell_y] = i # head[cell_id]
-        
-        # Example:
-        
-        # Initial state: Empty cell (cell coords: = 1, 1)
-        # head[1, 1] = -1
-        # list_next = [-1, -1, -1, ...]
-
-        # Add particle 10 to cell (1, 1):
-        # head[1, 1] = 10
-        # list_next[10] = -1
-
-        # Add particle 7 to cell (1, 1):
-        # list_next[7] = 10  (7 points to 10)
-        # head[1, 1] = 7        (7 is new head)
-
-        # Add particle 3 to cell (1, 1):
-        # list_next[3] = 7   (3 points to 7)
-        # head[1, 1] = 3        (3 is new head)
-        
-        # Later, when we want to find all particles in cell (1, 1), we can start at head[1, 1] and follow the links:
-        # j = head[1, 1]
-        # while j != -1:
-        #     # Do something with j
-        #     j = list_next[j]
+        list_next[i] = head[cell_x, cell_y] 
+        head[cell_x, cell_y] = i 
     
     return head, list_next, n_cells
 
@@ -231,8 +202,8 @@ def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion,
 def discretize_position(pos, box_size, grid_size):
     """Convert continuous position to discrete grid indices."""
     # Map position [0, box_size) to grid index [0, grid_size)
-    x_idx = int(pos[0] * grid_size / box_size)
-    y_idx = int(pos[1] * grid_size / box_size)
+    x_idx = np.int64(pos[0] * grid_size / box_size)
+    y_idx = np.int64(pos[1] * grid_size / box_size)
 
     # Clamp to valid range (in case of rounding errors at boundaries)
     x_idx = min(max(x_idx, 0), grid_size - 1)
@@ -336,8 +307,13 @@ def run_payload_simulation(params):
         orientations[i] = np.array([np.cos(angle), np.sin(angle)])
 
     # Initialize vector fields for all particles (all pointing upward: (0, 1))
-    vector_fields = np.zeros((n_particles, grid_size, grid_size, 2), dtype=np.float64)
-    vector_fields[:, :, :, 1] = 1.0  # All vectors point upward (0, 1)
+    # vector_fields = np.zeros((n_particles, grid_size, grid_size, 2), dtype=np.float64)
+    # vector_fields[:, :, :, 1] = 1.0  # All vectors point upward (0, 1)
+
+    #single_field = limit_cycle_vector_field(grid_size, cycle_radius=grid_size / 4, rad_mult=6.0)
+    #single_field = uniform_vector_field(grid_size, np.pi / 4)
+    single_field = radial_vector_field(grid_size, np.array([grid_size / 2, grid_size / 2]))
+    vector_fields = np.tile(single_field, (n_particles, 1, 1, 1))
 
     # Initialize payload location. Bottom left corner for now
     payload_pos = np.array([box_size/4, box_size/4])
@@ -402,26 +378,30 @@ def run_payload_simulation(params):
     print(f"Total payload displacement: {total_payload_displacement:.3f}")
     
     return (
-        saved_positions, 
-        saved_orientations, 
-        saved_velocities, 
-        saved_payload_positions, 
+        saved_positions,
+        saved_orientations,
+        saved_velocities,
+        saved_payload_positions,
         saved_payload_velocities,
         saved_curvity,
+        vector_fields,
         end_time - start_time
     )
 
-def create_payload_animation(positions, orientations, velocities, payload_positions, params, 
-                            curvity_values, output_file='visualizations/payload_animation_00.mp4'):
+def create_payload_animation(positions, orientations, velocities, payload_positions, params,
+                            curvity_values, output_file='visualizations/payload_animation_00.mp4',
+                            show_avg_vector_field=False, vector_field_step=20, vector_fields=None):
     """Create an animation of the payload transport simulation."""
+    
     print("Creating animation...")
-    
+
     start_time = time.time()
-    
+
     # Extract parameters
     box_size = params['box_size']
     payload_radius = params['payload_radius']
     n_particles = params['n_particles']
+    grid_size = params['grid_size']
     
     # Create figure and axis
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -492,10 +472,42 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     # Add time counter
     time_text = ax.text(0.02, 0.98, 'Frame: 0', transform=ax.transAxes, fontsize=12,
                         verticalalignment='top')
-    
+
+    # Initialize vector field visualization
+    quiver = None
+    if show_avg_vector_field:
+        if vector_fields is None:
+            raise ValueError("vector_fields must be provided when show_avg_vector_field is True")
+
+        # Compute average vector field across all particles
+        avg_field = np.mean(vector_fields, axis=0)
+
+        # Create coordinate grids with specified step
+        y_coords, x_coords = np.meshgrid(
+            np.arange(0, grid_size, vector_field_step),
+            np.arange(0, grid_size, vector_field_step),
+            indexing='ij'
+        )
+
+        # Scale coordinates to box_size
+        x_scaled = x_coords * (box_size / grid_size)
+        y_scaled = y_coords * (box_size / grid_size)
+
+        # Sample the average vector field at the specified step
+        u = avg_field[::vector_field_step, ::vector_field_step, 0]
+        v = avg_field[::vector_field_step, ::vector_field_step, 1]
+
+        # Create quiver plot with semi-transparent arrows
+        quiver = ax.quiver(x_scaled, y_scaled, u, v,
+                          angles='xy', scale_units='xy', scale=0.15,
+                          alpha=0.4, color='black', width=0.003)
+
     def init():
         """Initialize the animation."""
-        return [scatter, payload, trajectory, time_text, params_text, params_text_2]
+        artists = [scatter, payload, trajectory, time_text, params_text, params_text_2]
+        if quiver is not None:
+            artists.append(quiver)
+        return artists
     
     def update(frame):
         """Update the animation for each frame."""
@@ -520,7 +532,10 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         scatter.set_offsets(positions[frame])
         scatter.set_color([get_particle_color(cv) for cv in curvity_values[frame]])
 
-        return [scatter, payload, trajectory, time_text]
+        artists = [scatter, payload, trajectory, time_text]
+        if quiver is not None:
+            artists.append(quiver)
+        return artists
     
     # Create animation
     n_frames = positions.shape[0]
@@ -569,7 +584,7 @@ def default_payload_params(n_particles=1000, curvity=0, payload_radius=20):
         'box_size': 350,
         'grid_size': 350,  # Vector field grid size (matches box_size for 1:1 mapping)
         'dt': 0.01,
-        'n_steps': 20000,
+        'n_steps': 40000,
         'save_interval': 10,            # Interval for saving data
         'payload_radius': payload_radius,
         'payload_mobility': 1 / payload_radius,
@@ -640,20 +655,21 @@ if __name__ == "__main__":
 
 
     params = default_payload_params(n_particles=1000)
-    positions, orientations, velocities, payload_positions, payload_velocities, curvity_values, runtime = run_payload_simulation(params)
-    
+    positions, orientations, velocities, payload_positions, payload_velocities, curvity_values, vector_fields, runtime = run_payload_simulation(params)
+
     # Timestamp
     T = int(time.time())
-    
+
     # Save simulation data
     # save_simulation_data(
     #     f'./data/sim_data_T_{T}.npz',
     #     positions, orientations, velocities, payload_positions, payload_velocities, params, curvity_values
     # )
-    
+
     # Create animation
-    create_payload_animation(positions, orientations, velocities, payload_positions, params, 
-                                curvity_values, f'./visualizations/sim_animation_T_{T}.mp4')
+    create_payload_animation(positions, orientations, velocities, payload_positions, params,
+                                curvity_values, f'./visualizations/sim_animation_T_{T}.mp4', 
+                                show_avg_vector_field=True, vector_field_step=20, vector_fields=vector_fields)
 
     
 
