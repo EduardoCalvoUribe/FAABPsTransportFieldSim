@@ -226,55 +226,89 @@ def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion,
     return new_orientations
 
 
-# Unused
-@njit
-def update_curvity_half_box(positions, i, box_size):
-    """Updates curvity based on position. For testing purposes"""
-    # If the particle is in the top half of the box, it has positive curvity. Otherwise, negative
-    if positions[i, 1] > box_size / 2:
-        return True
-    else:
-        return False
+
+@njit(fastmath=True)
+def discretize_position(pos, box_size, grid_size):
+    """Convert continuous position to discrete grid indices."""
+    # Map position [0, box_size) to grid index [0, grid_size)
+    x_idx = int(pos[0] * grid_size / box_size)
+    y_idx = int(pos[1] * grid_size / box_size)
+
+    # Clamp to valid range (in case of rounding errors at boundaries)
+    x_idx = min(max(x_idx, 0), grid_size - 1)
+    y_idx = min(max(y_idx, 0), grid_size - 1)
+
+    return x_idx, y_idx
+
+@njit(fastmath=True)
+def compute_curvity_from_vector_field(positions, orientations, vector_fields, box_size, grid_size, n_particles):
+    """Compute curvity for all particles based on their vector field memory.
+
+    Curvity = -(e · v), where:
+    - e is the particle's heading direction (orientation)
+    - v is the vector at the particle's current location in its vector field
+    """
+    curvity = np.zeros(n_particles)
+
+    for i in range(n_particles):
+        # Get discrete grid indices for particle's position
+        x_idx, y_idx = discretize_position(positions[i], box_size, grid_size)
+
+        # Get vector from particle's memory at this location
+        v = vector_fields[i, x_idx, y_idx]
+
+        # Compute dot product: e · v
+        dot_product = orientations[i, 0] * v[0] + orientations[i, 1] * v[1]
+
+        # Curvity is negative dot product
+        curvity[i] = -dot_product
+
+    return curvity
     
 @njit(fastmath=True)
-def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel, 
-                         radii, v0s, mobilities, payload_mobility, curvity, curvity_on, curvity_off,
+def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel,
+                         radii, v0s, mobilities, payload_mobility, vector_fields, grid_size,
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles, step):
     """Simulate a single time step"""
     # Compute forces on particles and payload
     particle_forces, payload_force = compute_all_forces(
         positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size
     )
-    
+
+    # Compute curvity from vector fields
+    curvity = compute_curvity_from_vector_field(
+        positions, orientations, vector_fields, box_size, grid_size, n_particles
+    )
+
     # Update particle orientations
     orientations = update_orientation_vectors(
         orientations, particle_forces, curvity, dt, rot_diffusion, n_particles
     )
-    
+
     # Update particle positions
     for i in range(n_particles):
         # Self-propulsion velocity with particle-specific v0
         self_propulsion = v0s[i] * orientations[i]
-        
+
         # Force-induced velocity with particle-specific mobility
         force_velocity = mobilities[i] * particle_forces[i]
-        
+
         # Total velocity
         velocities[i] = self_propulsion + force_velocity # + velocities[i] / 10 # added velocities[i] to test inertia!!
-        
+
         # Update position
         positions[i] += velocities[i] * dt
-    
+
     # Update payload
     payload_vel = payload_mobility * payload_force
-        
+
     payload_pos += payload_vel * dt
-    
+
     # Apply periodic boundary conditions
     positions = positions % box_size
     payload_pos = payload_pos % box_size
-    
-    return positions, orientations, velocities, payload_pos, payload_vel
+
+    return positions, orientations, velocities, payload_pos, payload_vel, curvity
 
 #####################################################
 # Main simulation runner functions                  #
@@ -283,23 +317,28 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
 def run_payload_simulation(params):
     """Run the complete payload transport simulation."""
     print(f"Running payload transport simulation with {params['n_particles']} particles for {params['n_steps']} steps...")
-    
+
     # Initialize arrays
     n_particles = params['n_particles']
     box_size = params['box_size']
     n_steps = params['n_steps']
     save_interval = params['save_interval']
-    
+    grid_size = params['grid_size']
+
     # Initialize particle positions, orientations, and velocities
     positions = np.random.uniform(0, box_size, (n_particles, 2))
     orientations = np.zeros((n_particles, 2))
     velocities = np.zeros((n_particles, 2))
-    
+
     # Initialize random orientations
     for i in range(n_particles):
         angle = np.random.uniform(0, 2*np.pi)
         orientations[i] = np.array([np.cos(angle), np.sin(angle)])
-    
+
+    # Initialize vector fields for all particles (all pointing upward: (0, 1))
+    vector_fields = np.zeros((n_particles, grid_size, grid_size, 2), dtype=np.float64)
+    vector_fields[:, :, :, 1] = 1.0  # All vectors point upward (0, 1)
+
     # Initialize payload location. Bottom left corner for now
     payload_pos = np.array([box_size/4, box_size/4])
     payload_vel = np.zeros(2)
@@ -313,13 +352,18 @@ def run_payload_simulation(params):
     saved_payload_velocities = np.zeros((n_saves, 2))
     saved_curvity = np.zeros((n_saves, n_particles))
     
+    # Compute initial curvity from vector fields
+    initial_curvity = compute_curvity_from_vector_field(
+        positions, orientations, vector_fields, box_size, grid_size, n_particles
+    )
+
     # Store initial state
     saved_positions[0] = positions.copy()
     saved_orientations[0] = orientations.copy()
     saved_velocities[0] = velocities.copy()
     saved_payload_positions[0] = payload_pos.copy()
     saved_payload_velocities[0] = payload_vel.copy()
-    saved_curvity[0] = params['curvity'].copy()
+    saved_curvity[0] = initial_curvity.copy()
     
     # Run simulation
     start_time = time.time()
@@ -327,13 +371,13 @@ def run_payload_simulation(params):
     
     for step in range(1, n_steps + 1):
         # Unified simulation step
-        positions, orientations, velocities, payload_pos, payload_vel = simulate_single_step(
-            positions, orientations, velocities, payload_pos, payload_vel, 
-            params['particle_radius'], params['v0'], params['mobility'], params['payload_mobility'], 
-            params['curvity'], params['curvity_on'], params['curvity_off'], params['stiffness'], 
+        positions, orientations, velocities, payload_pos, payload_vel, curvity = simulate_single_step(
+            positions, orientations, velocities, payload_pos, payload_vel,
+            params['particle_radius'], params['v0'], params['mobility'], params['payload_mobility'],
+            vector_fields, grid_size, params['stiffness'],
             params['box_size'], params['payload_radius'], params['dt'], params['rot_diffusion'], n_particles, step
         )
-        
+
         # Save data at specified intervals
         if step % save_interval == 0:
             saved_positions[save_idx] = positions
@@ -341,7 +385,7 @@ def run_payload_simulation(params):
             saved_velocities[save_idx] = velocities
             saved_payload_positions[save_idx] = payload_pos
             saved_payload_velocities[save_idx] = payload_vel
-            saved_curvity[save_idx] = params['curvity'].copy()
+            saved_curvity[save_idx] = curvity.copy()
             save_idx += 1
             
             # Report progress periodically
@@ -388,18 +432,33 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     ax.set_title('FAABP Cooperative Transport Simulation')
     ax.grid(True, alpha=0.3)
     
-    # Color of particle based on curvity value (or is leader)
-    def get_particle_color(curvity_value, particle_index):
-        # if particle_index == 0:
-        #     return 'green'
-        return 'red' if curvity_value > 0 else 'darkblue'
-    
-    default_curvity = params['curvity'][0]
-    particle_colors = [get_particle_color(default_curvity, i) for i in range(n_particles)] # -------------- for v0_2
-    # Using scatter for particles instead of individual circles
-    # particle_colors = [get_particle_color(curvity_values[0, i], i) for i in range(n_particles)]
+    # Color mapping: curvity -1 (dark blue) -> 0 (gray) -> +1 (red)
+    def get_particle_color(curvity_value):
+        """Map curvity value to RGB color with smooth gradient.
+        -1: dark blue, 0: gray, +1: red"""
+        # Clamp curvity to [-1, 1] range
+        c = np.clip(curvity_value, -1, 1)
+
+        if c < 0:
+            # Interpolate from dark blue (0, 0, 0.5) to gray (0.5, 0.5, 0.5)
+            t = (c + 1)  # Map [-1, 0] to [0, 1]
+            r = 0.0 + t * 0.5
+            g = 0.0 + t * 0.5
+            b = 0.5 + t * 0.0
+        else:
+            # Interpolate from gray (0.5, 0.5, 0.5) to red (1, 0, 0)
+            t = c  # Map [0, 1] to [0, 1]
+            r = 0.5 + t * 0.5
+            g = 0.5 - t * 0.5
+            b = 0.5 - t * 0.5
+
+        return (r, g, b)
+
+    # Initialize particle colors based on initial curvity values
+    particle_colors = [get_particle_color(curvity_values[0, i]) for i in range(n_particles)]
+
     scatter = ax.scatter(
-        positions[0, :, 0], 
+        positions[0, :, 0],
         positions[0, :, 1],
         s=np.pi * (params['particle_radius'] * 2)**2,  # Area of circle
         c=particle_colors,
@@ -425,7 +484,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     )
     
     # Add parameters text
-    params_text = ax.text(-0.02, -0.065, f'n_particles: {n_particles}, curvity with LOS: {params["curvity_on"]}, curvity without LOS: {params["curvity_off"]}, particle radius: {params["particle_radius"][0]}, payload radius: {payload_radius}', transform=ax.transAxes, fontsize=12,
+    params_text = ax.text(-0.02, -0.065, f'n_particles: {n_particles}, particle radius: {params["particle_radius"][0]}, payload radius: {payload_radius}', transform=ax.transAxes, fontsize=12,
                         verticalalignment='top')
     params_text_2 = ax.text(-0.02, -0.093, f'orientational noise: {params["rot_diffusion"][0]}, particle mobility: {params["mobility"][0]}, payload mobility: {params["payload_mobility"]}', transform=ax.transAxes, fontsize=12,
                         verticalalignment='top')
@@ -459,7 +518,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         
         # Particle positions & colors update
         scatter.set_offsets(positions[frame])
-        scatter.set_color([get_particle_color(cv, i) for i, cv in enumerate(curvity_values[frame])])
+        scatter.set_color([get_particle_color(cv) for cv in curvity_values[frame]])
 
         return [scatter, payload, trajectory, time_text]
     
@@ -502,25 +561,24 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
 # Simulation configuration functions                #
 #####################################################
 
-def default_payload_params(n_particles=1000, curvity_on=-0.3, curvity_off=-0.3, curvity=0, payload_radius=20):
+def default_payload_params(n_particles=1000, curvity=0, payload_radius=20):
     """Return default parameters for payload transport simulation"""
     return {
         # Global parameters
-        'n_particles': n_particles,    
-        'box_size': 350,               
-        'dt': 0.01,                  
-        'n_steps': 10000,               
+        'n_particles': n_particles,
+        'box_size': 350,
+        'grid_size': 350,  # Vector field grid size (matches box_size for 1:1 mapping)
+        'dt': 0.01,
+        'n_steps': 20000,
         'save_interval': 10,            # Interval for saving data
-        'payload_radius': payload_radius,        
+        'payload_radius': payload_radius,
         'payload_mobility': 1 / payload_radius,
-        'stiffness': 25.0,              
+        'stiffness': 25.0,
         # Particle-specific parameters
-        'v0': np.ones(n_particles) * 3.75,           
-        'mobility': np.ones(n_particles) * 1,    # Manually kept to 1/r
-        'curvity': np.ones(n_particles) * curvity,     # Curvity array for all particles. Default is all 0 (but doesnt matter since it gets updated every step)
-        'curvity_on': curvity_on, # When there is line of sight
-        'curvity_off': curvity_off, # When there is no line of sight
-        'particle_radius': np.ones(n_particles) * 1, 
+        'v0': np.ones(n_particles) * 3.75,
+        'curvity': np.ones(n_particles) * curvity,     # Curvity array (now computed dynamically from vector fields)
+        'particle_radius': np.ones(n_particles) * 1,
+        'mobility': np.ones(n_particles) * 1,    # 1/r
         'rot_diffusion': np.ones(n_particles) * 0.05 # 0.05
     }
     
