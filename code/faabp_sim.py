@@ -225,58 +225,6 @@ def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion,
     
     return new_orientations
 
-@njit(fastmath=True)
-def has_line_of_sight(positions, i, goal_position, payload_pos, payload_radius):
-    """Returns True if particle has line of sight with the goal, False otherwise. Does not use periodic boundaries for obvious reasons"""
-    # I think I can vectorize this implementation to make it faster w/ Numba
-    # but I dont know if the gains are actually worth the effort.
-    # Would be less readable too
-    
-    # Points
-    x_i, y_i = positions[i]
-    x_goal, y_goal = goal_position
-    x_p, y_p = payload_pos
-    
-    # Quick bounding box check
-    min_x = min(x_i, x_goal) - 0.001
-    max_x = max(x_i, x_goal) + 0.001
-    min_y = min(y_i, y_goal) - 0.001
-    max_y = max(y_i, y_goal) + 0.001
-    
-    # If payload is outside bounding box (plus radius), it can't intersect
-    if (x_p - payload_radius > max_x or 
-        x_p + payload_radius < min_x or
-        y_p - payload_radius > max_y or
-        y_p + payload_radius < min_y):
-        return True
-    
-    # Direction vector: particle to goal
-    dx, dy = x_goal - x_i, y_goal - y_i
-    
-    # Direction vector: particle to payload
-    fx, fy = x_p - x_i, y_p - y_i
-    
-    # Coefficients of quadratic equations
-    a = dx**2 + dy**2 # Length of particle-goal line
-    b = 2 * (fx * dx + fy * dy)
-    c = fx**2 + fy**2 - payload_radius**2
-    
-    # Discriminant
-    discriminant = b**2 - 4 * a * c
-    
-    if discriminant < 0:
-        return True
-    else:
-        sqrt_discriminant = math.sqrt(discriminant)
-        # if a == 0:
-        #     a = 0.00000001 # was occuring when goal was attached to particle
-        t1 = (-b - sqrt_discriminant) / (2 * a)
-        t2 = (-b + sqrt_discriminant) / (2 * a)
-        
-        if (-1 <= t1 <= 0) or (-1 <= t2 <= 0):
-            return False
-        else:
-            return True
 
 # Unused
 @njit
@@ -305,25 +253,6 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
     
     # Update particle positions
     for i in range(n_particles):
-        
-        # Update curvity
-        goal_position = [4*(box_size / 5), 4*(box_size / 5)] # static location for now, top right corner.
-        # goal_position = positions[0]
-        
-        
-        # if has_line_of_sight(positions, i, goal_position, payload_pos, payload_radius):
-        #     # In the light
-                   
-        #     # curvity[i] = curvity_on
-        
-        #     v0s[i] = curvity_on
-        # else:
-        #     # In the shadow
-        
-        #     # curvity[i] = curvity_off
-        
-        #     v0s[i] = curvity_off
-        
         # Self-propulsion velocity with particle-specific v0
         self_propulsion = v0s[i] * orientations[i]
         
@@ -374,10 +303,7 @@ def run_payload_simulation(params):
     # Initialize payload location. Bottom left corner for now
     payload_pos = np.array([box_size/4, box_size/4])
     payload_vel = np.zeros(2)
-    
-    # Define goal position (currently hardcoded)
-    goal_position = np.array([4*(box_size / 5), 4*(box_size / 5)])
-    
+
     # Pre-allocate arrays for storing simulation data
     n_saves = n_steps // save_interval + 1
     saved_positions = np.zeros((n_saves, n_particles, 2))
@@ -407,27 +333,6 @@ def run_payload_simulation(params):
             params['curvity'], params['curvity_on'], params['curvity_off'], params['stiffness'], 
             params['box_size'], params['payload_radius'], params['dt'], params['rot_diffusion'], n_particles, step
         )
-        
-        # Check if payload has reached goal for early stopping
-        distance_to_goal = np.sqrt(np.sum((payload_pos - goal_position)**2))
-        if distance_to_goal <= params['payload_radius']:
-            print(f"Goal reached at step {step}!")
-            # Save final state
-            saved_positions[save_idx] = positions
-            saved_orientations[save_idx] = orientations
-            saved_velocities[save_idx] = velocities
-            saved_payload_positions[save_idx] = payload_pos
-            saved_payload_velocities[save_idx] = payload_vel
-            saved_curvity[save_idx] = params['curvity'].copy()
-            save_idx += 1
-            # Trim arrays to actual size
-            saved_positions = saved_positions[:save_idx]
-            saved_orientations = saved_orientations[:save_idx]
-            saved_velocities = saved_velocities[:save_idx]
-            saved_payload_positions = saved_payload_positions[:save_idx]
-            saved_payload_velocities = saved_payload_velocities[:save_idx]
-            saved_curvity = saved_curvity[:save_idx]
-            break
         
         # Save data at specified intervals
         if step % save_interval == 0:
@@ -509,16 +414,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         alpha=0.7
     )
     ax.add_patch(payload)
-    
-    # TEMPORARY: Static goal indication
-    goal_position = [4*(box_size / 5), 4*(box_size / 5)] 
-    goal = Circle(
-        (goal_position[0], goal_position[1]),
-        radius=2,
-        color='green'
-    )
-    ax.add_patch(goal)
-    
+
     # Create payload trajectory
     trajectory, = ax.plot(
         payload_positions[0:1, 0], 
