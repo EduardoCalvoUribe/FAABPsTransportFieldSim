@@ -3,7 +3,7 @@
 ## Overview
 Each particle has two key properties:
 - **Score (s)**: An integer representing the particle's "distance" from the goal in discrete hops
-- **Vector (v)**: A unit vector that influences the particle's curvity and turning behavior
+- **Vector (v)**: A unit vector that influences the particle's curvity (and therefore turning behavior)
 
 ## Algorithm Structure
 
