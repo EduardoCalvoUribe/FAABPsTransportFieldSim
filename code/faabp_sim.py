@@ -311,18 +311,18 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
         # goal_position = positions[0]
         
         
-        if has_line_of_sight(positions, i, goal_position, payload_pos, payload_radius):
-            # In the light
+        # if has_line_of_sight(positions, i, goal_position, payload_pos, payload_radius):
+        #     # In the light
                    
-            # curvity[i] = curvity_on
+        #     # curvity[i] = curvity_on
         
-            v0s[i] = curvity_on
-        else:
-            # In the shadow
+        #     v0s[i] = curvity_on
+        # else:
+        #     # In the shadow
         
-            # curvity[i] = curvity_off
+        #     # curvity[i] = curvity_off
         
-            v0s[i] = curvity_off
+        #     v0s[i] = curvity_off
         
         # Self-propulsion velocity with particle-specific v0
         self_propulsion = v0s[i] * orientations[i]
@@ -336,21 +336,8 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
         # Update position
         positions[i] += velocities[i] * dt
     
-    # INERTIA TEST
-    # payload_accel = payload_mobility * payload_force / 10 # 10 is mass. picked arbitrarily... could be scaled properly
-    # payload_vel = payload_vel + payload_accel * dt
-    
     # Update payload
     payload_vel = payload_mobility * payload_force
-    
-    # if step >= 0 and step <= 9: # BIG PUSH!!! -----------------------------------
-    #     payload_vel = payload_vel + np.array([10, 10])
-    #     print(f"Step {step}: PUSH!")
-    # if step < 10000:
-    #     payload_vel = np.array([0, 0], dtype=np.float64)
-    # if step == 30000: # BIG PUSH!!! -----------------------------------
-    #     payload_vel = payload_vel + np.array([5, 5], dtype=np.float64)
-    #     print(f"Step {step}: PUSH!")
         
     payload_pos += payload_vel * dt
     
@@ -626,10 +613,10 @@ def default_payload_params(n_particles=1000, curvity_on=-0.3, curvity_off=-0.3, 
         'n_particles': n_particles,    
         'box_size': 350,               
         'dt': 0.01,                  
-        'n_steps': 30000,               
+        'n_steps': 10000,               
         'save_interval': 10,            # Interval for saving data
         'payload_radius': payload_radius,        
-        'payload_mobility': 0.05,        # Manually kept to 1/r
+        'payload_mobility': 1 / payload_radius,
         'stiffness': 25.0,              
         # Particle-specific parameters
         'v0': np.ones(n_particles) * 3.75,           
@@ -698,46 +685,24 @@ if __name__ == "__main__":
     run_payload_simulation(params)
 
 
-    # params = default_payload_params(n_particles=1000)
-    # positions, orientations, velocities, payload_positions, payload_velocities, curvity_values, runtime = run_payload_simulation(params)
+    params = default_payload_params(n_particles=1000)
+    positions, orientations, velocities, payload_positions, payload_velocities, curvity_values, runtime = run_payload_simulation(params)
+    
+    # Timestamp
+    T = int(time.time())
     
     # Save simulation data
     # save_simulation_data(
-    #     f'D:/ThesisData/data/tests/sim_data_vOn_{3.75}_vOff_{10}_curvity_{0}_payloadinertia.npz',
+    #     f'./data/sim_data_T_{T}.npz',
     #     positions, orientations, velocities, payload_positions, payload_velocities, params, curvity_values
     # )
     
-    # # Create animation
-    # create_payload_animation(positions, orientations, velocities, payload_positions, params, 
-    #                             curvity_values, f'D:/ThesisData/visualizations/tests/sim_animation_vOn_{3.75}_vOff_{10}_curvity_{0}_pinertia.mp4')
+    # Create animation
+    create_payload_animation(positions, orientations, velocities, payload_positions, params, 
+                                curvity_values, f'./visualizations/sim_animation_T_{T}.mp4')
 
-    # Run simulations
-   
-    vels = [
-        [5, 10],
-        [5, 5],
-        [10, 10],
-        [10, 5],
-    ]
-    for curvity in [1, 0.8, 0.6, 0.4, 0.2, 0, -0.2, -0.4, -0.6, -0.8, -1]: 
-        for pair in vels: 
-            print(f"Running simulation with vOn={pair[0]}, vOff={pair[1]}, curvity={curvity}")
-            params = default_payload_params(curvity_on=pair[0], curvity_off=pair[1], curvity=curvity)
-            positions, orientations, velocities, payload_positions, payload_velocities, curvity_values, runtime = run_payload_simulation(params)
-            
-            # Save simulation data
-            save_simulation_data(
-                f'D:/ThesisData/data/dynamic_v0_2/sim_data_vOn_{pair[0]}_vOff_{pair[1]}_curvity_{curvity}.npz',
-                positions, orientations, velocities, payload_positions, payload_velocities, params, curvity_values
-            )
-            # Create animation
-            # create_payload_animation(positions, orientations, velocities, payload_positions, params, 
-            #                             curvity_values, f'D:/ThesisData/visualizations/dynamic_v0_2/sim_animation_vOn_{pair[0]}_vOff_{pair[1]}_curvity_{curvity}.mp4')
-
-                
     
-    # Timestamp
-    # T = int(time.time())
+
     
     # Create log file
     # log_file = f'./logs/log_{T}.txt'
