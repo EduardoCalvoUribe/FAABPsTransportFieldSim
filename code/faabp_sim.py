@@ -898,27 +898,4 @@ if __name__ == "__main__":
                                 show_vectors=True, particle_vectors=saved_particle_vectors)
 
     
-
-    
-    # Create log file
-    # log_file = f'./logs/log_{T}.txt'
-    # with open(log_file, 'a') as f:
-        # f.write("DEFAULT SETTINGS\n")
-        # f.write(f"Timestamp: {T}\n")
-        # f.write(f"Params: {params}\n")
-        # f.write(f"All runtimes: {runtimes}\n")
-        # f.write(f"Average runtime: {np.mean(runtimes)}\n")
-    
-    # Save simulation data
-    # save_simulation_data(
-    #     # Include timestamp in filename
-    #     'data/sim_data_{timestamp}.npz'.format(timestamp=T),
-    #     positions, orientations, velocities, payload_positions, payload_velocities, params,
-    #     curvity_values
-    # )
-    
-    # Create animation with frame-specific curvity values
-    # create_payload_animation(positions, orientations, velocities, payload_positions, params, 
-    #                          curvity_values, 'visualizations/sim_animation_{timestamp}.mp4'.format(timestamp=T))
-    
     print("Payload simulation and animation completed successfully!")
