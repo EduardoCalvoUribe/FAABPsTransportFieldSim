@@ -151,11 +151,11 @@ def compute_minimum_distance(pos_i, pos_j, box_size):
 @njit(fastmath=True)
 def compute_repulsive_force(pos_i, pos_j, radius_i, radius_j, stiffness, box_size):
     """Compute repulsive force between two particles.
-    
+
     Implements the equation:
     f_ij = { S_0 * (a+b-r_ij) * r_hat_ij, if r_ij <= a+b
            { 0,                           otherwise
-    
+
     where:
     - S_0 is the stiffness
     - a, b are the particle radii
@@ -164,24 +164,24 @@ def compute_repulsive_force(pos_i, pos_j, radius_i, radius_j, stiffness, box_siz
     """
     # r_ij = pos_j - pos_i
     r_ij = compute_minimum_distance(pos_i, pos_j, box_size)
-    
+
     dist = np.sqrt(np.sum(r_ij**2))
-    
+
     if dist < 1e-10:
-        r_ij = np.array([1e-5, 1e-5]) 
+        r_ij = np.array([1e-5, 1e-5])
         dist = np.sqrt(np.sum(r_ij**2))
-    
+
     r_hat = r_ij / dist
-    
+
     sum_radii = radius_i + radius_j
-    
+
     if dist < sum_radii:
         # Force magnitude: S_0 * (a+b-r_ij)
         force_magnitude = stiffness * (sum_radii - dist)
-        
-        # Force direction: -r_hat 
+
+        # Force direction: -r_hat
         return -force_magnitude * r_hat
-    
+
     # No force if particles don't overlap
     return np.zeros(2)
 
@@ -456,8 +456,8 @@ def has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, box_siz
 
 
 @njit(fastmath=True)
-def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size, current_score, head, list_next, n_cells, all_particle_vectors, payload_pos, payload_radius, walls):
-    """Compute v vector by aligning with neighbors' v vectors (Vicsek-style alignment).
+def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size, current_score, head, list_next, n_cells, all_particle_vectors, payload_pos, payload_radius, walls, directedness):
+    """Compute v vector by balancing score-weighted alignment and gradient following.
 
     Score calculation:
     - If goal is within range r: point to goal, return score 0
@@ -466,9 +466,10 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
     - If score > 20000: should halt program (checked externally)
 
     Vector calculation:
-    - Align v with neighbors' v vectors within range r
-    - Neighbors with lower scores have stronger alignment influence
-    - Influence is relative: min_score neighbor always has strongest weight
+    - Balances two components based on directedness parameter:
+      1. Score-weighted alignment: neighbors' v vectors weighted by exp(-(s_j - s_min)) (weight: 1 - directedness)
+      2. Gradient following: direction toward lowest-score neighbor position (weight: directedness)
+    - directedness ∈ [0, 1]: 0 = pure score-weighted Vicsek, 1 = pure gradient descent
 
     Uses cell list for O(N) neighbor search.
 
@@ -500,6 +501,7 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
     # Goal out of range - find all neighbors within r and collect their info
     neighbor_indices = []
     neighbor_scores = []
+    neighbor_positions = []
 
     # Determine cell size from the cell list
     cell_size = box_size / n_cells
@@ -511,7 +513,7 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
     # Check neighboring cells (including own cell)
     for dx in range(-1, 2):  # -1, 0, 1
         for dy in range(-1, 2):  # -1, 0, 1
-            
+
             # Get neighboring cell (with bounds checking, NON PERIODIC)
             neigh_x = cell_x + dx
             neigh_y = cell_y + dy
@@ -540,6 +542,7 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
                     if dist_j <= r and not particles_separated_by_wall(pos_i, positions[j], walls):
                         neighbor_indices.append(j)
                         neighbor_scores.append(particle_scores[j])
+                        neighbor_positions.append(positions[j].copy())
 
                 j = list_next[j]
 
@@ -551,10 +554,9 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
     min_score = min(neighbor_scores)
     new_score = min_score + 1
 
-    # Align v with neighbors' v vectors using score-weighted alignment
+    # Component 1: Score-weighted alignment with neighbors
     # Lower scores = higher weight (stronger influence)
-    # Use exponential weighting to make it relative: weight = exp(-(score - min_score))
-
+    # Use exponential weighting: weight = exp(-(score - min_score))
     weighted_v = np.zeros(2)
     total_weight = 0.0
 
@@ -575,20 +577,52 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
         weighted_v = weighted_v / total_weight
 
     # Normalize to unit vector
-    norm = np.sqrt(np.sum(weighted_v**2))
-    if norm > 0:
-        weighted_v = weighted_v / norm
+    norm_weighted = np.sqrt(np.sum(weighted_v**2))
+    if norm_weighted > 0:
+        weighted_v = weighted_v / norm_weighted
     else:
         weighted_v = np.array([0.0, 0.0])
 
-    return weighted_v, new_score
+    # Component 2: Direction toward particle with lowest score
+    # Find the particle(s) with minimum score
+    min_score_indices = []
+    for idx in range(len(neighbor_indices)):
+        if neighbor_scores[idx] == min_score:
+            min_score_indices.append(idx)
+
+    # Point toward the average position of min-score particles
+    target_pos = np.zeros(2)
+    for idx in min_score_indices:
+        target_pos += neighbor_positions[idx]
+    target_pos = target_pos / len(min_score_indices)
+
+    # Direction from current particle to target
+    gradient_v = target_pos - pos_i
+    norm_gradient = np.sqrt(np.sum(gradient_v**2))
+    if norm_gradient > 0:
+        gradient_v = gradient_v / norm_gradient
+    else:
+        gradient_v = np.array([0.0, 0.0])
+
+    # Combine components based on directedness parameter
+    # (1-d): score-weighted alignment, (d): direct gradient following
+    combined_v = (1.0 - directedness) * weighted_v + directedness * gradient_v
+
+    # Normalize final vector
+    norm = np.sqrt(np.sum(combined_v**2))
+    if norm > 0:
+        combined_v = combined_v / norm
+    else:
+        combined_v = np.array([0.0, 0.0])
+
+    return combined_v, new_score
 
 
 @njit(fastmath=True)
 def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel,
                          radii, v0s, mobilities, payload_mobility, particle_vectors, particle_scores,
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
-                         step, goal_position, use_goal, particle_view_range, goal_update_interval, walls):
+                         step, goal_position, use_goal, particle_view_range, goal_update_interval, walls, directedness):
     """Simulate a single time step"""
     # Compute forces on particles and payload
     particle_forces, payload_force = compute_all_forces(
@@ -605,7 +639,7 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
             particle_vectors[i], particle_scores[i] = point_vector_to_goal(
                 positions[i], goal_position, positions, particle_scores, i, n_particles,
                 particle_view_range, box_size, particle_scores[i], head_goal, list_next_goal, n_cells_goal,
-                particle_vectors, payload_pos, payload_radius, walls
+                particle_vectors, payload_pos, payload_radius, walls, directedness
             )
 
             # Check if any score exceeds 20000 (halt condition)
@@ -688,7 +722,7 @@ def run_payload_simulation(params):
     particle_vectors[:, 1] = np.sin(angle)
 
     # Initialize payload location. Bottom left corner for now
-    payload_pos = np.array([box_size/4, box_size/4])
+    payload_pos = np.array([box_size/6, box_size/6])
     payload_vel = np.zeros(2)
 
     # Pre-allocate arrays for storing simulation data
@@ -700,6 +734,7 @@ def run_payload_simulation(params):
     saved_payload_velocities = np.zeros((n_saves, 2))
     saved_curvity = np.zeros((n_saves, n_particles))
     saved_particle_vectors = np.zeros((n_saves, n_particles, 2))
+    saved_particle_scores = np.zeros((n_saves, n_particles), dtype=np.int64)
 
     # Compute initial curvity from particle vectors
     initial_curvity = compute_curvity_from_vectors(orientations, particle_vectors, n_particles)
@@ -712,6 +747,7 @@ def run_payload_simulation(params):
     saved_payload_velocities[0] = payload_vel.copy()
     saved_curvity[0] = initial_curvity.copy()
     saved_particle_vectors[0] = particle_vectors.copy()
+    saved_particle_scores[0] = particle_scores.copy()
 
     # Run simulation
     start_time = time.time()
@@ -725,7 +761,8 @@ def run_payload_simulation(params):
             params['particle_radius'], params['v0'], params['mobility'], params['payload_mobility'],
             particle_vectors, particle_scores, params['stiffness'],
             params['box_size'], params['payload_radius'], params['dt'], params['rot_diffusion'],
-            n_particles, step, goal_position, use_goal, particle_view_range, goal_update_interval, walls
+            n_particles, step, goal_position, use_goal, particle_view_range, goal_update_interval, walls,
+            params['directedness']
         )
 
         # Check if payload reached goal (if goal is enabled)
@@ -745,12 +782,14 @@ def run_payload_simulation(params):
             saved_payload_velocities[save_idx] = payload_vel
             saved_curvity[save_idx] = curvity.copy()
             saved_particle_vectors[save_idx] = particle_vectors.copy()
+            saved_particle_scores[save_idx] = particle_scores.copy()
             save_idx += 1
 
             # Report progress periodically
             if step % (save_interval * 10) == 0:
                 print(f"Step {step}:")
                 payload_displacement = np.sqrt(np.sum((saved_payload_positions[save_idx-1] - saved_payload_positions[0])**2))
+                print(f"  Payload position: {payload_pos}")
                 print(f"  Payload displacement from start: {payload_displacement:.3f}")
                 if use_goal:
                     distance_to_goal = np.sqrt(np.sum((payload_pos - goal_position)**2))
@@ -775,6 +814,7 @@ def run_payload_simulation(params):
         saved_payload_velocities,
         saved_curvity,
         saved_particle_vectors,
+        saved_particle_scores,
         particle_scores,
         particle_vectors,
         end_time - start_time
@@ -782,12 +822,13 @@ def run_payload_simulation(params):
 
 def create_payload_animation(positions, orientations, velocities, payload_positions, params,
                             curvity_values, output_file='visualizations/payload_animation_00.mp4',
-                            show_vectors=False, particle_vectors=None):
+                            show_vectors=False, particle_vectors=None, particle_scores=None):
     """Create an animation of the payload transport simulation.
 
     Args:
         show_vectors: If True, display the v vectors (extra vectors) as arrows attached to particles
         particle_vectors: Array of particle v vectors over time (n_frames, n_particles, 2)
+        particle_scores: Array of particle scores over time (n_frames, n_particles). If provided, colors particles by score instead of curvity.
     """
 
     print("Creating animation...")
@@ -811,30 +852,52 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     ax.set_title('FAABP Cooperative Transport Simulation')
     ax.grid(True, alpha=0.3)
     
-    # Color mapping: curvity -1 (dark blue) -> 0 (gray) -> +1 (red)
-    def get_particle_color(curvity_value):
-        """Map curvity value to RGB color with smooth gradient.
-        -1: dark blue, 0: gray, +1: red"""
-        # Clamp curvity to [-1, 1] range
-        c = np.clip(curvity_value, -1, 1)
+    # Color mapping functions
+    # OLD: Color mapping: curvity -1 (dark blue) -> 0 (gray) -> +1 (red)
+    # def get_particle_color(curvity_value):
+    #     """Map curvity value to RGB color with smooth gradient.
+    #     -1: dark blue, 0: gray, +1: red"""
+    #     # Clamp curvity to [-1, 1] range
+    #     c = np.clip(curvity_value, -1, 1)
+    #
+    #     if c < 0:
+    #         # Interpolate from dark blue (0, 0, 0.5) to gray (0.5, 0.5, 0.5)
+    #         t = (c + 1)  # Map [-1, 0] to [0, 1]
+    #         r = 0.0 + t * 0.5
+    #         g = 0.0 + t * 0.5
+    #         b = 0.5 + t * 0.0
+    #     else:
+    #         # Interpolate from gray (0.5, 0.5, 0.5) to red (1, 0, 0)
+    #         t = c  # Map [0, 1] to [0, 1]
+    #         r = 0.5 + t * 0.5
+    #         g = 0.5 - t * 0.5
+    #         b = 0.5 - t * 0.5
+    #
+    #     return (r, g, b)
 
-        if c < 0:
-            # Interpolate from dark blue (0, 0, 0.5) to gray (0.5, 0.5, 0.5)
-            t = (c + 1)  # Map [-1, 0] to [0, 1]
-            r = 0.0 + t * 0.5
-            g = 0.0 + t * 0.5
-            b = 0.5 + t * 0.0
-        else:
-            # Interpolate from gray (0.5, 0.5, 0.5) to red (1, 0, 0)
-            t = c  # Map [0, 1] to [0, 1]
-            r = 0.5 + t * 0.5
-            g = 0.5 - t * 0.5
-            b = 0.5 - t * 0.5
+    # NEW: Color mapping: score 0 (blue) -> 999+ (orange)
+    def get_particle_color(score_value):
+        """Map score value to RGB color with linear gradient.
+        0: blue (0, 0, 1), 20+: orange (1, 0.5, 0)"""
+        # Clamp score to [0, 50] range
+        s = np.clip(score_value, 0, 20)
+
+        # Linear interpolation from blue to orange
+        t = s / 20.0  # Map [0, 50] to [0, 1]
+
+        r = 0.0 + t * 1.0  # 0 -> 1
+        g = 0.0 + t * 0.5  # 0 -> 0.5
+        b = 1.0 - t * 1.0  # 1 -> 0
 
         return (r, g, b)
 
-    # Initialize particle colors based on initial curvity values
-    particle_colors = [get_particle_color(curvity_values[0, i]) for i in range(n_particles)]
+    # Initialize particle colors
+    if particle_scores is not None:
+        # Color by score
+        particle_colors = [get_particle_color(particle_scores[0, i]) for i in range(n_particles)]
+    else:
+        # Color by curvity (fallback)
+        particle_colors = [get_particle_color(curvity_values[0, i]) for i in range(n_particles)]
 
     scatter = ax.scatter(
         positions[0, :, 0],
@@ -943,7 +1006,11 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
 
         # Particle positions & colors update
         scatter.set_offsets(positions[frame])
-        scatter.set_color([get_particle_color(cv) for cv in curvity_values[frame]])
+        # Color by score if available, otherwise by curvity
+        if particle_scores is not None:
+            scatter.set_color([get_particle_color(score) for score in particle_scores[frame]])
+        else:
+            scatter.set_color([get_particle_color(cv) for cv in curvity_values[frame]])
 
         # Update v vectors if enabled
         if quiver is not None and particle_vectors is not None:
@@ -996,7 +1063,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
 # Simulation configuration functions                #
 #####################################################
 
-def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_position=None, use_goal=False, particle_view_range=None, goal_update_interval=10, walls=None):
+def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_position=None, use_goal=False, particle_view_range=None, goal_update_interval=10, walls=None, directedness=1):
     """Return default parameters for payload transport simulation
 
     Args:
@@ -1008,8 +1075,9 @@ def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_
         particle_view_range: Range for goal detection and particle targeting. If None, defaults to 0.1 * box_size
         goal_update_interval: How often to update particle scores and vectors (in timesteps). Default is 10.
         walls: Wall configuration as np.ndarray of shape (n_walls, 4). If None, defaults to empty array (no walls).
+        directedness: Balance between uniform alignment (0) and gradient following (1). Default is 0.5 (50/50).
     """
-    box_size = 350
+    box_size = 320
 
     # Default goal position is top-right corner
     if goal_position is None:
@@ -1030,7 +1098,7 @@ def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_
         'n_particles': n_particles,
         'box_size': box_size,
         'dt': 0.01,
-        'n_steps': 3000,
+        'n_steps': 2000,
         'save_interval': 10,            # Interval for saving data
         'payload_radius': payload_radius,
         'payload_mobility': 1 / payload_radius,
@@ -1040,6 +1108,7 @@ def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_
         'use_goal': use_goal,
         'particle_view_range': particle_view_range,
         'goal_update_interval': goal_update_interval,
+        'directedness': directedness,
         # Wall parameters
         'walls': walls,
         # Particle-specific parameters
@@ -1051,8 +1120,8 @@ def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_
     }
     
 
-def save_simulation_data(filename, positions, orientations, velocities, payload_positions, 
-                        payload_velocities, params, curvity_values):
+def save_simulation_data(filename, positions, orientations, velocities, payload_positions,
+                        payload_velocities, params, curvity_values, particle_vectors, particle_scores):
     """Save simulation data including individual particle parameters."""
     np.savez(
         filename,
@@ -1063,6 +1132,8 @@ def save_simulation_data(filename, positions, orientations, velocities, payload_
         payload_positions=payload_positions,
         payload_velocities=payload_velocities,
         curvity_values=curvity_values, # Curvity values over time, for each particle
+        particle_vectors=particle_vectors, # Particle v vectors over time
+        particle_scores=particle_scores, # Particle scores over time
         # Parameters
         # params['curvity'] accessible through curvity_values[-1]
         v0=params['v0'],
@@ -1072,7 +1143,16 @@ def save_simulation_data(filename, positions, orientations, velocities, payload_
         payload_radius=params['payload_radius'],
         box_size=params['box_size'],
         dt=params['dt'],
-        stiffness=params['stiffness']
+        stiffness=params['stiffness'],
+        rot_diffusion=params['rot_diffusion'],
+        # Goal parameters
+        goal_position=params['goal_position'],
+        use_goal=params['use_goal'],
+        particle_view_range=params['particle_view_range'],
+        goal_update_interval=params['goal_update_interval'],
+        directedness=params['directedness'],
+        # Wall parameters
+        walls=params['walls']
     )
 
 def extract_simulation_data(filename):
@@ -1097,17 +1177,25 @@ if __name__ == "__main__":
     run_payload_simulation(params)
 
     # Define maze walls
-    box_size = 350
+    box_size = 320
     walls = np.array([
-        # Top barrier
+        # Top maze wall
         [box_size*0.2, box_size*0.7, box_size, box_size*0.7],
 
-        # Bottom barrier
-        [box_size*0, box_size*0.3, box_size*0.8, box_size*0.3]
+        # Bottom maze wall
+        [box_size*0, box_size*0.3, box_size*0.8, box_size*0.3],
+        
+        # Boundary walls
+        [0, 0, 0, box_size],
+        [0, 0, box_size, 0],
+        [box_size, box_size, 0, box_size],
+        [box_size, box_size, box_size, 0]
+        
+        
     ], dtype=np.float64)
 
-    params = default_payload_params(n_particles=1000, use_goal=True, walls=walls)
-    positions, orientations, velocities, payload_positions, payload_velocities, curvity_values, saved_particle_vectors, particle_scores, particle_vectors, runtime = run_payload_simulation(params)
+    params = default_payload_params(n_particles=1300, use_goal=True, walls=walls)
+    positions, orientations, velocities, payload_positions, payload_velocities, curvity_values, saved_particle_vectors, saved_particle_scores, particle_scores, particle_vectors, runtime = run_payload_simulation(params)
 
     # Timestamp
     T = int(time.time())
@@ -1115,12 +1203,19 @@ if __name__ == "__main__":
     # Save simulation data
     # save_simulation_data(
     #     f'./data/sim_data_T_{T}.npz',
-    #     positions, orientations, velocities, payload_positions, payload_velocities, params, curvity_values
+    #     positions, orientations, velocities, payload_positions, payload_velocities, params, curvity_values,
+    #     saved_particle_vectors, saved_particle_scores
     # )
 
     # Create animation (set show_vectors=True to display v vectors as arrows)
     create_payload_animation(positions, orientations, velocities, payload_positions, params,
                                 curvity_values, f'./visualizations/sim_animation_T_{T}.mp4',
-                                show_vectors=True, particle_vectors=saved_particle_vectors)
+                                show_vectors=False, particle_vectors=saved_particle_vectors,
+                                particle_scores=saved_particle_scores)
     
     print("Payload simulation and animation completed successfully!")
+    
+    
+    # TODO
+    # make EVERYTHING periodic - however, keep the everything-blocking-walls. use walls at the boundary when wanted / needed.
+    # organize & refactor, split this into multiple files

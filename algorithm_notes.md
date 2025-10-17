@@ -60,30 +60,53 @@ where s* = min{s_j : j ∈ N_i}
 
 ---
 
-##### **Step 3: Vector Alignment (Vicsek-Style)**
+##### **Step 3: Vector Alignment (Hybrid: Score-Weighted + Gradient)**
 
-**v_i** aligns with neighbors' vectors using score-weighted averaging:
+**v_i** is computed as a weighted combination of two components:
 
 ```
-v_i = (Σ_j w_j · v_j) / ||Σ_j w_j · v_j||
+v_i = ((1-d) · v_weighted + d · v_gradient) / ||(1-d) · v_weighted + d · v_gradient||
 
-where j ∈ N_i and weights:
+where:
+- d ∈ [0, 1]: directedness hyperparameter (default: 0.5)
+- v_weighted: score-weighted alignment with neighbors
+- v_gradient: direction toward lowest-score neighbor(s)
+```
 
+**Component 1 - Score-Weighted Alignment** (weight: 1-d):
+```
+v_weighted = (Σ_j w_j · v_j) / ||Σ_j w_j · v_j||    where j ∈ N_i
+
+with weights:
 w_j = exp(-(s_j - s*))
-```
 
-**Weight Properties**:
-- Particles with minimum score s* get weight w = exp(0) = 1.0
-- Higher scores decay exponentially: w decreases as s_j increases
-- Relative weighting: Independent of absolute score values
-  - If s* = 1: s=1 gets w=1.0, s=2 gets w≈0.368, s=3 gets w≈0.135
-  - If s* = 500: s=500 gets w=1.0, s=501 gets w≈0.368, s=502 gets w≈0.135
-- **Result**: Minimum-score neighbors always dominate alignment
+where s* = min{s_j : j ∈ N_i}
+```
+- Exponentially weighted by score difference
+- Particles with minimum score s* get weight w = 1.0
+- Higher scores decay exponentially (s* + 1 → w ≈ 0.368, s* + 2 → w ≈ 0.135)
+- Vicsek-style alignment that favors following lower-score neighbors
+
+**Component 2 - Gradient Following** (weight: d):
+```
+v_gradient = (**x*** - **x_i**) / ||**x*** - **x_i**||
+
+where **x*** = (1/|J|) · Σ_j **x_j**    for j ∈ J
+      J = {j ∈ N_i : s_j = s*}
+```
+- Points directly toward the position of minimum-score neighbor(s)
+- Pure gradient descent behavior (most direct path)
+
+**Directedness Parameter** (d):
+- d = 0: Pure score-weighted Vicsek alignment (smooth, consensus-based)
+- d = 0.5: Balanced hybrid (default)
+- d = 1: Pure gradient descent (direct pursuit)
+- Higher d = more direct/aggressive goal-seeking
+- Lower d = more collective/smooth navigation
 
 **Normalization**:
 ```
-weighted_v = (Σ_j w_j · v_j) / (Σ_j w_j)    [weighted average]
-v_i = weighted_v / ||weighted_v||            [normalize to unit vector]
+v_i = combined / ||combined||    [normalize to unit vector]
 ```
 
 ---
@@ -149,10 +172,11 @@ Uses cell-list algorithm with O(N) complexity:
 
 | Aspect | Standard Vicsek | This Algorithm |
 |--------|-----------------|----------------|
-| Alignment | Equal weights for all neighbors | Score-weighted (lower = stronger) |
+| Alignment | Equal weights for all neighbors | Hybrid: (1-d)×score-weighted + d×gradient |
 | Goal-seeking | None | Direct (if visible) or gradient-based |
 | Score/Distance | N/A | Discrete gradient field |
-| Update rule | v̄ = average(neighbors' velocities) | v̄ = weighted_avg(neighbors' v, weights=exp(-Δs)) |
+| Update rule | v̄ = average(neighbors' velocities) | v̄ = (1-d)×Σ(exp(-Δs)·v_j) + d×toward(min-score) |
+| Tunability | Fixed consensus | Adjustable via directedness parameter |
 
 ---
 
@@ -162,7 +186,12 @@ This algorithm creates **emergent cooperative transport**:
 1. Particles near goal "see" it and orient toward it (s=0)
 2. Their neighbors align with them and get s=1
 3. Information cascades outward, forming gradient
-4. Particles far from goal follow the gradient by aligning with lower-score neighbors
+4. Particles far from goal follow the gradient through hybrid alignment:
+   - **Score-weighted component (1-d)**: Aligns with neighbors' vectors, but strongly favors lower-score neighbors via exponential weighting. Maintains collective behavior while following the gradient.
+   - **Gradient component (d)**: Direct spatial pursuit of lowest-score neighbor position. Most direct path but ignores vector field structure.
 5. Combined with FAABP dynamics (forces, curvity, self-propulsion), this creates collective payload pushing toward goal
 
-The exponential weighting ensures particles strongly prefer following the most direct path (lowest scores), creating efficient cooperative navigation.
+The **directedness parameter** allows tuning between:
+- **Low d (→ 0)**: Pure score-weighted Vicsek alignment. Smooth, collective navigation that follows the vector field gradient. More robust to noise and obstacles.
+- **High d (→ 1)**: Pure spatial gradient descent. Direct, aggressive pursuit of best neighbor. Faster but may create sharp turns or get stuck.
+- **Balanced d=0.5**: Compromise between smooth vector-field following and direct spatial pursuit.
