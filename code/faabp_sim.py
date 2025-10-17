@@ -291,10 +291,15 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
     """
     x_i, y_i = pos_i
     x_goal, y_goal = goal_position
-
-    # Check distance to goal
+    
+    # Check distance to goal (NON PERIODIC)
     dx_goal, dy_goal = x_goal - x_i, y_goal - y_i
     dist_to_goal = np.sqrt(dx_goal**2 + dy_goal**2)
+
+    # Check distance to goal (PERIODIC)
+    # r_goal = compute_minimum_distance(pos_i, goal_position, box_size)
+    # dist_to_goal = np.sqrt(np.sum(r_goal**2))
+    # dx_goal, dy_goal = r_goal[0], r_goal[1]
 
     # If goal is within range, point to it with score 0
     if dist_to_goal <= r:
@@ -316,13 +321,16 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
     # Check neighboring cells (including own cell)
     for dx in range(-1, 2):  # -1, 0, 1
         for dy in range(-1, 2):  # -1, 0, 1
-            # Get neighboring cell (with bounds checking, no periodic wrapping)
+            
+            # Get neighboring cell (with bounds checking, NON PERIODIC)
             neigh_x = cell_x + dx
             neigh_y = cell_y + dy
-
-            # Skip cells outside bounds
             if neigh_x < 0 or neigh_x >= n_cells or neigh_y < 0 or neigh_y >= n_cells:
-                continue
+                continue # Skip cells outside bounds
+
+            # Get neighboring cell (PERIODIC)
+            # neigh_x = (cell_x + dx) % n_cells
+            # neigh_y = (cell_y + dy) % n_cells
 
             # Get the first particle in the neighboring cell
             j = head[neigh_x, neigh_y]
@@ -330,10 +338,14 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
             # Loop through all particles in this cell
             while j != -1:
                 if i != j:
-                    # Compute direct distance (no periodic boundaries)
+                    
+                    # Compute direct distance (NON PERIODIC)
                     r_ij = positions[j] - pos_i
-                    dist_j = np.sqrt(np.sum(r_ij**2))
 
+                    # Compute distance (PERIODIC)
+                    # r_ij = compute_minimum_distance(pos_i, positions[j], box_size)
+                    
+                    dist_j = np.sqrt(np.sum(r_ij**2))
                     if dist_j <= r:
                         neighbor_indices.append(j)
                         neighbor_scores.append(particle_scores[j])
@@ -803,7 +815,7 @@ def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_
         'n_particles': n_particles,
         'box_size': box_size,
         'dt': 0.01,
-        'n_steps': 50000,
+        'n_steps': 1000,
         'save_interval': 10,            # Interval for saving data
         'payload_radius': payload_radius,
         'payload_mobility': 1 / payload_radius,
@@ -883,7 +895,7 @@ if __name__ == "__main__":
     # Create animation (set show_vectors=True to display v vectors as arrows)
     create_payload_animation(positions, orientations, velocities, payload_positions, params,
                                 curvity_values, f'./visualizations/sim_animation_T_{T}.mp4',
-                                show_vectors=False, particle_vectors=saved_particle_vectors)
+                                show_vectors=True, particle_vectors=saved_particle_vectors)
 
     
 
