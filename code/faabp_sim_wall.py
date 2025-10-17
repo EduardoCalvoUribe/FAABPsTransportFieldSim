@@ -479,15 +479,15 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
     """
     x_i, y_i = pos_i
     x_goal, y_goal = goal_position
-    
+
     # Check distance to goal (NON PERIODIC)
-    dx_goal, dy_goal = x_goal - x_i, y_goal - y_i
-    dist_to_goal = np.sqrt(dx_goal**2 + dy_goal**2)
+    # dx_goal, dy_goal = x_goal - x_i, y_goal - y_i
+    # dist_to_goal = np.sqrt(dx_goal**2 + dy_goal**2)
 
     # Check distance to goal (PERIODIC)
-    # r_goal = compute_minimum_distance(pos_i, goal_position, box_size)
-    # dist_to_goal = np.sqrt(np.sum(r_goal**2))
-    # dx_goal, dy_goal = r_goal[0], r_goal[1]
+    r_goal = compute_minimum_distance(pos_i, goal_position, box_size)
+    dist_to_goal = np.sqrt(np.sum(r_goal**2))
+    dx_goal, dy_goal = r_goal[0], r_goal[1]
 
     # If goal is within range, check line of sight
     if dist_to_goal <= r:
@@ -515,14 +515,14 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
         for dy in range(-1, 2):  # -1, 0, 1
 
             # Get neighboring cell (with bounds checking, NON PERIODIC)
-            neigh_x = cell_x + dx
-            neigh_y = cell_y + dy
-            if neigh_x < 0 or neigh_x >= n_cells or neigh_y < 0 or neigh_y >= n_cells:
-                continue # Skip cells outside bounds
+            # neigh_x = cell_x + dx
+            # neigh_y = cell_y + dy
+            # if neigh_x < 0 or neigh_x >= n_cells or neigh_y < 0 or neigh_y >= n_cells:
+            #     continue # Skip cells outside bounds
 
             # Get neighboring cell (PERIODIC)
-            # neigh_x = (cell_x + dx) % n_cells
-            # neigh_y = (cell_y + dy) % n_cells
+            neigh_x = (cell_x + dx) % n_cells
+            neigh_y = (cell_y + dy) % n_cells
 
             # Get the first particle in the neighboring cell
             j = head[neigh_x, neigh_y]
@@ -532,10 +532,10 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
                 if i != j:
 
                     # Compute direct distance (NON PERIODIC)
-                    r_ij = positions[j] - pos_i
+                    # r_ij = positions[j] - pos_i
 
                     # Compute distance (PERIODIC)
-                    # r_ij = compute_minimum_distance(pos_i, positions[j], box_size)
+                    r_ij = compute_minimum_distance(pos_i, positions[j], box_size)
 
                     dist_j = np.sqrt(np.sum(r_ij**2))
                     # Only include neighbor if within range AND not separated by wall
@@ -854,42 +854,42 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     
     # Color mapping functions
     # OLD: Color mapping: curvity -1 (dark blue) -> 0 (gray) -> +1 (red)
-    # def get_particle_color(curvity_value):
-    #     """Map curvity value to RGB color with smooth gradient.
-    #     -1: dark blue, 0: gray, +1: red"""
-    #     # Clamp curvity to [-1, 1] range
-    #     c = np.clip(curvity_value, -1, 1)
-    #
-    #     if c < 0:
-    #         # Interpolate from dark blue (0, 0, 0.5) to gray (0.5, 0.5, 0.5)
-    #         t = (c + 1)  # Map [-1, 0] to [0, 1]
-    #         r = 0.0 + t * 0.5
-    #         g = 0.0 + t * 0.5
-    #         b = 0.5 + t * 0.0
-    #     else:
-    #         # Interpolate from gray (0.5, 0.5, 0.5) to red (1, 0, 0)
-    #         t = c  # Map [0, 1] to [0, 1]
-    #         r = 0.5 + t * 0.5
-    #         g = 0.5 - t * 0.5
-    #         b = 0.5 - t * 0.5
-    #
-    #     return (r, g, b)
+    def get_particle_color(curvity_value):
+        """Map curvity value to RGB color with smooth gradient.
+        -1: dark blue, 0: gray, +1: red"""
+        # Clamp curvity to [-1, 1] range
+        c = np.clip(curvity_value, -1, 1)
+    
+        if c < 0:
+            # Interpolate from dark blue (0, 0, 0.5) to gray (0.5, 0.5, 0.5)
+            t = (c + 1)  # Map [-1, 0] to [0, 1]
+            r = 0.0 + t * 0.5
+            g = 0.0 + t * 0.5
+            b = 0.5 + t * 0.0
+        else:
+            # Interpolate from gray (0.5, 0.5, 0.5) to red (1, 0, 0)
+            t = c  # Map [0, 1] to [0, 1]
+            r = 0.5 + t * 0.5
+            g = 0.5 - t * 0.5
+            b = 0.5 - t * 0.5
+    
+        return (r, g, b)
 
     # NEW: Color mapping: score 0 (blue) -> 999+ (orange)
-    def get_particle_color(score_value):
-        """Map score value to RGB color with linear gradient.
-        0: blue (0, 0, 1), 20+: orange (1, 0.5, 0)"""
-        # Clamp score to [0, 50] range
-        s = np.clip(score_value, 0, 20)
+    # def get_particle_color(score_value):
+    #     """Map score value to RGB color with linear gradient.
+    #     0: blue (0, 0, 1), 20+: orange (1, 0.5, 0)"""
+    #     # Clamp score to [0, 50] range
+    #     s = np.clip(score_value, 0, 20)
 
-        # Linear interpolation from blue to orange
-        t = s / 20.0  # Map [0, 50] to [0, 1]
+    #     # Linear interpolation from blue to orange
+    #     t = s / 20.0  # Map [0, 50] to [0, 1]
 
-        r = 0.0 + t * 1.0  # 0 -> 1
-        g = 0.0 + t * 0.5  # 0 -> 0.5
-        b = 1.0 - t * 1.0  # 1 -> 0
+    #     r = 0.0 + t * 1.0  # 0 -> 1
+    #     g = 0.0 + t * 0.5  # 0 -> 0.5
+    #     b = 1.0 - t * 1.0  # 1 -> 0
 
-        return (r, g, b)
+    #     return (r, g, b)
 
     # Initialize particle colors
     if particle_scores is not None:
@@ -1098,7 +1098,7 @@ def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_
         'n_particles': n_particles,
         'box_size': box_size,
         'dt': 0.01,
-        'n_steps': 2000,
+        'n_steps': 50000,
         'save_interval': 10,            # Interval for saving data
         'payload_radius': payload_radius,
         'payload_mobility': 1 / payload_radius,
@@ -1180,10 +1180,10 @@ if __name__ == "__main__":
     box_size = 320
     walls = np.array([
         # Top maze wall
-        [box_size*0.2, box_size*0.7, box_size, box_size*0.7],
+        # [box_size*0.2, box_size*0.7, box_size, box_size*0.7],
 
-        # Bottom maze wall
-        [box_size*0, box_size*0.3, box_size*0.8, box_size*0.3],
+        # # Bottom maze wall
+        # [box_size*0, box_size*0.3, box_size*0.8, box_size*0.3],
         
         # Boundary walls
         [0, 0, 0, box_size],
@@ -1211,7 +1211,7 @@ if __name__ == "__main__":
     create_payload_animation(positions, orientations, velocities, payload_positions, params,
                                 curvity_values, f'./visualizations/sim_animation_T_{T}.mp4',
                                 show_vectors=False, particle_vectors=saved_particle_vectors,
-                                particle_scores=saved_particle_scores)
+                                particle_scores=None) #saved_particle_scores
     
     print("Payload simulation and animation completed successfully!")
     
