@@ -495,7 +495,7 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
         if has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, box_size, walls):
             if dist_to_goal > 0:
                 return np.array([dx_goal / dist_to_goal, dy_goal / dist_to_goal]), 0
-            return np.array([0.0, 0.0]), 0
+            return np.array([0.0, 0.0]), 0 # payload is exactly on the goal
         # If blocked, fall through to gradient-following behavior
 
     # Goal out of range - find all neighbors within r and collect their info
@@ -622,15 +622,15 @@ def point_vector_to_goal(pos_i, goal_position, positions, particle_scores, i, n_
 def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel,
                          radii, v0s, mobilities, payload_mobility, particle_vectors, particle_scores,
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
-                         step, goal_position, use_goal, particle_view_range, goal_update_interval, walls, directedness):
+                         step, goal_position, particle_view_range, goal_update_interval, walls, directedness):
     """Simulate a single time step"""
     # Compute forces on particles and payload
     particle_forces, payload_force = compute_all_forces(
         positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls
     )
 
-    # Update particle vectors and scores based on goal (if enabled and at update interval)
-    if use_goal and (step % goal_update_interval == 0):
+    # Update particle vectors and scores based on goal (at update interval)
+    if step % goal_update_interval == 0:
         # Create cell list for efficient neighbor search
         cell_size = particle_view_range  # Use particle_view_range as cell size for this search
         head_goal, list_next_goal, n_cells_goal = create_cell_list(positions, box_size, cell_size, n_particles)
@@ -641,13 +641,9 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
                 particle_view_range, box_size, particle_scores[i], head_goal, list_next_goal, n_cells_goal,
                 particle_vectors, payload_pos, payload_radius, walls, directedness
             )
-
-            # Check if any score exceeds 20000 (halt condition)
-            if particle_scores[i] > 20000:
-                raise ValueError(f"Particle {i} score exceeded 20000: {particle_scores[i]}")
-
-    # Compute curvity from particle vectors
-    curvity = compute_curvity_from_vectors(orientations, particle_vectors, n_particles)
+            
+        # Compute curvity from particle vectors
+        curvity = compute_curvity_from_vectors(orientations, particle_vectors, n_particles)
 
     # Update particle orientations
     orientations = update_orientation_vectors(
@@ -696,7 +692,6 @@ def run_payload_simulation(params):
 
     # Extract goal parameters
     goal_position = params['goal_position']
-    use_goal = params['use_goal']
     particle_view_range = params['particle_view_range']
     goal_update_interval = params['goal_update_interval']
 
@@ -761,12 +756,12 @@ def run_payload_simulation(params):
             params['particle_radius'], params['v0'], params['mobility'], params['payload_mobility'],
             particle_vectors, particle_scores, params['stiffness'],
             params['box_size'], params['payload_radius'], params['dt'], params['rot_diffusion'],
-            n_particles, step, goal_position, use_goal, particle_view_range, goal_update_interval, walls,
+            n_particles, step, goal_position, particle_view_range, goal_update_interval, walls,
             params['directedness']
         )
 
-        # Check if payload reached goal (if goal is enabled)
-        if use_goal and not goal_reached:
+        # Check if payload reached goal
+        if not goal_reached:
             distance_to_goal = np.sqrt(np.sum((payload_pos - goal_position)**2))
             if distance_to_goal <= params['payload_radius']:
                 print(f"Goal reached at step {step}! Distance: {distance_to_goal:.3f}")
@@ -791,9 +786,8 @@ def run_payload_simulation(params):
                 payload_displacement = np.sqrt(np.sum((saved_payload_positions[save_idx-1] - saved_payload_positions[0])**2))
                 print(f"  Payload position: {payload_pos}")
                 print(f"  Payload displacement from start: {payload_displacement:.3f}")
-                if use_goal:
-                    distance_to_goal = np.sqrt(np.sum((payload_pos - goal_position)**2))
-                    print(f"  Distance to goal: {distance_to_goal:.3f}")
+                distance_to_goal = np.sqrt(np.sum((payload_pos - goal_position)**2))
+                print(f"  Distance to goal: {distance_to_goal:.3f}")
 
     end_time = time.time()
     print(f"Simulation completed in {end_time - start_time:.2f} seconds")
@@ -802,9 +796,8 @@ def run_payload_simulation(params):
     total_payload_displacement = np.sqrt(np.sum((saved_payload_positions[-1] - saved_payload_positions[0])**2))
     print(f"Total payload displacement: {total_payload_displacement:.3f}")
 
-    if use_goal:
-        final_distance_to_goal = np.sqrt(np.sum((saved_payload_positions[-1] - goal_position)**2))
-        print(f"Final distance to goal: {final_distance_to_goal:.3f}")
+    final_distance_to_goal = np.sqrt(np.sum((saved_payload_positions[-1] - goal_position)**2))
+    print(f"Final distance to goal: {final_distance_to_goal:.3f}")
 
     return (
         saved_positions,
@@ -840,7 +833,6 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     payload_radius = params['payload_radius']
     n_particles = params['n_particles']
     goal_position = params['goal_position']
-    use_goal = params['use_goal']
     walls = params.get('walls', np.zeros((0, 4), dtype=np.float64))
 
     # Create figure and axis
@@ -916,11 +908,9 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     )
     ax.add_patch(payload)
 
-    # Create goal visualization (if enabled)
-    goal = None
-    if use_goal:
-        goal, = ax.plot(goal_position[0], goal_position[1], 'g*', markersize=15, markeredgewidth=1.5, markeredgecolor='darkgreen')
-        # Green star marker for goal point
+    # Create goal visualization
+    goal, = ax.plot(goal_position[0], goal_position[1], 'g*', markersize=15, markeredgewidth=1.5, markeredgecolor='darkgreen')
+    # Green star marker for goal point
 
     # Draw walls
     wall_lines = []
@@ -976,9 +966,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
 
     def init():
         """Initialize the animation."""
-        artists = [scatter, payload, trajectory, time_text, params_text, params_text_2]
-        if goal is not None:
-            artists.append(goal)
+        artists = [scatter, payload, trajectory, time_text, params_text, params_text_2, goal]
         if quiver is not None:
             artists.append(quiver)
         # Add wall lines (they don't change, but include for completeness)
@@ -1063,7 +1051,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
 # Simulation configuration functions                #
 #####################################################
 
-def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_position=None, use_goal=False, particle_view_range=None, goal_update_interval=10, walls=None, directedness=1):
+def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_position=None, particle_view_range=None, goal_update_interval=10, walls=None, directedness=1):
     """Return default parameters for payload transport simulation
 
     Args:
@@ -1071,7 +1059,6 @@ def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_
         curvity: Default curvity value for particles
         payload_radius: Radius of the payload
         goal_position: Target position as [x, y]. If None, defaults to top-right corner (4/5 * box_size)
-        use_goal: Whether to enable goal-based behavior and visualization
         particle_view_range: Range for goal detection and particle targeting. If None, defaults to 0.1 * box_size
         goal_update_interval: How often to update particle scores and vectors (in timesteps). Default is 10.
         walls: Wall configuration as np.ndarray of shape (n_walls, 4). If None, defaults to empty array (no walls).
@@ -1098,14 +1085,13 @@ def default_payload_params(n_particles=1000, curvity=0, payload_radius=20, goal_
         'n_particles': n_particles,
         'box_size': box_size,
         'dt': 0.01,
-        'n_steps': 50000,
+        'n_steps': 2000,
         'save_interval': 10,            # Interval for saving data
         'payload_radius': payload_radius,
         'payload_mobility': 1 / payload_radius,
         'stiffness': 25.0,
         # Goal parameters
         'goal_position': goal_position,
-        'use_goal': use_goal,
         'particle_view_range': particle_view_range,
         'goal_update_interval': goal_update_interval,
         'directedness': directedness,
@@ -1147,7 +1133,6 @@ def save_simulation_data(filename, positions, orientations, velocities, payload_
         rot_diffusion=params['rot_diffusion'],
         # Goal parameters
         goal_position=params['goal_position'],
-        use_goal=params['use_goal'],
         particle_view_range=params['particle_view_range'],
         goal_update_interval=params['goal_update_interval'],
         directedness=params['directedness'],
@@ -1194,7 +1179,7 @@ if __name__ == "__main__":
         
     ], dtype=np.float64)
 
-    params = default_payload_params(n_particles=1300, use_goal=True, walls=walls)
+    params = default_payload_params(n_particles=1300, walls=None) #walls=walls
     positions, orientations, velocities, payload_positions, payload_velocities, curvity_values, saved_particle_vectors, saved_particle_scores, particle_scores, particle_vectors, runtime = run_payload_simulation(params)
 
     # Timestamp
@@ -1210,7 +1195,7 @@ if __name__ == "__main__":
     # Create animation (set show_vectors=True to display v vectors as arrows)
     create_payload_animation(positions, orientations, velocities, payload_positions, params,
                                 curvity_values, f'./visualizations/sim_animation_T_{T}.mp4',
-                                show_vectors=False, particle_vectors=saved_particle_vectors,
+                                show_vectors=True, particle_vectors=saved_particle_vectors,
                                 particle_scores=None) #saved_particle_scores
     
     print("Payload simulation and animation completed successfully!")
