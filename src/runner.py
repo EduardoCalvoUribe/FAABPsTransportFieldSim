@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-from .simulation import simulate_single_step, compute_curvity_from_polarity
+from .simulation import simulate_single_step
 
 
 #####################################################
@@ -59,8 +59,8 @@ def run_payload_simulation(params):
     saved_polarity = np.zeros((n_saves, n_particles, 2))
     saved_particle_scores = np.zeros((n_saves, n_particles), dtype=np.int64)
 
-    # Compute initial curvity from polarity vectors
-    initial_curvity = compute_curvity_from_polarity(orientations, polarity, n_particles)
+    # Set initial curvity
+    initial_curvity = np.full(n_particles, -1.0)
 
     # Store initial state
     saved_positions[0] = positions.copy()

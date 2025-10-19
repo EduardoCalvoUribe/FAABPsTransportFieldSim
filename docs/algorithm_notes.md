@@ -3,42 +3,42 @@
 ## Overview
 Each particle has two key properties:
 - **Score (s)**: An integer representing the particle's "distance" from the goal in discrete hops
-- **Vector (v)**: A unit vector that influences the particle's curvity (and therefore turning behavior)
+- **Polarity (p)**: A unit vector that influences the particle's curvity (and therefore turning behavior)
 
 ## Algorithm Structure
 
 ### 1. Particle Properties
 Every particle `i` has:
 - **s_i** ∈ ℤ: Score (initialized to 9999)
-- **v_i** ∈ ℝ²: Unit vector (||v_i|| = 1)
+- **p_i** ∈ ℝ²: Polarity unit vector (||p_i|| = 1)
 - **e_i** ∈ ℝ²: Heading/orientation vector (||e_i|| = 1)
 - **r**: View range (hyperparameter, default: 0.1 × box_size)
 
-### 2. Core Update Rules (Executed Every `goal_update_interval` Steps)
+### 2. Core Update Rules (Executed Every `score_and_polarity_update_interval` Steps)
 
 For each particle `i` at position **x_i**:
 
 #### **Case A: Line of Sight to Goal**
-If ||**x_goal** - **x_i**|| ≤ r (goal within view range):
+If ||**x_goal** - **x_i**|| ≤ r (goal within view range) AND no walls or payload block the line of sight:
 
 ```
 s_i = 0
-v_i = (**x_goal** - **x_i**) / ||**x_goal** - **x_i**||
+p_i = (**x_goal** - **x_i**) / ||**x_goal** - **x_i**||
 ```
 
-**Meaning**: Particle has direct access to goal; points directly toward it with score 0.
+**Meaning**: Particle has direct, unobstructed access to goal; points directly toward it with score 0.
 
 ---
 
 #### **Case B: No Line of Sight to Goal**
-If ||**x_goal** - **x_i**|| > r (goal out of range):
+If goal is out of range OR line of sight is blocked by walls or payload:
 
 ##### **Step 1: Find Neighbors Within Range**
 Define neighbor set:
 ```
-N_i = {j ≠ i : ||**x_j** - **x_i**|| ≤ r}
+N_i = {j ≠ i : ||**x_j** - **x_i**|| ≤ r AND not separated by wall}
 ```
-**Note**: Uses direct Euclidean distance (no periodic boundary conditions).
+**Note**: Uses periodic boundary conditions for distance calculation. Particles separated by walls along the shortest periodic path are excluded from the neighbor set.
 
 ---
 
@@ -60,22 +60,22 @@ where s* = min{s_j : j ∈ N_i}
 
 ---
 
-##### **Step 3: Vector Alignment (Hybrid: Score-Weighted + Gradient)**
+##### **Step 3: Polarity Alignment (Hybrid: Score-Weighted + Gradient)**
 
-**v_i** is computed as a weighted combination of two components:
+**p_i** is computed as a weighted combination of two components:
 
 ```
-v_i = ((1-d) · v_weighted + d · v_gradient) / ||(1-d) · v_weighted + d · v_gradient||
+p_i = ((1-d) · p_weighted + d · p_gradient) / ||(1-d) · p_weighted + d · p_gradient||
 
 where:
 - d ∈ [0, 1]: directedness hyperparameter (default: 0.5)
-- v_weighted: score-weighted alignment with neighbors
-- v_gradient: direction toward lowest-score neighbor(s)
+- p_weighted: score-weighted alignment with neighbors
+- p_gradient: direction toward lowest-score neighbor(s)
 ```
 
 **Component 1 - Score-Weighted Alignment** (weight: 1-d):
 ```
-v_weighted = (Σ_j w_j · v_j) / ||Σ_j w_j · v_j||    where j ∈ N_i
+p_weighted = (Σ_j w_j · p_j) / ||Σ_j w_j · p_j||    where j ∈ N_i
 
 with weights:
 w_j = exp(-(s_j - s*))
@@ -89,12 +89,13 @@ where s* = min{s_j : j ∈ N_i}
 
 **Component 2 - Gradient Following** (weight: d):
 ```
-v_gradient = (**x*** - **x_i**) / ||**x*** - **x_i**||
+p_gradient = (**x*** - **x_i**) / ||**x*** - **x_i**||
 
 where **x*** = (1/|J|) · Σ_j **x_j**    for j ∈ J
       J = {j ∈ N_i : s_j = s*}
 ```
-- Points directly toward the position of minimum-score neighbor(s)
+- Points directly toward the average position of minimum-score neighbor(s)
+- Uses periodic boundary conditions to compute relative positions
 - Pure gradient descent behavior (most direct path)
 
 **Directedness Parameter** (d):
@@ -106,28 +107,23 @@ where **x*** = (1/|J|) · Σ_j **x_j**    for j ∈ J
 
 **Normalization**:
 ```
-v_i = combined / ||combined||    [normalize to unit vector]
+p_i = combined / ||combined||    [normalize to unit vector]
 ```
 
 ---
 
 ### 3. Curvity Calculation
 
-Once **v_i** is computed, it determines particle curvity:
+Once **p_i** is computed, it determines particle curvity:
 
 ```
-κ_i = -(e_i · v_i)
+κ_i = -(e_i · p_i)
 ```
 
 Where:
 - **e_i**: Current heading/orientation (unit vector)
-- **v_i**: Computed goal-seeking vector (unit vector)
+- **p_i**: Computed polarity vector (unit vector)
 - κ_i ∈ [-1, 1]: Curvity parameter
-
-**Interpretation**:
-- κ_i = -1: v and e perfectly aligned (no turning needed)
-- κ_i = 0: v perpendicular to e
-- κ_i = +1: v opposite to e (maximum turning)
 
 **Effect on dynamics**:
 Curvity influences orientation update via torque:
@@ -144,15 +140,16 @@ where F_i is the net force on particle i.
 Uses cell-list algorithm with O(N) complexity:
 - Cell size = r (particle view range)
 - Search 3×3 neighborhood of cells
-- **No periodic wrapping** (bounds checking skips out-of-range cells)
+- **Uses periodic wrapping** for neighbor search
+- Particles separated by walls along shortest periodic path are excluded
 
 ### Update Frequency
-- Parameter: `goal_update_interval` (default: 10 timesteps)
-- Vectors and scores update every `goal_update_interval` steps
+- Parameter: `score_and_polarity_update_interval` (default: 10 timesteps)
+- Polarity vectors and scores update every `score_and_polarity_update_interval` steps
 - Reduces computational cost while maintaining gradient propagation
 
 ### Initialization
-- All particles start with s_i = 9999, v_i = (cos(π/4), sin(π/4))
+- All particles start with s_i = 9999, p_i = (cos(π/4), sin(π/4))
 - Goal position: default (4/5 × box_size, 4/5 × box_size)
 - Score propagates outward from goal over time
 
@@ -168,30 +165,18 @@ Uses cell-list algorithm with O(N) complexity:
 
 ---
 
-## Comparison to Standard Vicsek Model
-
-| Aspect | Standard Vicsek | This Algorithm |
-|--------|-----------------|----------------|
-| Alignment | Equal weights for all neighbors | Hybrid: (1-d)×score-weighted + d×gradient |
-| Goal-seeking | None | Direct (if visible) or gradient-based |
-| Score/Distance | N/A | Discrete gradient field |
-| Update rule | v̄ = average(neighbors' velocities) | v̄ = (1-d)×Σ(exp(-Δs)·v_j) + d×toward(min-score) |
-| Tunability | Fixed consensus | Adjustable via directedness parameter |
-
----
-
 ## Physical Interpretation
 
 This algorithm creates **emergent cooperative transport**:
-1. Particles near goal "see" it and orient toward it (s=0)
+1. Particles with clear line of sight to goal (within range, unobstructed by walls/payload) orient toward it (s=0)
 2. Their neighbors align with them and get s=1
 3. Information cascades outward, forming gradient
 4. Particles far from goal follow the gradient through hybrid alignment:
-   - **Score-weighted component (1-d)**: Aligns with neighbors' vectors, but strongly favors lower-score neighbors via exponential weighting. Maintains collective behavior while following the gradient.
-   - **Gradient component (d)**: Direct spatial pursuit of lowest-score neighbor position. Most direct path but ignores vector field structure.
+   - **Score-weighted component (1-d)**: Aligns with neighbors' polarity vectors, but strongly favors lower-score neighbors via exponential weighting. Maintains collective behavior while following the gradient.
+   - **Gradient component (d)**: Direct spatial pursuit of lowest-score neighbor position (using periodic boundaries). Most direct path but ignores polarity field structure.
 5. Combined with FAABP dynamics (forces, curvity, self-propulsion), this creates collective payload pushing toward goal
 
 The **directedness parameter** allows tuning between:
-- **Low d (→ 0)**: Pure score-weighted Vicsek alignment. Smooth, collective navigation that follows the vector field gradient. More robust to noise and obstacles.
+- **Low d (→ 0)**: Pure score-weighted Vicsek alignment. Smooth, collective navigation that follows the polarity field gradient. More robust to noise and obstacles.
 - **High d (→ 1)**: Pure spatial gradient descent. Direct, aggressive pursuit of best neighbor. Faster but may create sharp turns or get stuck.
-- **Balanced d=0.5**: Compromise between smooth vector-field following and direct spatial pursuit.
+- **Balanced d=0.5**: Compromise between smooth polarity-field following and direct spatial pursuit.
