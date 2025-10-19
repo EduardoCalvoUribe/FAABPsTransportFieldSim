@@ -94,7 +94,10 @@ def run_payload_simulation(params):
             if distance_to_goal <= params['payload_radius']:
                 print(f"Goal reached at step {step}! Distance: {distance_to_goal:.3f}")
                 goal_reached = True
-                # Continue simulation but mark that goal was reached
+                # End simulation early if configured to do so
+                if params['end_when_goal_reached']:
+                    print("Ending simulation early (END_WHEN_GOAL_REACHED = True)")
+                    break
 
         # Save data at specified intervals
         if step % save_interval == 0:

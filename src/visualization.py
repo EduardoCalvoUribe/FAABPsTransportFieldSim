@@ -42,29 +42,29 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
 
     # Color mapping functions
     # STANDARD: Color mapping: curvity -1 (dark blue) -> 0 (gray) -> +1 (red)
-    # def get_particle_color(curvity_value):
-    #     """Map curvity value to RGB color with smooth gradient.
-    #     -1: dark blue, 0: gray, +1: red"""
-    #     # Clamp curvity to [-1, 1] range
-    #     c = np.clip(curvity_value, -1, 1)
+    def get_particle_color_based_on_curvity(curvity_value):
+        """Map curvity value to RGB color with smooth gradient.
+        -1: dark blue, 0: gray, +1: red"""
+        # Clamp curvity to [-1, 1] range
+        c = np.clip(curvity_value, -1, 1)
 
-    #     if c < 0:
-    #         # Interpolate from dark blue (0, 0, 0.5) to gray (0.5, 0.5, 0.5)
-    #         t = (c + 1)  # Map [-1, 0] to [0, 1]
-    #         r = 0.0 + t * 0.5
-    #         g = 0.0 + t * 0.5
-    #         b = 0.5 + t * 0.0
-    #     else:
-    #         # Interpolate from gray (0.5, 0.5, 0.5) to red (1, 0, 0)
-    #         t = c  # Map [0, 1] to [0, 1]
-    #         r = 0.5 + t * 0.5
-    #         g = 0.5 - t * 0.5
-    #         b = 0.5 - t * 0.5
+        if c < 0:
+            # Interpolate from dark blue (0, 0, 0.5) to gray (0.5, 0.5, 0.5)
+            t = (c + 1)  # Map [-1, 0] to [0, 1]
+            r = 0.0 + t * 0.5
+            g = 0.0 + t * 0.5
+            b = 0.5 + t * 0.0
+        else:
+            # Interpolate from gray (0.5, 0.5, 0.5) to red (1, 0, 0)
+            t = c  # Map [0, 1] to [0, 1]
+            r = 0.5 + t * 0.5
+            g = 0.5 - t * 0.5
+            b = 0.5 - t * 0.5
 
-    #     return (r, g, b)
+        return (r, g, b)
 
     # DEBUG: Color mapping: score 0 (blue) -> 999+ (orange)
-    def get_particle_color(score_value):
+    def get_particle_color_based_on_score(score_value):
         """Map score value to RGB color with linear gradient.
         0: blue (0, 0, 1), 20+: orange (1, 0.5, 0)"""
         # Clamp score to [0, 50] range
@@ -82,10 +82,10 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     # Initialize particle colors
     if particle_scores is not None:
         # Color by score
-        particle_colors = [get_particle_color(particle_scores[0, i]) for i in range(n_particles)]
+        particle_colors = [get_particle_color_based_on_score(particle_scores[0, i]) for i in range(n_particles)]
     else:
         # Color by curvity (fallback)
-        particle_colors = [get_particle_color(curvity_values[0, i]) for i in range(n_particles)]
+        particle_colors = [get_particle_color_based_on_curvity(curvity_values[0, i]) for i in range(n_particles)]
 
     scatter = ax.scatter(
         positions[0, :, 0],
@@ -192,9 +192,9 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         scatter.set_offsets(positions[frame])
         # Color by score if available, otherwise by curvity
         if particle_scores is not None:
-            scatter.set_color([get_particle_color(score) for score in particle_scores[frame]])
+            scatter.set_color([get_particle_color_based_on_score(score) for score in particle_scores[frame]])
         else:
-            scatter.set_color([get_particle_color(cv) for cv in curvity_values[frame]])
+            scatter.set_color([get_particle_color_based_on_curvity(cv) for cv in curvity_values[frame]])
 
         # Update polarity vectors if enabled
         if quiver is not None and polarity is not None:

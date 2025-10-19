@@ -332,19 +332,43 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
         if neighbor_scores[idx] == min_score:
             min_score_indices.append(idx)
 
-    # Point toward the average position of min-score particles
-    target_pos = np.zeros(2)
+    # Point toward the average position of min-score particles (using periodic relative positions)
+    avg_relative_pos = np.zeros(2)
     for idx in min_score_indices:
-        target_pos += neighbor_positions[idx]
-    target_pos = target_pos / len(min_score_indices)
+        # Get relative position accounting for periodic boundaries
+        r_ij = compute_minimum_distance(pos_i, neighbor_positions[idx], box_size)
+        avg_relative_pos += r_ij
+    avg_relative_pos = avg_relative_pos / len(min_score_indices)
 
     # Direction from current particle to target
-    gradient_v = target_pos - pos_i
+    gradient_v = avg_relative_pos
     norm_gradient = np.sqrt(np.sum(gradient_v**2))
     if norm_gradient > 0:
         gradient_v = gradient_v / norm_gradient
     else:
         gradient_v = np.array([0.0, 0.0])
+
+    # ALTERNATIVE: Compute average angle from current particle to min-score neighbors
+    # total_x = 0.0
+    # total_y = 0.0
+    # for idx in min_score_indices:
+    #     # Direction from current particle to this neighbor (PERIODIC)
+    #     r_ij = compute_minimum_distance(pos_i, neighbor_positions[idx], box_size)
+    #     dist = np.sqrt(np.sum(r_ij**2))
+    #     if dist > 0:
+    #         # Unit vector toward this neighbor
+    #         unit_x = r_ij[0] / dist
+    #         unit_y = r_ij[1] / dist
+    #         total_x += unit_x
+    #         total_y += unit_y
+    #
+    # # Average the unit vectors (this gives average angle)
+    # gradient_v = np.array([total_x, total_y])
+    # norm_gradient = np.sqrt(gradient_v[0]**2 + gradient_v[1]**2)
+    # if norm_gradient > 0:
+    #     gradient_v = gradient_v / norm_gradient
+    # else:
+    #     gradient_v = np.array([0.0, 0.0])
 
     # Combine components based on directedness parameter
     # (1-d): score-weighted alignment, (d): direct gradient following

@@ -14,9 +14,9 @@ from src.visualization import create_payload_animation
 RANDOM_SEED = 42
 
 # Simulation parameters
-N_PARTICLES = 1000
-BOX_SIZE = 350
-N_STEPS = 1000
+N_PARTICLES = 1200
+BOX_SIZE = 300
+N_STEPS = 250000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -35,13 +35,13 @@ PAYLOAD_START_POSITION = np.array([BOX_SIZE/6, BOX_SIZE/6])  # Bottom-left corne
 STIFFNESS = 25.0
 
 # Goal parameters
-GOAL_POSITION = np.array([4 * BOX_SIZE / 5, 4 * BOX_SIZE / 5])  # Top-right corner
+GOAL_POSITION = np.array([5 * BOX_SIZE / 6, 5 * BOX_SIZE / 6])  # Top-right corner
 PARTICLE_VIEW_RANGE = 0.1 * BOX_SIZE  # Range for goal detection
-SCORE_AND_POLARITY_UPDATE_INTERVAL = 10  # How often to update scores & polarity (timesteps)
-DIRECTEDNESS = 1                    # 0 = pure alignment, 1 = pure gradient following
+SCORE_AND_POLARITY_UPDATE_INTERVAL = 50  # How often to update scores & polarity (timesteps)
+DIRECTEDNESS = 1                    # 0 = pure vicsek alignment, 1 = pure gradient following
+END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
 
 # Wall configuration (set to None for no walls)
-# WALLS = None
 # Example walls:
 WALLS = np.array([
     # Boundary walls
@@ -50,17 +50,19 @@ WALLS = np.array([
     [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
     # Maze walls
-    [BOX_SIZE*0.2, BOX_SIZE*0.7, BOX_SIZE, BOX_SIZE*0.7],
-    [0, BOX_SIZE*0.3, BOX_SIZE*0.8, BOX_SIZE*0.3],
+    [BOX_SIZE*0.33, BOX_SIZE*0.66, BOX_SIZE, BOX_SIZE*0.66],
+    [0, BOX_SIZE*0.33, BOX_SIZE*0.66, BOX_SIZE*0.33],
 ], dtype=np.float64)
+# WALLS = None
+
 
 # Visualization parameters
-SHOW_VECTORS = True              # Display v vectors as arrows
-COLOR_BY_SCORE = True           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "./visualizations/AllWall_Direct1.mp4"           # If None, uses timestamp. Otherwise specify path.
+SHOW_VECTORS = False              # Display v vectors as arrows
+COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
+OUTPUT_FILENAME = "./visualizations/polarity_test_full.mp4"           # If None, uses timestamp. Otherwise specify path.
 
 # Data saving (set to True to save simulation data)
-SAVE_DATA = False
+SAVE_DATA = True
 
 
 #####################
@@ -99,6 +101,7 @@ if __name__ == "__main__":
         'particle_view_range': PARTICLE_VIEW_RANGE,
         'score_and_polarity_update_interval': SCORE_AND_POLARITY_UPDATE_INTERVAL,
         'directedness': DIRECTEDNESS,
+        'end_when_goal_reached': END_WHEN_GOAL_REACHED,
         'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),
         'v0': np.ones(compile_n_particles) * PARTICLE_V0,
         'curvity': np.zeros(compile_n_particles),
@@ -131,6 +134,7 @@ if __name__ == "__main__":
         'particle_view_range': PARTICLE_VIEW_RANGE,
         'score_and_polarity_update_interval': SCORE_AND_POLARITY_UPDATE_INTERVAL,
         'directedness': DIRECTEDNESS,
+        'end_when_goal_reached': END_WHEN_GOAL_REACHED,
 
         # Wall parameters
         'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),
