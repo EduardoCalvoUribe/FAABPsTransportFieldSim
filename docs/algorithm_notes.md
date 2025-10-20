@@ -1,4 +1,4 @@
-# Goal-Seeking Algorithm with Vicsek-Style Alignment
+# Goal-Seeking Algorithm using Polarity 
 
 ## Overview
 Each particle has two key properties:
