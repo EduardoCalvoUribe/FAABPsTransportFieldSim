@@ -16,7 +16,7 @@ RANDOM_SEED = 42
 # Simulation parameters
 N_PARTICLES = 1200
 BOX_SIZE = 300
-N_STEPS = 250000
+N_STEPS = 300000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -29,13 +29,13 @@ ROTATIONAL_DIFFUSION = 0.05     # Orientational noise
 # Payload parameters
 PAYLOAD_RADIUS = 20
 PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
-PAYLOAD_START_POSITION = np.array([BOX_SIZE/6, BOX_SIZE/6])  # Bottom-left corner
+PAYLOAD_START_POSITION = np.array([BOX_SIZE/6, 5 * BOX_SIZE/6])  # Top-left corner
 
 # Force parameters
 STIFFNESS = 25.0
 
 # Goal parameters
-GOAL_POSITION = np.array([5 * BOX_SIZE / 6, 5 * BOX_SIZE / 6])  # Top-right corner
+GOAL_POSITION = np.array([BOX_SIZE*0.125, BOX_SIZE*0.125])  # Bottom-left corner
 PARTICLE_VIEW_RANGE = 0.1 * BOX_SIZE  # Range for goal detection
 SCORE_AND_POLARITY_UPDATE_INTERVAL = 50  # How often to update scores & polarity (timesteps)
 DIRECTEDNESS = 1                    # 0 = pure vicsek alignment, 1 = pure gradient following
@@ -50,8 +50,10 @@ WALLS = np.array([
     [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
     # Maze walls
-    [BOX_SIZE*0.33, BOX_SIZE*0.66, BOX_SIZE, BOX_SIZE*0.66],
-    [0, BOX_SIZE*0.33, BOX_SIZE*0.66, BOX_SIZE*0.33],
+    # [BOX_SIZE*0.33, BOX_SIZE*0.66, BOX_SIZE, BOX_SIZE*0.66],
+    [0, BOX_SIZE*0.25, BOX_SIZE*0.55, BOX_SIZE*0.25], # bottom wall
+    [BOX_SIZE*0.375, BOX_SIZE, BOX_SIZE*0.375, BOX_SIZE*0.45], # top left wall
+    [BOX_SIZE*0.75, BOX_SIZE, BOX_SIZE*0.75, BOX_SIZE*0.45], # top right wall
 ], dtype=np.float64)
 # WALLS = None
 
@@ -59,10 +61,11 @@ WALLS = np.array([
 # Visualization parameters
 SHOW_VECTORS = False              # Display v vectors as arrows
 COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "./visualizations/polarity_test_full.mp4"           # If None, uses timestamp. Otherwise specify path.
+OUTPUT_FILENAME = "E:/PostThesis/visualizations/polarity_test_deadend.mp4"           # If None, uses timestamp. Otherwise specify path.
 
 # Data saving (set to True to save simulation data)
-SAVE_DATA = True
+SAVE_DATA = False
+DATA_OUTPUT_PATH = "E:/PostThesis/data/polarity_test_deadend.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 
 #####################
@@ -161,9 +164,14 @@ if __name__ == "__main__":
 
     if SAVE_DATA:
         from src.runner import save_simulation_data
-        T = int(time.time())
+        # Determine data output filename
+        if DATA_OUTPUT_PATH is None:
+            T = int(time.time())
+            data_file = f'./data/sim_data_T_{T}.npz'
+        else:
+            data_file = DATA_OUTPUT_PATH
         save_simulation_data(
-            f'./data/sim_data_T_{T}.npz',
+            data_file,
             positions, orientations, velocities, payload_positions, payload_velocities,
             params, curvity_values, saved_polarity, saved_particle_scores
         )
