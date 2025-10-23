@@ -123,6 +123,16 @@ def run_payload_simulation(params):
     end_time = time.time()
     print(f"Simulation completed in {end_time - start_time:.2f} seconds")
 
+    # Trim arrays to only include saved frames
+    saved_positions = saved_positions[:save_idx]
+    saved_orientations = saved_orientations[:save_idx]
+    saved_velocities = saved_velocities[:save_idx]
+    saved_payload_positions = saved_payload_positions[:save_idx]
+    saved_payload_velocities = saved_payload_velocities[:save_idx]
+    saved_curvity = saved_curvity[:save_idx]
+    saved_polarity = saved_polarity[:save_idx]
+    saved_particle_scores = saved_particle_scores[:save_idx]
+
     # Calculate payload displacement
     total_payload_displacement = np.sqrt(np.sum((saved_payload_positions[-1] - saved_payload_positions[0])**2))
     print(f"Total payload displacement: {total_payload_displacement:.3f}")
