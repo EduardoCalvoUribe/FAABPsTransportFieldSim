@@ -16,7 +16,7 @@ RANDOM_SEED = 42
 # Simulation parameters
 N_PARTICLES = 1200
 BOX_SIZE = 300
-N_STEPS = 300000
+N_STEPS = 2000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -37,7 +37,7 @@ STIFFNESS = 25.0
 # Goal parameters
 GOAL_POSITION = np.array([BOX_SIZE*0.125, BOX_SIZE*0.125])  # Bottom-left corner
 PARTICLE_VIEW_RANGE = 0.1 * BOX_SIZE  # Range for goal detection
-SCORE_AND_POLARITY_UPDATE_INTERVAL = 50  # How often to update scores & polarity (timesteps)
+SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
 DIRECTEDNESS = 1                    # 0 = pure vicsek alignment, 1 = pure gradient following
 END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
 
@@ -61,7 +61,7 @@ WALLS = np.array([
 # Visualization parameters
 SHOW_VECTORS = False              # Display v vectors as arrows
 COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "E:/PostThesis/visualizations/polarity_test_deadend.mp4"           # If None, uses timestamp. Otherwise specify path.
+OUTPUT_FILENAME = "E:/PostThesis/visualizations/test.mp4"           # If None, uses timestamp. Otherwise specify path.
 
 # Data saving (set to True to save simulation data)
 SAVE_DATA = False

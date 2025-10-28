@@ -203,6 +203,143 @@ def has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, box_siz
 
 
 @njit(fastmath=True)
+def compute_polarity_weighted_vicsek(neighbor_indices, neighbor_scores, all_polarity):
+    """Component 1: Score-weighted alignment with neighbors.
+
+    Lower scores = higher weight (stronger influence).
+    Uses exponential weighting: weight = exp(-(score - min_score)).
+
+    Args:
+        neighbor_indices: list of neighbor particle indices
+        neighbor_scores: scores of neighbor particles
+        all_polarity: polarity vectors of all particles
+
+    Returns:
+        weighted_polarity: normalized score-weighted average polarity vector
+    """
+    min_score = min(neighbor_scores)
+    weighted_polarity = np.zeros(2)
+    total_weight = 0.0
+
+    for idx in range(len(neighbor_indices)):
+        j = neighbor_indices[idx]
+        score_j = neighbor_scores[idx]
+
+        # Weight based on relative score difference from minimum
+        # Particles with min_score get weight=1.0, others get exponentially smaller weights
+        score_diff = score_j - min_score
+        weight = np.exp(-score_diff)  # Exponential decay based on score difference
+
+        weighted_polarity += weight * all_polarity[j]
+        total_weight += weight
+
+    # Normalize the weighted average
+    if total_weight > 0:
+        weighted_polarity = weighted_polarity / total_weight
+
+    # Normalize to unit vector
+    norm_weighted = np.sqrt(np.sum(weighted_polarity**2))
+    if norm_weighted > 0:
+        weighted_polarity = weighted_polarity / norm_weighted
+    else:
+        weighted_polarity = np.array([0.0, 0.0])
+
+    return weighted_polarity
+
+
+@njit(fastmath=True)
+def compute_polarity_toward_minscore_pos(pos_i, neighbor_scores, neighbor_positions, box_size):
+    """Component 2: Direction toward particle with lowest score.
+
+    Finds particles with minimum score and computes direction toward their
+    average position using periodic boundaries.
+
+    Args:
+        pos_i: current particle position
+        neighbor_scores: scores of neighbor particles
+        neighbor_positions: positions of neighbor particles
+        box_size: simulation box size for periodic boundaries
+
+    Returns:
+        gradient_polarity: normalized direction toward min-score particles
+    """
+    min_score = min(neighbor_scores)
+
+    # Find the particle(s) with minimum score
+    min_score_indices = []
+    for idx in range(len(neighbor_scores)):
+        if neighbor_scores[idx] == min_score:
+            min_score_indices.append(idx)
+
+    # Point toward the average position of min-score particles (using periodic relative positions)
+    avg_relative_pos = np.zeros(2)
+    for idx in min_score_indices:
+        # Get relative position accounting for periodic boundaries
+        r_ij = compute_minimum_distance(pos_i, neighbor_positions[idx], box_size)
+        avg_relative_pos += r_ij
+    avg_relative_pos = avg_relative_pos / len(min_score_indices)
+
+    # Direction from current particle to target
+    gradient_polarity = avg_relative_pos
+    norm_gradient = np.sqrt(np.sum(gradient_polarity**2))
+    if norm_gradient > 0:
+        gradient_polarity = gradient_polarity / norm_gradient
+    else:
+        gradient_polarity = np.array([0.0, 0.0])
+
+    return gradient_polarity
+
+
+@njit(fastmath=True)
+def compute_polarity_toward_minscore_ang(pos_i, neighbor_scores, neighbor_positions, box_size):
+    """ALTERNATIVE Component 2: Average angle toward min-score neighbors.
+
+    Instead of pointing to average position, this computes the average of unit
+    vectors pointing toward each min-score neighbor separately.
+
+    Args:
+        pos_i: current particle position
+        neighbor_scores: scores of neighbor particles
+        neighbor_positions: positions of neighbor particles
+        box_size: simulation box size for periodic boundaries
+
+    Returns:
+        gradient_polarity: normalized average direction toward min-score particles
+    """
+    min_score = min(neighbor_scores)
+
+    # Find the particle(s) with minimum score
+    min_score_indices = []
+    for idx in range(len(neighbor_scores)):
+        if neighbor_scores[idx] == min_score:
+            min_score_indices.append(idx)
+
+    # Compute average angle from current particle to min-score neighbors
+    total_x = 0.0
+    total_y = 0.0
+    for idx in min_score_indices:
+        # Direction from current particle to this neighbor (PERIODIC)
+        r_ij = compute_minimum_distance(pos_i, neighbor_positions[idx], box_size)
+        dist = np.sqrt(np.sum(r_ij**2))
+        if dist > 0:
+            # Unit vector toward this neighbor
+            unit_x = r_ij[0] / dist
+            unit_y = r_ij[1] / dist
+            total_x += unit_x
+            total_y += unit_y
+
+    # Average the unit vectors (this gives average angle)
+    gradient_polarity = np.array([total_x, total_y])
+    norm_gradient = np.sqrt(gradient_polarity[0]**2 + gradient_polarity[1]**2)
+    if norm_gradient > 0:
+        gradient_polarity = gradient_polarity / norm_gradient
+    else:
+        gradient_polarity = np.array([0.0, 0.0])
+
+    return gradient_polarity
+
+
+@njit(fastmath=True)
 def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size, current_score, head, list_next, n_cells, all_polarity, payload_pos, payload_radius, walls, directedness):
     """Compute polarity vector by balancing score-weighted alignment and gradient following.
 
@@ -297,91 +434,26 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
     new_score = min_score + 1
 
     # Component 1: Score-weighted alignment with neighbors
-    # Lower scores = higher weight (stronger influence)
-    # Use exponential weighting: weight = exp(-(score - min_score))
-    weighted_v = np.zeros(2)
-    total_weight = 0.0
-
-    for idx in range(len(neighbor_indices)):
-        j = neighbor_indices[idx]
-        score_j = neighbor_scores[idx]
-
-        # Weight based on relative score difference from minimum
-        # Particles with min_score get weight=1.0, others get exponentially smaller weights
-        score_diff = score_j - min_score
-        weight = np.exp(-score_diff)  # Exponential decay based on score difference
-
-        weighted_v += weight * all_polarity[j]
-        total_weight += weight
-
-    # Normalize the weighted average
-    if total_weight > 0:
-        weighted_v = weighted_v / total_weight
-
-    # Normalize to unit vector
-    norm_weighted = np.sqrt(np.sum(weighted_v**2))
-    if norm_weighted > 0:
-        weighted_v = weighted_v / norm_weighted
-    else:
-        weighted_v = np.array([0.0, 0.0])
+    weighted_polarity = compute_polarity_weighted_vicsek(neighbor_indices, neighbor_scores, all_polarity)
 
     # Component 2: Direction toward particle with lowest score
-    # Find the particle(s) with minimum score
-    min_score_indices = []
-    for idx in range(len(neighbor_indices)):
-        if neighbor_scores[idx] == min_score:
-            min_score_indices.append(idx)
+    gradient_polarity = compute_polarity_toward_minscore_pos(pos_i, neighbor_scores, neighbor_positions, box_size)
 
-    # Point toward the average position of min-score particles (using periodic relative positions)
-    avg_relative_pos = np.zeros(2)
-    for idx in min_score_indices:
-        # Get relative position accounting for periodic boundaries
-        r_ij = compute_minimum_distance(pos_i, neighbor_positions[idx], box_size)
-        avg_relative_pos += r_ij
-    avg_relative_pos = avg_relative_pos / len(min_score_indices)
-
-    # Direction from current particle to target
-    gradient_v = avg_relative_pos
-    norm_gradient = np.sqrt(np.sum(gradient_v**2))
-    if norm_gradient > 0:
-        gradient_v = gradient_v / norm_gradient
-    else:
-        gradient_v = np.array([0.0, 0.0])
-
-    # ALTERNATIVE: Compute average angle from current particle to min-score neighbors
-    # total_x = 0.0
-    # total_y = 0.0
-    # for idx in min_score_indices:
-    #     # Direction from current particle to this neighbor (PERIODIC)
-    #     r_ij = compute_minimum_distance(pos_i, neighbor_positions[idx], box_size)
-    #     dist = np.sqrt(np.sum(r_ij**2))
-    #     if dist > 0:
-    #         # Unit vector toward this neighbor
-    #         unit_x = r_ij[0] / dist
-    #         unit_y = r_ij[1] / dist
-    #         total_x += unit_x
-    #         total_y += unit_y
-    #
-    # # Average the unit vectors (this gives average angle)
-    # gradient_v = np.array([total_x, total_y])
-    # norm_gradient = np.sqrt(gradient_v[0]**2 + gradient_v[1]**2)
-    # if norm_gradient > 0:
-    #     gradient_v = gradient_v / norm_gradient
-    # else:
-    #     gradient_v = np.array([0.0, 0.0])
+    # ALTERNATIVE Component 2: Uncomment to use average angle method instead
+    # gradient_polarity = compute_polarity_toward_minscore_ang(pos_i, neighbor_scores, neighbor_positions, box_size)
 
     # Combine components based on directedness parameter
     # (1-d): score-weighted alignment, (d): direct gradient following
-    combined_v = (1.0 - directedness) * weighted_v + directedness * gradient_v
+    combined_polarity = (1.0 - directedness) * weighted_polarity + directedness * gradient_polarity
 
     # Normalize final vector
-    norm = np.sqrt(np.sum(combined_v**2))
+    norm = np.sqrt(np.sum(combined_polarity**2))
     if norm > 0:
-        combined_v = combined_v / norm
+        combined_polarity = combined_polarity / norm
     else:
-        combined_v = np.array([0.0, 0.0])
+        combined_polarity = np.array([0.0, 0.0])
 
-    return combined_v, new_score
+    return combined_polarity, new_score
 
 
 @njit(fastmath=True)
