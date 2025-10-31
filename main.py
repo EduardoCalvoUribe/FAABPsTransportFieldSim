@@ -16,7 +16,7 @@ RANDOM_SEED = 42
 # Simulation parameters
 N_PARTICLES = 1200
 BOX_SIZE = 300
-N_STEPS = 2000
+N_STEPS = 15000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -59,8 +59,8 @@ WALLS = np.array([
 
 
 # Visualization parameters
-SHOW_VECTORS = False              # Display v vectors as arrows
-COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
+SHOW_VECTORS = True              # Display v vectors as arrows
+COLOR_BY_SCORE = True           # If True: color by score, if False: color by curvity
 OUTPUT_FILENAME = "E:/PostThesis/visualizations/test.mp4"           # If None, uses timestamp. Otherwise specify path.
 
 # Data saving (set to True to save simulation data)

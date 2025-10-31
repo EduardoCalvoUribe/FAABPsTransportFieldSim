@@ -147,7 +147,7 @@ def compute_curvity_from_polarity(orientations, polarity, n_particles):
     return curvity
 
 @njit(fastmath=True)
-def has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, box_size, walls):
+def has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls):
     """Check if particle i has line of sight to goal (no walls or payload blocking).
 
     Returns True if line from particle to goal doesn't intersect with walls or payload circle.
@@ -158,7 +158,7 @@ def has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, box_siz
     x_p, y_p = payload_pos
 
     # Check if any wall blocks line of sight
-    if line_intersects_any_wall(x_i, y_i, x_goal, y_goal, walls):
+    if walls is not None and line_intersects_any_wall(x_i, y_i, x_goal, y_goal, walls):
         return False  # Wall blocks line of sight
 
     # Quick bounding box check
@@ -177,12 +177,13 @@ def has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, box_siz
     # Direction vector: particle to goal
     dx, dy = x_goal - x_i, y_goal - y_i
 
-    # Direction vector: particle to payload
+    # Vector from particle to payload center
     fx, fy = x_p - x_i, y_p - y_i
 
     # Coefficients of quadratic equation for line-circle intersection
+    # Line: P(t) = (x_i, y_i) + t*(dx, dy), we want |P(t) - payload_center|^2 = radius^2
     a = dx**2 + dy**2
-    b = 2 * (fx * dx + fy * dy)
+    b = -2 * (fx * dx + fy * dy)
     c = fx**2 + fy**2 - payload_radius**2
 
     # Discriminant
@@ -378,7 +379,7 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
         # If goal is within range, check line of sight
         if dist_to_goal <= r:
             # Check if line of sight is clear (no walls or payload blocking)
-            if has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, box_size, walls):
+            if has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls):
                 if dist_to_goal > 0:
                     return np.array([dx_goal / dist_to_goal, dy_goal / dist_to_goal]), 0
                 return np.array([0.0, 0.0]), 0 # payload is exactly on the goal
