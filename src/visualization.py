@@ -11,13 +11,12 @@ import time
 
 def create_payload_animation(positions, orientations, velocities, payload_positions, params,
                             curvity_values, output_file='visualizations/payload_animation_00.mp4',
-                            show_vectors=False, polarity=None, particle_scores=None):
+                            show_vectors=False, polarity=None):
     """Create an animation of the payload transport simulation.
 
     Args:
         show_vectors: If True, display the polarity vectors as arrows attached to particles
-        polarity: Array of polarity vectors over time (n_frames, n_particles, 2)
-        particle_scores: Array of particle scores over time (n_frames, n_particles). If provided, colors particles by score instead of curvity.
+        polarity: Array of active polarity vectors over time (n_frames, n_particles, 2)
     """
 
     print("Creating animation...")
@@ -30,6 +29,11 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     n_particles = params['n_particles']
     goal_position = params['goal_position']
     walls = params.get('walls', np.zeros((0, 4), dtype=np.float64))
+    save_interval = params['save_interval']
+    n_training_steps = params.get('n_training_steps', params['n_steps'] // 2)
+
+    # Calculate which frame corresponds to end of training phase
+    training_end_frame = n_training_steps // save_interval
 
     # Create figure and axis
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -40,8 +44,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     ax.set_title('FAABP Cooperative Transport Simulation')
     ax.grid(True, alpha=0.3)
 
-    # Color mapping functions
-    # STANDARD: Color mapping: curvity -1 (dark blue) -> 0 (gray) -> +1 (red)
+    # Color mapping: curvity -1 (dark blue) -> 0 (gray) -> +1 (red)
     def get_particle_color_based_on_curvity(curvity_value):
         """Map curvity value to RGB color with smooth gradient.
         -1: dark blue, 0: gray, +1: red"""
@@ -63,29 +66,8 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
 
         return (r, g, b)
 
-    # DEBUG: Color mapping: score 0 (blue) -> 999+ (orange)
-    def get_particle_color_based_on_score(score_value):
-        """Map score value to RGB color with linear gradient.
-        0: blue (0, 0, 1), 20+: orange (1, 0.5, 0)"""
-        # Clamp score to [0, 50] range
-        s = np.clip(score_value, 0, 10)
-
-        # Linear interpolation from blue to orange
-        t = s / 10.0  # Map [0, 50] to [0, 1]
-
-        r = 0.0 + t * 1.0  # 0 -> 1
-        g = 0.0 + t * 0.5  # 0 -> 0.5
-        b = 1.0 - t * 1.0  # 1 -> 0
-
-        return (r, g, b)
-
-    # Initialize particle colors
-    if particle_scores is not None:
-        # Color by score
-        particle_colors = [get_particle_color_based_on_score(particle_scores[0, i]) for i in range(n_particles)]
-    else:
-        # Color by curvity (fallback)
-        particle_colors = [get_particle_color_based_on_curvity(curvity_values[0, i]) for i in range(n_particles)]
+    # Initialize particle colors based on curvity
+    particle_colors = [get_particle_color_based_on_curvity(curvity_values[0, i]) for i in range(n_particles)]
 
     scatter = ax.scatter(
         positions[0, :, 0],
@@ -181,20 +163,21 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         # Update payload
         payload.center = (payload_positions[frame, 0], payload_positions[frame, 1])
 
-        # Update payload trajectory
-        trajectory_end = min(frame + 1, len(payload_positions))
-        trajectory.set_data(
-            payload_positions[:trajectory_end, 0],
-            payload_positions[:trajectory_end, 1]
-        )
+        # Update payload trajectory - only draw after training phase
+        if frame > training_end_frame:
+            # Start trajectory from end of training phase
+            trajectory.set_data(
+                payload_positions[training_end_frame:frame+1, 0],
+                payload_positions[training_end_frame:frame+1, 1]
+            )
+        else:
+            # Don't draw trajectory during training
+            trajectory.set_data([], [])
 
         # Particle positions & colors update
         scatter.set_offsets(positions[frame])
-        # Color by score if available, otherwise by curvity
-        if particle_scores is not None:
-            scatter.set_color([get_particle_color_based_on_score(score) for score in particle_scores[frame]])
-        else:
-            scatter.set_color([get_particle_color_based_on_curvity(cv) for cv in curvity_values[frame]])
+        # Color by curvity
+        scatter.set_color([get_particle_color_based_on_curvity(cv) for cv in curvity_values[frame]])
 
         # Update polarity vectors if enabled
         if quiver is not None and polarity is not None:
@@ -247,3 +230,147 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
 
     print(f"Animation saved as '{output_file}'")
     print(f"Animation creation time: {end_time - start_time:.2f} seconds")
+
+
+def create_averaged_polarity_field_png(polarity_fields, box_size, output_file='visualizations/polarity_field.png'):
+    """Create a PNG visualization of the averaged polarity field from all particles.
+
+    Args:
+        polarity_fields: Polarity vector fields from all particles (n_particles, box_size, box_size, 2)
+        box_size: Size of the simulation box
+        output_file: Path to save the PNG file
+    """
+    print("Creating averaged polarity field visualization...")
+
+    # Average polarity fields across all particles
+    averaged_field = np.mean(polarity_fields, axis=0)  # Shape: (box_size, box_size, 2)
+
+    # Compute magnitudes for normalization
+    magnitudes = np.sqrt(averaged_field[:, :, 0]**2 + averaged_field[:, :, 1]**2)
+    max_magnitude = np.max(magnitudes)
+
+    # Normalize vectors for visualization (if max_magnitude is non-zero)
+    if max_magnitude > 0:
+        normalized_field = averaged_field / max_magnitude
+    else:
+        normalized_field = averaged_field
+
+    # Create figure
+    fig, ax = plt.subplots(figsize=(10, 10))
+    ax.set_xlim(0, box_size)
+    ax.set_ylim(0, box_size)
+    ax.set_title('Averaged Polarity Vector Field (Post-Training)')
+    ax.set_xlabel('X Position')
+    ax.set_ylabel('Y Position')
+    ax.grid(True, alpha=0.3)
+    ax.set_aspect('equal')
+
+    # Create grid coordinates for quiver plot
+    # Sample at grid cell centers
+    x = np.arange(0.5, box_size, 1)
+    y = np.arange(0.5, box_size, 1)
+    X, Y = np.meshgrid(x, y)
+
+    # Extract U and V components (need to transpose to match grid orientation)
+    U = normalized_field[:, :, 0].T
+    V = normalized_field[:, :, 1].T
+
+    # Create quiver plot with color based on magnitude
+    quiver = ax.quiver(
+        X, Y, U, V,
+        magnitudes.T,  # Color by original magnitude
+        angles='xy',
+        scale_units='xy',
+        scale=0.8,  # Adjust arrow scaling
+        cmap='viridis',
+        alpha=0.7,
+        width=0.003,
+        headwidth=3.5,
+        headlength=4.5
+    )
+
+    # Add colorbar
+    cbar = plt.colorbar(quiver, ax=ax, label='Vector Magnitude')
+
+    # Save figure
+    plt.savefig(output_file, dpi=200, bbox_inches='tight')
+    plt.close()
+
+    print(f"Polarity field visualization saved as '{output_file}'")
+    print(f"Max field magnitude: {max_magnitude:.4f}")
+
+
+def create_averaged_polarity_field_by_direction_png(polarity_fields, box_size, output_file='visualizations/polarity_field_direction.png'):
+    """Create a PNG visualization of the averaged polarity field colored by direction.
+
+    Args:
+        polarity_fields: Polarity vector fields from all particles (n_particles, box_size, box_size, 2)
+        box_size: Size of the simulation box
+        output_file: Path to save the PNG file
+    """
+    print("Creating averaged polarity field visualization (colored by direction)...")
+
+    # Average polarity fields across all particles
+    averaged_field = np.mean(polarity_fields, axis=0)  # Shape: (box_size, box_size, 2)
+
+    # Compute magnitudes for normalization
+    magnitudes = np.sqrt(averaged_field[:, :, 0]**2 + averaged_field[:, :, 1]**2)
+    max_magnitude = np.max(magnitudes)
+
+    # Normalize vectors for visualization (if max_magnitude is non-zero)
+    if max_magnitude > 0:
+        normalized_field = averaged_field / max_magnitude
+    else:
+        normalized_field = averaged_field
+
+    # Compute angles for coloring (in radians, then convert to degrees)
+    # atan2(y, x) gives angle from -pi to pi
+    angles = np.arctan2(averaged_field[:, :, 1], averaged_field[:, :, 0])
+    # Convert to degrees: -180 to 180, then shift to 0 to 360
+    angles_deg = (np.degrees(angles) + 360) % 360
+
+    # Create figure
+    fig, ax = plt.subplots(figsize=(10, 10))
+    ax.set_xlim(0, box_size)
+    ax.set_ylim(0, box_size)
+    ax.set_title('Averaged Polarity Vector Field (Colored by Direction)')
+    ax.set_xlabel('X Position')
+    ax.set_ylabel('Y Position')
+    ax.grid(True, alpha=0.3)
+    ax.set_aspect('equal')
+
+    # Create grid coordinates for quiver plot
+    # Sample at grid cell centers
+    x = np.arange(0.5, box_size, 1)
+    y = np.arange(0.5, box_size, 1)
+    X, Y = np.meshgrid(x, y)
+
+    # Extract U and V components (need to transpose to match grid orientation)
+    U = normalized_field[:, :, 0].T
+    V = normalized_field[:, :, 1].T
+
+    # Create quiver plot with color based on direction
+    quiver = ax.quiver(
+        X, Y, U, V,
+        angles_deg.T,  # Color by direction angle
+        angles='xy',
+        scale_units='xy',
+        scale=0.8,  # Adjust arrow scaling
+        cmap='hsv',  # HSV colormap is cyclic and good for directions
+        alpha=0.7,
+        width=0.003,
+        headwidth=3.5,
+        headlength=4.5,
+        clim=(0, 360)  # Set color limits to full angle range
+    )
+
+    # Add colorbar with angle labels
+    cbar = plt.colorbar(quiver, ax=ax, label='Direction (degrees)')
+    cbar.set_ticks([0, 45, 90, 135, 180, 225, 270, 315, 360])
+    cbar.set_ticklabels(['0° (→)', '45°', '90° (↑)', '135°', '180° (←)', '225°', '270° (↓)', '315°', '360°'])
+
+    # Save figure
+    plt.savefig(output_file, dpi=200, bbox_inches='tight')
+    plt.close()
+
+    print(f"Polarity field visualization (by direction) saved as '{output_file}'")

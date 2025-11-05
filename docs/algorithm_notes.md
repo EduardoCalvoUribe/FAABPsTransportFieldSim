@@ -1,182 +1,326 @@
-# Goal-Seeking Algorithm using Polarity 
+# Force-Aligning Active Brownian Particles (FAABPs) with Polarity Fields
 
 ## Overview
-Each particle has two key properties:
-- **Score (s)**: An integer representing the particle's "distance" from the goal in discrete hops
-- **Polarity (p)**: A unit vector that influences the particle's curvity (and therefore turning behavior)
+
+This simulation implements Force-Aligning Active Brownian Particles (FAABPs) that learn to cooperatively transport a payload through spatial memory stored in polarity fields. Each particle maintains a personal spatial memory (polarity field) that encodes historical force experiences, enabling collective path learning and emergent cooperative behavior.
+
+## Core Concepts
+
+### Particle Properties
+Each particle `i` has the following properties:
+- **Position** `x_i ∈ ℝ²`: Spatial location
+- **Orientation** `e_i ∈ ℝ²`: Heading direction (unit vector, ||e_i|| = 1)
+- **Velocity** `v_i ∈ ℝ²`: Current velocity
+- **Active polarity** `p_i ∈ ℝ²`: Polarity vector fetched from field at current position
+- **Curvity** `κ_i ∈ [-1, 1]`: Force-alignment parameter computed from polarity
+
+### Polarity Fields
+Each particle maintains a **personal polarity field**:
+- **Structure**: `F_i[x, y] ∈ ℝ²` for each grid cell (x, y)
+- **Dimensions**: `box_size × box_size × 2` (vector at each integer grid position)
+- **Purpose**: Spatial memory encoding historical force experiences
+- **Learning**: Updated through two mechanisms:
+  1. **Force accumulation**: Direct experience of forces at visited locations
+  2. **Collision sharing**: Knowledge transfer when particles collide
 
 ## Algorithm Structure
 
-### 1. Particle Properties
-Every particle `i` has:
-- **s_i** ∈ ℤ: Score (initialized to 9999)
-- **p_i** ∈ ℝ²: Polarity unit vector (||p_i|| = 1)
-- **e_i** ∈ ℝ²: Heading/orientation vector (||e_i|| = 1)
-- **r**: View range (hyperparameter, default: 0.1 × box_size)
+### Phase 1: Training Phase (Circular Payload Motion)
 
-### 2. Core Update Rules (Executed Every `score_and_polarity_update_interval` Steps)
+During the first `n_training_steps`, the payload follows a prescribed circular path while particles interact with it and learn force patterns.
 
-For each particle `i` at position **x_i**:
-
-#### **Case A: Line of Sight to Goal**
-If ||**x_goal** - **x_i**|| ≤ r (goal within view range) AND no walls or payload block the line of sight:
-
+#### Payload Motion
 ```
-s_i = 0
-p_i = (**x_goal** - **x_i**) / ||**x_goal** - **x_i**||
+Angular velocity: ω = (2π × n_rotations) / n_training_steps
+Angle at step t: θ(t) = ω × t
+
+Position: payload_pos(t) = center + radius × [cos(θ), sin(θ)]
+Velocity: payload_vel(t) = radius × ω × [-sin(θ), cos(θ)]
 ```
 
-**Meaning**: Particle has direct, unobstructed access to goal; points directly toward it with score 0.
+#### Particle Learning
+Particles accumulate force experiences in their polarity fields through two mechanisms:
 
----
-
-#### **Case B: No Line of Sight to Goal**
-If goal is out of range OR line of sight is blocked by walls or payload:
-
-##### **Step 1: Find Neighbors Within Range**
-Define neighbor set:
+**1. Force Accumulation** (every `force_update_interval` steps):
 ```
-N_i = {j ≠ i : ||**x_j** - **x_i**|| ≤ r AND not separated by wall}
+For each particle i at position (x, y):
+  grid_x = int(x) mod box_size
+  grid_y = int(y) mod box_size
+
+  F_i[grid_x, grid_y] = tanh(F_i[grid_x, grid_y] + α × F_external_i)
 ```
-**Note**: Uses periodic boundary conditions for distance calculation. Particles separated by walls along the shortest periodic path are excluded from the neighbor set.
+- `α`: Force scaling factor (default: 0.1)
+- `F_external_i`: Net force on particle from payload and other particles
+- `tanh()`: Prevents unbounded growth, keeps field vectors bounded
 
----
-
-##### **Step 2: Score Calculation**
-
+**2. Collision-Based Knowledge Sharing** (every `collision_share_interval` steps):
 ```
-s_i = {
-    s* + 1,     if N_i ≠ ∅
-    9999,       if N_i = ∅
-}
-
-where s* = min{s_j : j ∈ N_i}
+When particles i and j collide (new collision, not continuous contact):
+  For all grid cells (x, y):
+    F_sum = F_i[x, y] + F_j[x, y]
+    F_i[x, y] = tanh(F_sum)
+    F_j[x, y] = tanh(F_sum)
 ```
+- Particles exchange complete spatial knowledge upon collision
+- Only new collisions trigger sharing (tracked via `last_collision_partner`)
+- Both particles receive the same updated field
 
-**Meaning**:
-- Score is minimum neighbor score plus one (gradient descent toward goal)
-- If isolated (no neighbors), score resets to 9999
-- **Halt condition**: If s_i > 20000, terminate simulation (indicates unreachable goal)
+### Phase 2: Test Phase (Passive Payload)
 
----
+After training, the payload becomes passive and responds only to forces from particles. Learning can be controlled via `test_phase_learning`:
+- `0`: No learning (frozen fields)
+- `1`: Collision communication only
+- `2`: Both force accumulation and collision sharing (default)
 
-##### **Step 3: Polarity Alignment (Hybrid: Score-Weighted + Gradient)**
-
-**p_i** is computed as a weighted combination of two components:
-
+#### Payload Dynamics
 ```
-p_i = ((1-d) · p_weighted + d · p_gradient) / ||(1-d) · p_weighted + d · p_gradient||
+Force: F_payload = Σ(particle-payload forces) + Σ(wall forces)
+Velocity: v_payload = μ_payload × F_payload
+Position: payload_pos += v_payload × dt
+```
+- `μ_payload = 1 / payload_radius`: Payload mobility
+
+## Physics Equations
+
+### 1. Force Computation
+
+**Repulsive Forces** (soft-sphere model):
+```
+F_ij = { S₀ × (r_i + r_j - ||x_j - x_i||) × r̂_ij,  if ||x_j - x_i|| < r_i + r_j
+       { 0,                                          otherwise
 
 where:
-- d ∈ [0, 1]: directedness hyperparameter (default: 0.5)
-- p_weighted: score-weighted alignment with neighbors
-- p_gradient: direction toward lowest-score neighbor(s)
+  r̂_ij = (x_j - x_i) / ||x_j - x_i||  (unit vector from i to j)
+  S₀: stiffness parameter
 ```
 
-**Component 1 - Score-Weighted Alignment** (weight: 1-d):
+Applied between:
+- Particle-particle pairs (via efficient cell list, O(N))
+- Particle-payload pairs
+- Particles/payload and walls
+
+**Wall Forces**:
 ```
-p_weighted = (Σ_j w_j · p_j) / ||Σ_j w_j · p_j||    where j ∈ N_i
-
-with weights:
-w_j = exp(-(s_j - s*))
-
-where s* = min{s_j : j ∈ N_i}
+For each wall segment:
+  d = point_to_segment_distance(particle_pos, wall_segment)
+  if d < r_particle:
+    overlap = r_particle - d
+    F_wall = S₀ × overlap × n̂
 ```
-- Exponentially weighted by score difference
-- Particles with minimum score s* get weight w = 1.0
-- Higher scores decay exponentially (s* + 1 → w ≈ 0.368, s* + 2 → w ≈ 0.135)
-- Vicsek-style alignment that favors following lower-score neighbors
+- `n̂`: Normal vector from wall toward particle
 
-**Component 2 - Gradient Following** (weight: d):
+**Periodic Boundaries**: Distances computed using minimum image convention, but wall intersection checks use the actual periodic shortest path to prevent forces through walls.
+
+### 2. Curvity and Polarity
+
+**Active Polarity Fetch**:
 ```
-p_gradient = (**x*** - **x_i**) / ||**x*** - **x_i**||
+At each timestep, particle i at position (x, y):
+  grid_x = int(x) mod box_size
+  grid_y = int(y) mod box_size
 
-where **x*** = (1/|J|) · Σ_j **x_j**    for j ∈ J
-      J = {j ∈ N_i : s_j = s*}
-```
-- Points directly toward the average position of minimum-score neighbor(s)
-- Uses periodic boundary conditions to compute relative positions
-- Pure gradient descent behavior (most direct path)
-
-**Directedness Parameter** (d):
-- d = 0: Pure score-weighted Vicsek alignment (smooth, consensus-based)
-- d = 0.5: Balanced hybrid (default)
-- d = 1: Pure gradient descent (direct pursuit)
-- Higher d = more direct/aggressive goal-seeking
-- Lower d = more collective/smooth navigation
-
-**Normalization**:
-```
-p_i = combined / ||combined||    [normalize to unit vector]
+  p_i = F_i[grid_x, grid_y]  (fetch from personal field)
 ```
 
----
-
-### 3. Curvity Calculation
-
-Once **p_i** is computed, it determines particle curvity:
-
+**Curvity Calculation**:
 ```
 κ_i = -(e_i · p_i)
+
+where:
+  e_i: current orientation (heading)
+  p_i: active polarity (fetched from field)
 ```
 
-Where:
-- **e_i**: Current heading/orientation (unit vector)
-- **p_i**: Computed polarity vector (unit vector)
-- κ_i ∈ [-1, 1]: Curvity parameter
+**Physical Meaning**:
+- `κ > 0`: Polarity opposes heading → particle curves to align with polarity
+- `κ < 0`: Polarity aligns with heading → particle continues straight
+- `κ = 0`: Polarity perpendicular to heading → no alignment torque
 
-**Effect on dynamics**:
-Curvity influences orientation update via torque:
-```
-τ_i = κ_i · (e_i × F_i)
-```
-where F_i is the net force on particle i.
+### 3. Orientation Dynamics
 
----
+**Torque from Force Alignment**:
+```
+τ_i = κ_i × (e_i × F_i)
+    = κ_i × (e_i,x × F_i,y - e_i,y × F_i,x)
+```
+
+**Orientation Update**:
+```
+Change: de_i/dt = τ_i × (e_i × ẑ) + ξ_i
+
+where:
+  e_i × ẑ = [-e_i,y, e_i,x]  (perpendicular to orientation)
+  ξ_i: rotational diffusion noise
+```
+
+**Rotational Noise**:
+```
+ξ_i ~ N(0, √(2 D_rot dt))  projected perpendicular to e_i
+```
+
+**Final Update**:
+```
+e_i(t + dt) = normalize(e_i(t) + de_i)
+```
+
+### 4. Position Dynamics
+
+**Velocity Composition**:
+```
+v_i = v₀_i × e_i + μ_i × F_i
+
+where:
+  v₀_i × e_i: self-propulsion
+  μ_i × F_i: force-induced motion
+```
+
+**Position Update**:
+```
+x_i(t + dt) = x_i(t) + v_i × dt  (mod box_size)
+```
 
 ## Implementation Details
 
 ### Efficient Neighbor Search
-Uses cell-list algorithm with O(N) complexity:
-- Cell size = r (particle view range)
-- Search 3×3 neighborhood of cells
-- **Uses periodic wrapping** for neighbor search
-- Particles separated by walls along shortest periodic path are excluded
+Uses **cell list algorithm** for O(N) complexity:
+```
+Cell size: max(2 × max_particle_radius, ...)
+Grid: n_cells × n_cells  where n_cells = floor(box_size / cell_size)
 
-### Update Frequency
-- Parameter: `score_and_polarity_update_interval` (default: 10 timesteps)
-- Polarity vectors and scores update every `score_and_polarity_update_interval` steps
-- Reduces computational cost while maintaining gradient propagation
+For each particle:
+  1. Assign to cell based on position
+  2. Check 3×3 neighborhood of cells (including own)
+  3. Use linked list to iterate particles in each cell
+```
 
-### Initialization
-- All particles start with s_i = 9999, p_i = (cos(π/4), sin(π/4))
-- Goal position: default (4/5 × box_size, 4/5 × box_size)
-- Score propagates outward from goal over time
+**Periodic Boundaries**: Cell wrapping handles periodic boundary conditions automatically.
 
----
+**Wall Filtering**: Particle pairs separated by walls along the periodic shortest path are excluded from force calculations.
 
-## Key Properties
+### Wall Handling
 
-1. **Gradient Formation**: Scores form discrete gradient field pointing toward goal
-2. **Information Propagation**: Score=0 spreads from goal at ~1 cell per update
-3. **Alignment Consensus**: Particles align with lowest-score neighbors (follow the gradient)
-4. **Scale Invariance**: Exponential weighting ensures relative influence independent of absolute scores
-5. **Isolation Handling**: Isolated particles reset to s=9999, preventing stale information
+**Line Segment Intersection**:
+```
+Check if segment (p1, p2) intersects wall (w1, w2):
+  - Use cross-product method
+  - Return True if segments intersect
 
----
+For periodic boundaries:
+  - Compute shortest periodic path
+  - Check wall intersection along this path
+```
 
-## Physical Interpretation
+**Collision Detection**:
+```
+For particle at position p with radius r:
+  For each wall segment:
+    d = distance from p to segment
+    if d < r:
+      Apply repulsive force
+```
 
-This algorithm creates **emergent cooperative transport**:
-1. Particles with clear line of sight to goal (within range, unobstructed by walls/payload) orient toward it (s=0)
-2. Their neighbors align with them and get s=1
-3. Information cascades outward, forming gradient
-4. Particles far from goal follow the gradient through hybrid alignment:
-   - **Score-weighted component (1-d)**: Aligns with neighbors' polarity vectors, but strongly favors lower-score neighbors via exponential weighting. Maintains collective behavior while following the gradient.
-   - **Gradient component (d)**: Direct spatial pursuit of lowest-score neighbor position (using periodic boundaries). Most direct path but ignores polarity field structure.
-5. Combined with FAABP dynamics (forces, curvity, self-propulsion), this creates collective payload pushing toward goal
+### Numerical Integration
 
-The **directedness parameter** allows tuning between:
-- **Low d (→ 0)**: Pure score-weighted Vicsek alignment. Smooth, collective navigation that follows the polarity field gradient. More robust to noise and obstacles.
-- **High d (→ 1)**: Pure spatial gradient descent. Direct, aggressive pursuit of best neighbor. Faster but may create sharp turns or get stuck.
-- **Balanced d=0.5**: Compromise between smooth polarity-field following and direct spatial pursuit.
+**Time Integration**:
+- **Method**: Forward Euler
+- **Time step**: `dt = 0.01` (typical)
+- **Update order**:
+  1. Compute forces
+  2. Fetch polarity from fields
+  3. Compute curvity
+  4. Update polarity fields (training phase)
+  5. Share fields on collision (training phase)
+  6. Update orientations
+  7. Update positions
+  8. Apply periodic boundaries
+
+### JIT Compilation
+
+All performance-critical functions use Numba's `@njit(fastmath=True)`:
+- `compute_all_forces()`
+- `simulate_single_step()`
+- `update_orientation_vectors()`
+- `update_polarity_fields_from_forces()`
+- `share_polarity_fields_on_collision()`
+- All physics utility functions
+
+## Key Parameters
+
+### Particle Parameters
+- `N_PARTICLES`: Number of particles (default: 1200)
+- `PARTICLE_RADIUS`: Particle size (default: 1.0)
+- `PARTICLE_V0`: Self-propulsion speed (default: 3.75)
+- `PARTICLE_MOBILITY`: Response to forces (default: 1.0)
+- `ROTATIONAL_DIFFUSION`: Orientational noise (default: 0.05)
+
+### Payload Parameters
+- `PAYLOAD_RADIUS`: Payload size (default: 20)
+- `PAYLOAD_MOBILITY`: `1 / PAYLOAD_RADIUS` (size-dependent)
+- `PAYLOAD_CIRCLE_RADIUS`: Training path radius (default: BOX_SIZE/3)
+- `PAYLOAD_N_ROTATIONS`: Number of training rotations (default: 6)
+
+### Force Parameters
+- `STIFFNESS`: Repulsive force strength (default: 25.0)
+- `POLARITY_FORCE_SCALING`: Learning rate for force accumulation (default: 0.1)
+
+### Learning Parameters
+- `FORCE_UPDATE_INTERVAL`: How often to update fields with forces (default: 20 steps)
+- `COLLISION_SHARE_INTERVAL`: How often to share on collision (default: 10 steps)
+- `TEST_PHASE_LEARNING`: Learning control in test phase (default: 0, no learning)
+
+### Simulation Parameters
+- `BOX_SIZE`: Domain size (default: 300)
+- `N_TRAINING_STEPS`: Training duration (default: 20000)
+- `N_TEST_STEPS`: Test duration (default: 60000)
+- `DT`: Time step (default: 0.01)
+
+## Emergent Behavior
+
+### Collective Transport Mechanism
+
+1. **Training Phase Learning**:
+   - Payload follows circular path
+   - Particles pushed by payload experience forces
+   - Forces accumulate in spatial fields at visited locations
+   - Collision sharing spreads knowledge across swarm
+   - Each particle builds personal map of "good directions" at each location
+
+2. **Test Phase Exploitation**:
+   - Payload becomes passive
+   - Particles fetch polarity vectors from learned fields
+   - Curvity computed from polarity → particles align with learned directions
+   - Particles collectively push payload along learned path
+   - Emergent cooperative transport without explicit goal-seeking
+
+3. **Key Mechanisms**:
+   - **Spatial memory**: Polarity fields encode location-dependent behavior
+   - **Distributed learning**: Each particle has independent memory, shared via collisions
+   - **Force alignment**: Curvity mechanism couples motion to learned polarity
+   - **Collective action**: Multiple particles push payload coherently
+
+### Advantages of Polarity Field Approach
+
+1. **Scalability**: Each particle operates independently, no global coordination
+2. **Robustness**: Distributed memory survives individual particle failure
+3. **Adaptability**: Fields can adapt if environment changes (with learning enabled)
+4. **Simplicity**: No explicit path planning or communication protocol
+5. **Biological plausibility**: Similar to stigmergy in social insects
+
+## Data Storage and Visualization
+
+### Saved Data
+- Particle positions, orientations, velocities
+- Payload positions and velocities
+- Curvity values over time
+- Active polarity vectors (fetched from fields)
+
+### Visualization
+- Particles colored by curvity (`κ > 0` = red/orange, `κ < 0` = blue/cyan)
+- Optional polarity vector arrows
+- Payload trajectory
+- Wall segments (if present)
+- Goal position marker
+
+## References
+
+This simulation is based on the Force-Aligning Active Brownian Particle (FAABP) model, which couples particle orientation to experienced forces through the curvity parameter. The polarity field extension adds spatial memory for learning-based collective transport.
