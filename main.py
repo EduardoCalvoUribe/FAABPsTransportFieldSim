@@ -14,9 +14,9 @@ from src.visualization import create_payload_animation
 RANDOM_SEED = 42
 
 # Simulation parameters
-N_PARTICLES = 1200
+N_PARTICLES = 1100
 BOX_SIZE = 300
-N_STEPS = 15000
+N_STEPS = 200000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -29,7 +29,7 @@ ROTATIONAL_DIFFUSION = 0.05     # Orientational noise
 # Payload parameters
 PAYLOAD_RADIUS = 20
 PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
-PAYLOAD_START_POSITION = np.array([BOX_SIZE/6, 5 * BOX_SIZE/6])  # Top-left corner
+PAYLOAD_START_POSITION = np.array([BOX_SIZE/2, 5 * BOX_SIZE/6])
 
 # Force parameters
 STIFFNESS = 25.0
@@ -56,12 +56,32 @@ WALLS = np.array([
     [BOX_SIZE*0.75, BOX_SIZE, BOX_SIZE*0.75, BOX_SIZE*0.45], # top right wall
 ], dtype=np.float64)
 # WALLS = None
+WALLS = np.array([
+    # Boundary walls
+    [0, 0, 0, BOX_SIZE],
+    [0, 0, BOX_SIZE, 0],
+    [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
+    [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
+    # Inverted Y shape walls
+    # [2 * BOX_SIZE/6, BOX_SIZE, 4 * BOX_SIZE/6, BOX_SIZE], #top wall
+    [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 2.2 * BOX_SIZE/6, BOX_SIZE], #top left
+    [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, 3.8 * BOX_SIZE/6, BOX_SIZE], #top right
+    [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 0, 4 * BOX_SIZE/7], # left shoulder
+    [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, BOX_SIZE, 4 * BOX_SIZE/7], # right shoulder
+    # [0, 4 * BOX_SIZE/7, 0, 0], #bot left
+    # [BOX_SIZE, 4*BOX_SIZE/7, BOX_SIZE, 0], #bot right
+    # [0, 0, BOX_SIZE, 0], #bot
+    [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 2 * BOX_SIZE/7, 0], #inner left
+    [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7], #inner top
+    [5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 0], #inner right
+], dtype=np.float64)
 
 
 # Visualization parameters
-SHOW_VECTORS = True              # Display v vectors as arrows
-COLOR_BY_SCORE = True           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "E:/PostThesis/visualizations/test.mp4"           # If None, uses timestamp. Otherwise specify path.
+SHOW_VECTORS = False              # Display v vectors as arrows
+COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
+OUTPUT_FILENAME = "E:/PostThesis/visualizations/forkpath.mp4"           # If None, uses timestamp. Otherwise specify path.
+# OUTPUT_FILENAME = "C:/Users/educa/Videos/ye/test.mp4"
 
 # Data saving (set to True to save simulation data)
 SAVE_DATA = False
