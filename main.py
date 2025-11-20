@@ -16,8 +16,8 @@ RANDOM_SEED = 42
 # Simulation parameters
 N_PARTICLES = 1200
 BOX_SIZE = 300
-N_TRAINING_STEPS = 20000  # Number of steps for training phase (circular payload motion)
-N_TEST_STEPS = 80000      # Number of steps for test phase (passive payload)
+N_TRAINING_STEPS = 30000  # Number of steps for training phase (circular payload motion)
+N_TEST_STEPS = 160000      # Number of steps for test phase (passive payload)
 N_STEPS = N_TRAINING_STEPS + N_TEST_STEPS
 SAVE_INTERVAL = 10
 DT = 0.01
@@ -46,10 +46,10 @@ END_WHEN_GOAL_REACHED = False        # If True, simulation ends when payload rea
 PAYLOAD_CIRCULAR_MOTION = True  # If True, payload follows circular path during training phase
 PAYLOAD_CIRCLE_CENTER = np.array([BOX_SIZE/2, BOX_SIZE/2])  # Center of circular path
 PAYLOAD_CIRCLE_RADIUS = BOX_SIZE/3  # Radius of circular path
-PAYLOAD_N_ROTATIONS = 8  # Number of full rotations during training phase
+PAYLOAD_N_ROTATIONS = 12  # Number of full rotations during training phase
 
 # Collision-based polarity sharing
-COLLISION_SHARE_INTERVAL = 10  # How often to share polarity fields on collision (timesteps, 1=every step)
+COLLISION_SHARE_INTERVAL = 20  # How often to share polarity fields on collision (timesteps, 1=every step)
 
 # Learning control during test phase
 TEST_PHASE_LEARNING = 0  # 0=no learning, 1=collision communication only, 2=both F and collision (default)
@@ -64,16 +64,16 @@ WALLS = np.array([
     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
     # Maze walls
     # [BOX_SIZE*0.33, BOX_SIZE*0.66, BOX_SIZE, BOX_SIZE*0.66],
-    [0, BOX_SIZE*0.25, BOX_SIZE*0.55, BOX_SIZE*0.25], # bottom wall
-    [BOX_SIZE*0.375, BOX_SIZE, BOX_SIZE*0.375, BOX_SIZE*0.45], # top left wall
-    [BOX_SIZE*0.75, BOX_SIZE, BOX_SIZE*0.75, BOX_SIZE*0.45], # top right wall
+    # [0, BOX_SIZE*0.25, BOX_SIZE*0.55, BOX_SIZE*0.25], # bottom wall
+    # [BOX_SIZE*0.375, BOX_SIZE, BOX_SIZE*0.375, BOX_SIZE*0.45], # top left wall
+    # [BOX_SIZE*0.75, BOX_SIZE, BOX_SIZE*0.75, BOX_SIZE*0.45], # top right wall
 ], dtype=np.float64)
-WALLS = None
+# WALLS = None
 
 
 # Visualization parameters
 SHOW_VECTORS = False              # Display polarity vectors as arrows
-OUTPUT_FILENAME = "E:/PostThesis/visualizations/test_polfield_collcomms.mp4"           # If None, uses timestamp. Otherwise specify path.
+OUTPUT_FILENAME = "E:/PostThesis/visualizations/test_polfield_collcomms_walls.mp4"           # If None, uses timestamp. Otherwise specify path.
 # OUTPUT_FILENAME = "C:/Users/educa/Videos/ye/test_postfield.mp4"
 
 # Data saving (set to True to save simulation data)
