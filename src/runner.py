@@ -81,6 +81,7 @@ def run_payload_simulation(params):
     start_time = time.time()
     save_idx = 1
     goal_reached = False
+    final_step = n_steps  # Track actual step count when simulation ends
 
     for step in range(1, n_steps + 1):
         # Unified simulation step
@@ -99,6 +100,7 @@ def run_payload_simulation(params):
             if distance_to_goal <= params['payload_radius']:
                 print(f"Goal reached at step {step}! Distance: {distance_to_goal:.3f}")
                 goal_reached = True
+                final_step = step  # Record actual step when goal was reached
                 # End simulation early if configured to do so
                 if params['end_when_goal_reached']:
                     print("Ending simulation early (END_WHEN_GOAL_REACHED = True)")
@@ -156,7 +158,8 @@ def run_payload_simulation(params):
         saved_particle_scores,
         particle_scores,
         polarity,
-        end_time - start_time
+        end_time - start_time,
+        final_step  # Actual step count when simulation ended
     )
 
 
