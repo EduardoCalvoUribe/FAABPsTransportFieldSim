@@ -4,6 +4,7 @@ import os
 
 from src.runner import run_payload_simulation
 from src.visualization import create_payload_animation
+from src.genes import crossover_and_mutate
 
 
 #####################################################
@@ -14,9 +15,9 @@ from src.visualization import create_payload_animation
 RANDOM_SEED = 42
 
 # Simulation parameters
-N_PARTICLES = 1100
+N_PARTICLES = 1000
 BOX_SIZE = 300
-N_STEPS = 200000
+N_STEPS = 2000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -26,16 +27,20 @@ PARTICLE_V0 = 3.75              # Self-propulsion speed
 PARTICLE_MOBILITY = 1.0
 ROTATIONAL_DIFFUSION = 0.05     # Orientational noise
 
+MAX_CURVITY = 1.0
+MIN_CURVITY = -1.0
+MID_CURVITY = 0.5
+
 # Payload parameters
 PAYLOAD_RADIUS = 20
 PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
-PAYLOAD_START_POSITION = np.array([BOX_SIZE/2, 5 * BOX_SIZE/6])
+PAYLOAD_START_POSITION = np.array([50.0, 50.0])
 
 # Force parameters
 STIFFNESS = 25.0
 
 # Goal parameters
-GOAL_POSITION = np.array([BOX_SIZE*0.125, BOX_SIZE*0.125])  # Bottom-left corner
+GOAL_POSITION = np.array([250.0, 250.0])  # Top-left corner
 PARTICLE_VIEW_RANGE = 0.1 * BOX_SIZE  # Range for goal detection
 SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
 DIRECTEDNESS = 1                    # 0 = pure vicsek alignment, 1 = pure gradient following
@@ -75,17 +80,26 @@ WALLS = np.array([
     [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7], #inner top
     [5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 0], #inner right
 ], dtype=np.float64)
+WALLS = np.array([
+    # Boundary walls
+    [0, 0, 0, BOX_SIZE],
+    [0, 0, BOX_SIZE, 0],
+    [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
+    [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
+    # walls inside
+    [0, 100.0, 200.0, 100.0],
+    [100.0, 200.0, 300.0, 200.0]
+], dtype=np.float64)
 
 
 # Visualization parameters
-SHOW_VECTORS = False              # Display v vectors as arrows
-COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "E:/PostThesis/visualizations/forkpath.mp4"           # If None, uses timestamp. Otherwise specify path.
-# OUTPUT_FILENAME = "C:/Users/educa/Videos/ye/test.mp4"
+SHOW_VECTORS = True              # Display v vectors as arrows
+COLOR_BY_SCORE = True           # If True: color by score, if False: color by curvity
+OUTPUT_FILENAME = "E:/PostThesis/visualizations/test.gif"           # If None, uses timestamp. Otherwise specify path.
 
 # Data saving (set to True to save simulation data)
 SAVE_DATA = False
-DATA_OUTPUT_PATH = "E:/PostThesis/data/polarity_test_deadend.npz"                    # If None, uses timestamp. Otherwise specify path.
+DATA_OUTPUT_PATH = "E:/PostThesis/data/test.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 
 #####################
@@ -130,7 +144,10 @@ if __name__ == "__main__":
         'curvity': np.zeros(compile_n_particles),
         'particle_radius': np.ones(compile_n_particles) * PARTICLE_RADIUS,
         'mobility': np.ones(compile_n_particles) * PARTICLE_MOBILITY,
-        'rot_diffusion': np.ones(compile_n_particles) * ROTATIONAL_DIFFUSION
+        'rot_diffusion': np.ones(compile_n_particles) * ROTATIONAL_DIFFUSION,
+        'max_curvity': MAX_CURVITY,
+        'min_curvity': MIN_CURVITY,
+        'mid_curvity': MID_CURVITY
     }
 
     run_payload_simulation(compile_params)
@@ -167,7 +184,11 @@ if __name__ == "__main__":
         'curvity': np.zeros(N_PARTICLES),  # Computed dynamically from score & polarity
         'particle_radius': np.ones(N_PARTICLES) * PARTICLE_RADIUS,
         'mobility': np.ones(N_PARTICLES) * PARTICLE_MOBILITY,
-        'rot_diffusion': np.ones(N_PARTICLES) * ROTATIONAL_DIFFUSION
+        'rot_diffusion': np.ones(N_PARTICLES) * ROTATIONAL_DIFFUSION,
+        
+        'max_curvity': MAX_CURVITY,
+        'min_curvity': MIN_CURVITY,
+        'mid_curvity': MID_CURVITY
     }
 
     #####################################################

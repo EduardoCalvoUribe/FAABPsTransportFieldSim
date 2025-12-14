@@ -128,21 +128,34 @@ def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion,
 
 
 @njit(fastmath=True)
-def compute_curvity_from_polarity(orientations, polarity, n_particles):
+def compute_curvity_from_polarity(orientations, polarity, n_particles, max_curvity = 1, min_curvity = -1, mid_curvity = 0.5):
     """Compute curvity for all particles based on their polarity vectors.
 
     Curvity = -(e · p), where:
     - e is the particle's heading direction (orientation)
     - p is the particle's polarity vector
     """
+    assert -1 <= min_curvity <= 1, "min_curvity must be in range [-1, 1]"
+    assert -1 <= max_curvity <= 1, "max_curvity must be in range [-1, 1]"
+    assert -1 <= mid_curvity <= 1, "mid_curvity must be in range [-1, 1]"
+    assert min_curvity < mid_curvity < max_curvity, "Must have min_curvity < mid_curvity < max_curvity"
+    
     curvity = np.zeros(n_particles)
 
     for i in range(n_particles):
         # Compute dot product: e · p
         dot_product = orientations[i, 0] * polarity[i, 0] + orientations[i, 1] * polarity[i, 1]
 
-        # Curvity is negative dot product
-        curvity[i] = -dot_product
+        # Piecewise linear mapping:
+        # dot_product = 1 (aligned) → min_curvity
+        # dot_product = 0 (perpendicular) → mid_curvity
+        # dot_product = -1 (disaligned) → max_curvity
+        if dot_product >= 0:
+            # Linear interpolation from mid_curvity (at 0) to min_curvity (at 1)
+            curvity[i] = mid_curvity + (min_curvity - mid_curvity) * dot_product
+        else:
+            # Linear interpolation from max_curvity (at -1) to mid_curvity (at 0)
+            curvity[i] = max_curvity + (mid_curvity - max_curvity) * (dot_product + 1)
 
     return curvity
 
@@ -461,15 +474,13 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
 def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel,
                          radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
-                         step, goal_position, particle_view_range, score_and_polarity_update_interval, walls, directedness):
+                         step, goal_position, particle_view_range, score_and_polarity_update_interval, walls, directedness, 
+                         max_curvity, min_curvity, mid_curvity):
     """Simulate a single time step"""
     # Compute forces on particles and payload
     particle_forces, payload_force = compute_all_forces(
         positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls
     )
-
-    # Initialize curvity (will be updated if at update interval)
-    curvity = compute_curvity_from_polarity(orientations, polarity, n_particles)
 
     # Update polarity vectors and scores based on goal (at update interval)
     if step % score_and_polarity_update_interval == 0:
@@ -484,8 +495,7 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
                 polarity, payload_pos, payload_radius, walls, directedness
             )
 
-        # Recompute curvity from updated polarity vectors
-        curvity = compute_curvity_from_polarity(orientations, polarity, n_particles)
+    curvity = compute_curvity_from_polarity(orientations, polarity, n_particles, max_curvity, min_curvity, mid_curvity)
 
     # Update particle orientations
     orientations = update_orientation_vectors(

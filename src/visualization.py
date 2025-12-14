@@ -232,13 +232,13 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         interval=120  # Increased from 50
     )
 
-    #writer = PillowWriter(fps=target_fps) # for gifs, but its slower
-    writer = FFMpegWriter(
-        fps=target_fps,
-        bitrate=8000,
-        codec='libx264',
-        extra_args=['-pix_fmt', 'yuv420p', '-crf', '18']
-    ) # mp4 with high quality settings
+    writer = PillowWriter(fps=target_fps) # for gifs, but its slower
+    # writer = FFMpegWriter(
+    #     fps=target_fps,
+    #     bitrate=8000,
+    #     codec='libx264',
+    #     extra_args=['-pix_fmt', 'yuv420p', '-crf', '18']
+    # ) # mp4 with high quality settings (requires FFmpeg installation)
 
     anim.save(output_file, writer=writer)
     plt.close()
