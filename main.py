@@ -25,11 +25,11 @@ DT = 0.01
 PARTICLE_RADIUS = 1.0
 PARTICLE_V0 = 3.75              # Self-propulsion speed
 PARTICLE_MOBILITY = 1.0
-ROTATIONAL_DIFFUSION = 0.05     # Orientational noise
+ROTATIONAL_DIFFUSION = 0.045777 # 0.05     # Orientational noise
 
 MAX_CURVITY = 1.0
 MIN_CURVITY = -1.0
-MID_CURVITY = 0.5
+MID_CURVITY = -0.947740 # 0.5
 
 # Payload parameters
 PAYLOAD_RADIUS = 20
@@ -93,8 +93,8 @@ WALLS = np.array([
 
 
 # Visualization parameters
-SHOW_VECTORS = True              # Display v vectors as arrows
-COLOR_BY_SCORE = True           # If True: color by score, if False: color by curvity
+SHOW_VECTORS = False              # Display v vectors as arrows
+COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
 OUTPUT_FILENAME = "E:/PostThesis/visualizations/test.gif"           # If None, uses timestamp. Otherwise specify path.
 
 # Data saving (set to True to save simulation data)
@@ -357,12 +357,51 @@ if __name__ == "__main__":
     # RUN GENETIC OPTIMIZATION                          #
     #####################################################
 
-    best_gene, best_steps = run_genetic_optimization(
-        params,
-        n_generations=N_GENERATIONS,
-        population_size=POPULATION_SIZE,
-        mutation_probability=MUTATION_PROBABILITY,
-        output_file=OPTIMIZATION_RESULTS_FILE
+    # best_gene, best_steps = run_genetic_optimization(
+    #     params,
+    #     n_generations=N_GENERATIONS,
+    #     population_size=POPULATION_SIZE,
+    #     mutation_probability=MUTATION_PROBABILITY,
+    #     output_file=OPTIMIZATION_RESULTS_FILE
+    # )
+    
+    #####################################################
+    # RUN SIMULATION (NORMAL MODE - NO OPTIMIZATION)    #
+    #####################################################
+
+    # Run the simulation
+    result = run_payload_simulation(params)
+    
+    # Unpack results
+    (saved_positions, saved_orientations, saved_velocities,
+     saved_payload_positions, saved_payload_velocities, saved_curvity,
+     saved_polarity, saved_particle_scores, particle_scores, polarity,
+     simulation_time, final_step) = result
+    
+    print(f"\nSimulation completed in {simulation_time:.2f} seconds")
+    print(f"Final step: {final_step}")
+    
+    # Save data if enabled
+    if SAVE_DATA:
+        from src.runner import save_simulation_data
+        save_simulation_data(
+            DATA_OUTPUT_PATH,
+            saved_positions, saved_orientations, saved_velocities,
+            saved_payload_positions, saved_payload_velocities,
+            params, saved_curvity, saved_polarity, saved_particle_scores
+        )
+        print(f"Data saved to: {DATA_OUTPUT_PATH}")
+    
+    # Create visualization
+    create_payload_animation(
+        saved_positions, saved_orientations, saved_velocities,
+        saved_payload_positions, params, saved_curvity,
+        output_file=OUTPUT_FILENAME,
+        show_vectors=SHOW_VECTORS,
+        polarity=saved_polarity,
+        particle_scores=saved_particle_scores if COLOR_BY_SCORE else None
     )
+    
+    print("Simulation and visualization completed successfully!")
 
     print("Genetic optimization completed successfully!")
