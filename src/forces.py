@@ -46,6 +46,87 @@ def compute_repulsive_force(pos_i, pos_j, radius_i, radius_j, stiffness, box_siz
     return np.zeros(2)
 
 @njit(fastmath=True)
+def compute_hollow_payload_force(pos_particle, pos_payload, particle_radius, inner_radius, outer_radius, inner_offset, stiffness, box_size):
+    """Compute repulsive force between a particle and a hollow (ring-shaped) payload.
+
+    The hollow payload is a ring with inner_radius and outer_radius.
+    The inner circle can be offset from the outer circle center.
+    - Particles inside the hollow center can push outward against the inner surface
+    - Particles outside can push inward against the outer surface
+
+    Args:
+        pos_particle: np.ndarray [x, y], particle position
+        pos_payload: np.ndarray [x, y], hollow payload center position (outer circle center)
+        particle_radius: float, particle radius
+        inner_radius: float, inner radius of the hollow payload (the hole)
+        outer_radius: float, outer radius of the hollow payload
+        inner_offset: np.ndarray [x, y], offset of inner circle center from outer circle center
+        stiffness: float, force stiffness
+        box_size: float, simulation box size for periodic boundaries
+
+    Returns:
+        force: np.ndarray [fx, fy], force on the particle (negate for payload)
+    """
+    # Compute inner circle center position
+    pos_inner_center = pos_payload + inner_offset
+
+    # Vector from outer payload center to particle (with periodic boundaries)
+    r_vec_outer = compute_minimum_distance(pos_payload, pos_particle, box_size)
+    dist_outer = np.sqrt(np.sum(r_vec_outer**2))
+
+    # Vector from inner circle center to particle (with periodic boundaries)
+    r_vec_inner = compute_minimum_distance(pos_inner_center, pos_particle, box_size)
+    dist_inner = np.sqrt(np.sum(r_vec_inner**2))
+
+    force = np.zeros(2)
+
+    # Check collision with inner surface (based on distance to inner circle center)
+    if dist_inner < 1e-10:
+        # Particle at inner center - only push if it overlaps with inner wall
+        if particle_radius > inner_radius:
+            overlap = particle_radius - inner_radius
+            force += np.array([-stiffness * overlap, 0.0])
+    elif dist_inner < inner_radius:
+        # Particle center is inside the hollow region
+        if dist_inner + particle_radius > inner_radius:
+            # Collision with inner surface
+            overlap = (dist_inner + particle_radius) - inner_radius
+            r_hat_inner = r_vec_inner / dist_inner
+            force_magnitude = stiffness * overlap
+            force += -force_magnitude * r_hat_inner  # Push toward inner center (away from inner wall)
+    elif dist_inner <= inner_radius + particle_radius:
+        # Particle center is outside inner circle but particle edge might overlap
+        # This case: particle is in the ring material or touching from outside
+        if dist_inner - particle_radius < inner_radius:
+            # Particle overlaps with inner wall from outside (inside ring material)
+            overlap = inner_radius - (dist_inner - particle_radius)
+            r_hat_inner = r_vec_inner / dist_inner
+            force_magnitude = stiffness * overlap
+            force += -force_magnitude * r_hat_inner  # Push toward inner center
+
+    # Check collision with outer surface (based on distance to outer circle center)
+    if dist_outer > 1e-10:
+        r_hat_outer = r_vec_outer / dist_outer
+
+        if dist_outer > outer_radius:
+            # Particle center is outside the ring
+            if dist_outer - particle_radius < outer_radius:
+                # Collision with outer surface
+                overlap = outer_radius - (dist_outer - particle_radius)
+                force_magnitude = stiffness * overlap
+                force += force_magnitude * r_hat_outer  # Push away from outer center
+        elif dist_outer >= outer_radius - particle_radius:
+            # Particle center is inside but particle edge might overlap outer wall
+            if dist_outer + particle_radius > outer_radius:
+                # Particle overlaps with outer wall from inside (inside ring material)
+                overlap = (dist_outer + particle_radius) - outer_radius
+                force_magnitude = stiffness * overlap
+                force += -force_magnitude * r_hat_outer  # Push toward outer center
+
+    return force
+
+
+@njit(fastmath=True)
 def compute_wall_forces(pos, radius, walls, stiffness):
     """Compute repulsive forces from all walls on a particle/payload.
 

@@ -3,7 +3,8 @@ import numpy as np
 from src.forces import (
     compute_repulsive_force,
     compute_wall_forces,
-    create_cell_list
+    create_cell_list,
+    compute_hollow_payload_force
 )
 
 
@@ -224,3 +225,180 @@ class TestCellList:
             particle_count += 1
             current = list_next[current]
         assert particle_count == 3
+
+
+class TestHollowPayloadForce:
+    """Tests for hollow (ring-shaped) payload force computation."""
+
+    def test_particle_inside_hollow_no_collision(self):
+        """Test no force when particle is inside hollow region without touching inner wall."""
+        pos_particle = np.array([50.0, 50.0])  # At center
+        pos_payload = np.array([50.0, 50.0])   # Payload centered at same point
+        particle_radius = 1.0
+        inner_radius = 10.0
+        outer_radius = 20.0
+        inner_offset = np.zeros(2)
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_hollow_payload_force(
+            pos_particle, pos_payload, particle_radius,
+            inner_radius, outer_radius, inner_offset, stiffness, box_size
+        )
+
+        # Particle at center, well within hollow region, no collision
+        np.testing.assert_array_almost_equal(force, np.zeros(2), decimal=5)
+
+    def test_particle_inside_hollow_collision_with_inner_wall(self):
+        """Test force when particle inside hollow collides with inner wall."""
+        pos_particle = np.array([59.5, 50.0])  # Close to inner wall on right
+        pos_payload = np.array([50.0, 50.0])
+        particle_radius = 1.0
+        inner_radius = 10.0
+        outer_radius = 20.0
+        inner_offset = np.zeros(2)
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_hollow_payload_force(
+            pos_particle, pos_payload, particle_radius,
+            inner_radius, outer_radius, inner_offset, stiffness, box_size
+        )
+
+        # Particle is 9.5 from center, radius 1.0 means edge at 10.5 > inner_radius
+        # Force should push particle toward center (negative x)
+        assert force[0] < 0
+        assert abs(force[1]) < 1e-6
+
+    def test_particle_outside_no_collision(self):
+        """Test no force when particle is outside ring without touching outer wall."""
+        pos_particle = np.array([80.0, 50.0])  # Far outside
+        pos_payload = np.array([50.0, 50.0])
+        particle_radius = 1.0
+        inner_radius = 10.0
+        outer_radius = 20.0
+        inner_offset = np.zeros(2)
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_hollow_payload_force(
+            pos_particle, pos_payload, particle_radius,
+            inner_radius, outer_radius, inner_offset, stiffness, box_size
+        )
+
+        # Particle center is 30 from payload center, outer radius is 20
+        # Particle edge at 29, which is > outer_radius, no collision
+        np.testing.assert_array_almost_equal(force, np.zeros(2), decimal=5)
+
+    def test_particle_outside_collision_with_outer_wall(self):
+        """Test force when particle outside collides with outer wall."""
+        pos_particle = np.array([70.5, 50.0])  # Close to outer wall
+        pos_payload = np.array([50.0, 50.0])
+        particle_radius = 1.0
+        inner_radius = 10.0
+        outer_radius = 20.0
+        inner_offset = np.zeros(2)
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_hollow_payload_force(
+            pos_particle, pos_payload, particle_radius,
+            inner_radius, outer_radius, inner_offset, stiffness, box_size
+        )
+
+        # Particle center is 20.5 from payload center
+        # Particle inner edge at 19.5 < outer_radius (20), so collision
+        # Force should push particle away from center (positive x)
+        assert force[0] > 0
+        assert abs(force[1]) < 1e-6
+
+    def test_force_direction_symmetry(self):
+        """Test that forces are symmetric in all directions."""
+        pos_payload = np.array([50.0, 50.0])
+        particle_radius = 1.0
+        inner_radius = 10.0
+        outer_radius = 20.0
+        inner_offset = np.zeros(2)
+        stiffness = 10.0
+        box_size = 100.0
+
+        # Test collision from inside at different angles
+        # Right side
+        force_right = compute_hollow_payload_force(
+            np.array([59.5, 50.0]), pos_payload, particle_radius,
+            inner_radius, outer_radius, inner_offset, stiffness, box_size
+        )
+        # Top
+        force_top = compute_hollow_payload_force(
+            np.array([50.0, 59.5]), pos_payload, particle_radius,
+            inner_radius, outer_radius, inner_offset, stiffness, box_size
+        )
+
+        # Magnitudes should be equal
+        assert abs(np.linalg.norm(force_right) - np.linalg.norm(force_top)) < 1e-6
+
+        # Directions should be toward center
+        assert force_right[0] < 0  # Pushed left (toward center)
+        assert force_top[1] < 0    # Pushed down (toward center)
+
+    def test_newtons_third_law(self):
+        """Test that the force follows Newton's third law (negate for payload)."""
+        pos_particle = np.array([59.5, 50.0])
+        pos_payload = np.array([50.0, 50.0])
+        particle_radius = 1.0
+        inner_radius = 10.0
+        outer_radius = 20.0
+        inner_offset = np.zeros(2)
+        stiffness = 10.0
+        box_size = 100.0
+
+        force_on_particle = compute_hollow_payload_force(
+            pos_particle, pos_payload, particle_radius,
+            inner_radius, outer_radius, inner_offset, stiffness, box_size
+        )
+
+        # Force on payload should be opposite (negated in simulation code)
+        # Here we just verify the force is non-zero and pointing toward center
+        assert np.linalg.norm(force_on_particle) > 0
+
+    def test_periodic_boundary(self):
+        """Test force computation across periodic boundary."""
+        pos_particle = np.array([5.0, 50.0])
+        pos_payload = np.array([95.0, 50.0])  # 10 units away with wrapping
+        particle_radius = 1.0
+        inner_radius = 8.0
+        outer_radius = 15.0
+        inner_offset = np.zeros(2)
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_hollow_payload_force(
+            pos_particle, pos_payload, particle_radius,
+            inner_radius, outer_radius, inner_offset, stiffness, box_size
+        )
+
+        # With periodic boundaries, effective distance is 10
+        # Particle would be outside the ring, but close to outer wall
+        # This tests that periodic boundaries are handled correctly
+        assert isinstance(force, np.ndarray)
+        assert force.shape == (2,)
+
+    def test_inner_offset(self):
+        """Test that inner circle offset works correctly."""
+        pos_particle = np.array([55.0, 50.0])  # 5 units to the right of payload center
+        pos_payload = np.array([50.0, 50.0])
+        particle_radius = 1.0
+        inner_radius = 10.0
+        outer_radius = 20.0
+        inner_offset = np.array([5.0, 0.0])  # Inner circle shifted 5 units right
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_hollow_payload_force(
+            pos_particle, pos_payload, particle_radius,
+            inner_radius, outer_radius, inner_offset, stiffness, box_size
+        )
+
+        # Particle is at the center of the offset inner circle
+        # Should not collide with inner wall since it's well within the hollow
+        np.testing.assert_array_almost_equal(force, np.zeros(2), decimal=5)

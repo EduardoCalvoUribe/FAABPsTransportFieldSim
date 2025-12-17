@@ -43,17 +43,13 @@ RANDOM_SEED = 42
 # }
 
 CURVITY_DISTRIBUTION = {
-    0: 200,
-    0.25: 200,
-    0.5: 200,
-    0.75: 200,
-    1: 200,
+    -0.2: 600,
 }
 
 # Total particles = sum of all counts
 N_PARTICLES = sum(CURVITY_DISTRIBUTION.values())
 
-BOX_SIZE = 300
+BOX_SIZE = 100
 N_STEPS = 20000
 SAVE_INTERVAL = 10
 DT = 0.01
@@ -87,16 +83,16 @@ WALLS = np.array([
     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0, 0],
     # Inverted Y shape walls (straight, c=0)
     # [2 * BOX_SIZE/6, BOX_SIZE, 4 * BOX_SIZE/6, BOX_SIZE, 0], #top wall
-    [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 2.2 * BOX_SIZE/6, BOX_SIZE, 0], #top left
-    [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, 3.8 * BOX_SIZE/6, BOX_SIZE, 0], #top right
-    [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 0, 4 * BOX_SIZE/7, 0], # left shoulder
-    [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, BOX_SIZE, 4 * BOX_SIZE/7, 0], # right shoulder
+    # [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 2.2 * BOX_SIZE/6, BOX_SIZE, 0], #top left
+    # [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, 3.8 * BOX_SIZE/6, BOX_SIZE, 0], #top right
+    # [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 0, 4 * BOX_SIZE/7, 0], # left shoulder
+    # [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, BOX_SIZE, 4 * BOX_SIZE/7, 0], # right shoulder
     # [0, 4 * BOX_SIZE/7, 0, 0, 0], #bot left
     # [BOX_SIZE, 4*BOX_SIZE/7, BOX_SIZE, 0, 0], #bot right
     # [0, 0, BOX_SIZE, 0, 0], #bot
-    [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 2 * BOX_SIZE/7, 0, 0], #inner left
-    [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 0], #inner top
-    [5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 0, 0], #inner right
+    # [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 2 * BOX_SIZE/7, 0, 0], #inner left
+    # [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 0], #inner top
+    # [5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 0, 0], #inner right
 ], dtype=np.float64)
 # circle:
 WALLS = np.array([
