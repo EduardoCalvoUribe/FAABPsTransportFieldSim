@@ -14,10 +14,11 @@ from src.genes import crossover_and_mutate
 # Set random seed for reproducibility
 RANDOM_SEED = 42
 
+# max_c=0.864, min_c=-1.000, mid_c=-0.482, rot_diff=0.1030
 # Simulation parameters
-N_PARTICLES = 1000
-BOX_SIZE = 300
-N_STEPS = 200000
+N_PARTICLES = 200
+BOX_SIZE = 100
+N_STEPS = 40000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -25,23 +26,23 @@ DT = 0.01
 PARTICLE_RADIUS = 1.0
 PARTICLE_V0 = 3.75              # Self-propulsion speed
 PARTICLE_MOBILITY = 1.0
-ROTATIONAL_DIFFUSION = 0.045777 # 0.05     # Orientational noise
+ROTATIONAL_DIFFUSION = 0.05 # 0.05     # Orientational noise
 
 MAX_CURVITY = 1.0
 MIN_CURVITY = -1.0
-MID_CURVITY = -0.947740 # 0.5
+MID_CURVITY = 0.0 # 0.5
 
 # Payload parameters
-PAYLOAD_RADIUS = 20
+PAYLOAD_RADIUS = 10
 PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
-PAYLOAD_START_POSITION = np.array([50.0, 50.0])
+PAYLOAD_START_POSITION = np.array([16.6, 16.6])
 
 # Force parameters
 STIFFNESS = 25.0
 
 # Goal parameters
-GOAL_POSITION = np.array([250.0, 250.0])  # Top-left corner
-PARTICLE_VIEW_RANGE = 0.1 * BOX_SIZE  # Range for goal detection
+GOAL_POSITION = np.array([83.3, 83.3])  # Top-left corner
+PARTICLE_VIEW_RANGE = 0.2 * BOX_SIZE  # Range for goal detection
 SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
 DIRECTEDNESS = 1                    # 0 = pure vicsek alignment, 1 = pure gradient following
 END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
@@ -87,25 +88,25 @@ WALLS = np.array([
     [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
     # walls inside
-    [0, 100.0, 200.0, 100.0],
-    [100.0, 200.0, 300.0, 200.0]
+    # [0, 33.3, 66.6, 33.3],
+    # [33.3, 66.6, 100.0, 66.3]
 ], dtype=np.float64)
 
 
 # Visualization parameters
-SHOW_VECTORS = False              # Display v vectors as arrows
-COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "E:/PostThesis/visualizations/test.gif"           # If None, uses timestamp. Otherwise specify path.
+SHOW_VECTORS = True              # Display v vectors as arrows
+COLOR_BY_SCORE = True           # If True: color by score, if False: color by curvity
+OUTPUT_FILENAME = "E:/PostThesis/visualizations/small_start.mp4"           # If None, uses timestamp. Otherwise specify path.
 
 # Data saving (set to True to save simulation data)
 SAVE_DATA = False
 DATA_OUTPUT_PATH = "E:/PostThesis/data/test.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 # Genetic algorithm parameters
-N_GENERATIONS = 5
-POPULATION_SIZE = 6
-MUTATION_PROBABILITY = 0.3
-OPTIMIZATION_RESULTS_FILE = "optimization_results.txt"
+N_GENERATIONS = 8
+POPULATION_SIZE = 8
+MUTATION_PROBABILITY = 0.2
+OPTIMIZATION_RESULTS_FILE = "optimization_results_2.txt"
 
 
 #####################################################

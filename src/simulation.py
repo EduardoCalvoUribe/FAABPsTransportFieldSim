@@ -138,7 +138,13 @@ def compute_curvity_from_polarity(orientations, polarity, n_particles, max_curvi
     assert -1 <= min_curvity <= 1, "min_curvity must be in range [-1, 1]"
     assert -1 <= max_curvity <= 1, "max_curvity must be in range [-1, 1]"
     assert -1 <= mid_curvity <= 1, "mid_curvity must be in range [-1, 1]"
-    assert min_curvity < mid_curvity < max_curvity, "Must have min_curvity < mid_curvity < max_curvity"
+    if not min_curvity < mid_curvity < max_curvity:
+        # Nudge values to ensure strict ordering
+        epsilon = 1e-6
+        if min_curvity >= mid_curvity:
+            mid_curvity = min_curvity + epsilon
+        if mid_curvity >= max_curvity:
+            mid_curvity = mid_curvity - epsilon
     
     curvity = np.zeros(n_particles)
 

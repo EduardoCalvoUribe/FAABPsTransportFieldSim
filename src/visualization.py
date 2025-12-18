@@ -90,7 +90,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     scatter = ax.scatter(
         positions[0, :, 0],
         positions[0, :, 1],
-        s=np.pi * (params['particle_radius'] * 2)**2,  # Area of circle
+        s=np.pi * (params['particle_radius'] * 6)**2,  # Area of circle
         c=particle_colors,
         alpha=0.7
     )
@@ -232,13 +232,13 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         interval=120  # Increased from 50
     )
 
-    writer = PillowWriter(fps=target_fps) # for gifs, but its slower
-    # writer = FFMpegWriter(
-    #     fps=target_fps,
-    #     bitrate=8000,
-    #     codec='libx264',
-    #     extra_args=['-pix_fmt', 'yuv420p', '-crf', '18']
-    # ) # mp4 with high quality settings (requires FFmpeg installation)
+    # writer = PillowWriter(fps=target_fps) # for gifs, but its slower
+    writer = FFMpegWriter(
+        fps=target_fps,
+        bitrate=8000,
+        codec='libx264',
+        extra_args=['-pix_fmt', 'yuv420p', '-crf', '18']
+    ) # mp4 with high quality settings (requires FFmpeg installation)
 
     anim.save(output_file, writer=writer)
     plt.close()
