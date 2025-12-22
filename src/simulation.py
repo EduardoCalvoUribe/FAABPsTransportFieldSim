@@ -2,7 +2,9 @@ import numpy as np
 from numba import njit
 
 from .physics_utils import normalize, particles_separated_by_wall_periodic
-from .forces import compute_repulsive_force, compute_wall_forces, create_cell_list, compute_hollow_payload_force
+from .forces import (compute_repulsive_force, compute_wall_forces, create_cell_list,
+                     compute_hollow_payload_force, compute_payload_payload_force,
+                     compute_payload_enclosure_force)
 
 
 ##########################
@@ -273,3 +275,188 @@ def simulate_single_step_hollow_payload(positions, orientations, velocities, pay
     payload_pos = payload_pos % box_size
 
     return positions, orientations, velocities, payload_pos, payload_vel
+
+
+@njit(fastmath=True)
+def compute_all_forces_multi_hollow_payload(
+    positions, radii,
+    small_payload_positions, small_payload_radii,
+    large_payload_pos, large_payload_radius,
+    stiffness, n_particles, n_small_payloads, box_size, walls
+):
+    """Compute all forces for multi-hollow-payload simulation.
+
+    Forces computed:
+    1. Particle-particle repulsion
+    2. Particle-wall forces
+    3. Particle-small_payload forces (loop over all small payloads)
+    4. Particle-large_payload forces
+    5. Small_payload-small_payload forces
+    6. Small_payload-large_payload forces
+    7. Small_payload-wall forces
+    8. Large_payload-wall forces
+
+    Returns:
+        particle_forces: np.ndarray (n_particles, 2)
+        small_payload_forces: np.ndarray (n_small_payloads, 2)
+        large_payload_force: np.ndarray (2,)
+    """
+    particle_forces = np.zeros((n_particles, 2))
+    small_payload_forces = np.zeros((n_small_payloads, 2))
+    large_payload_force = np.zeros(2)
+
+    # Determine maximum interaction distance (for cell size)
+    max_radius = np.max(radii)
+    cell_size = 2 * max_radius
+
+    # Create cell list for particle-particle interactions (O(N))
+    head, list_next, n_cells = create_cell_list(positions, box_size, cell_size, n_particles)
+
+    # --- Particle forces ---
+    for i in range(n_particles):
+        # Particle vs all small hollow payloads
+        for j in range(n_small_payloads):
+            if not particles_separated_by_wall_periodic(
+                positions[i], small_payload_positions[j], walls, box_size
+            ):
+                f = compute_hollow_payload_force(
+                    positions[i], small_payload_positions[j],
+                    radii[i], small_payload_radii[j],
+                    stiffness, box_size
+                )
+                particle_forces[i] += f
+                small_payload_forces[j] -= f  # Newton's 3rd law
+
+        # Particle vs large hollow payload
+        if not particles_separated_by_wall_periodic(
+            positions[i], large_payload_pos, walls, box_size
+        ):
+            f = compute_hollow_payload_force(
+                positions[i], large_payload_pos,
+                radii[i], large_payload_radius,
+                stiffness, box_size
+            )
+            particle_forces[i] += f
+            large_payload_force -= f
+
+        # Particle vs walls
+        wall_force = compute_wall_forces(positions[i], radii[i], walls, stiffness)
+        particle_forces[i] += wall_force
+
+    # --- Particle-particle forces (cell list) ---
+    for i in range(n_particles):
+        cell_x = int(positions[i, 0] / cell_size)
+        cell_y = int(positions[i, 1] / cell_size)
+
+        for dx in range(-1, 2):
+            for dy in range(-1, 2):
+                neigh_x = (cell_x + dx) % n_cells
+                neigh_y = (cell_y + dy) % n_cells
+                j = head[neigh_x, neigh_y]
+
+                while j != -1:
+                    if i != j:
+                        if not particles_separated_by_wall_periodic(
+                            positions[i], positions[j], walls, box_size
+                        ):
+                            particle_forces[i] += compute_repulsive_force(
+                                positions[i], positions[j],
+                                radii[i], radii[j],
+                                stiffness, box_size
+                            )
+                    j = list_next[j]
+
+    # --- Small payload vs small payload (all pairs) ---
+    for i in range(n_small_payloads):
+        for j in range(i + 1, n_small_payloads):
+            f = compute_payload_payload_force(
+                small_payload_positions[i], small_payload_positions[j],
+                small_payload_radii[i], small_payload_radii[j],
+                stiffness, box_size
+            )
+            small_payload_forces[i] += f
+            small_payload_forces[j] -= f  # Newton's 3rd law
+
+    # --- Small payload vs large payload ---
+    for i in range(n_small_payloads):
+        f = compute_payload_enclosure_force(
+            small_payload_positions[i], large_payload_pos,
+            small_payload_radii[i], large_payload_radius,
+            stiffness, box_size
+        )
+        small_payload_forces[i] += f
+        large_payload_force -= f  # Newton's 3rd law
+
+    # --- Small payload vs walls ---
+    for i in range(n_small_payloads):
+        wall_f = compute_wall_forces(
+            small_payload_positions[i], small_payload_radii[i],
+            walls, stiffness
+        )
+        small_payload_forces[i] += wall_f
+
+    # --- Large payload vs walls ---
+    large_wall_f = compute_wall_forces(
+        large_payload_pos, large_payload_radius,
+        walls, stiffness
+    )
+    large_payload_force += large_wall_f
+
+    return particle_forces, small_payload_forces, large_payload_force
+
+
+@njit(fastmath=True)
+def simulate_single_step_multi_hollow_payload(
+    positions, orientations, velocities,
+    small_payload_positions, small_payload_velocities,
+    large_payload_pos, large_payload_vel,
+    radii, v0s, mobilities,
+    small_payload_mobilities, large_payload_mobility,
+    curvity, stiffness, box_size,
+    small_payload_radii, large_payload_radius,
+    dt, rot_diffusion, n_particles, n_small_payloads, walls
+):
+    """Simulate single step with multiple hollow payloads.
+
+    10 small hollow payloads inside 1 large enclosing hollow payload.
+    Particles interact with all payloads. Payloads collide with each other
+    and with the enclosing payload.
+    """
+    # Compute all forces
+    particle_forces, small_payload_forces, large_payload_force = \
+        compute_all_forces_multi_hollow_payload(
+            positions, radii,
+            small_payload_positions, small_payload_radii,
+            large_payload_pos, large_payload_radius,
+            stiffness, n_particles, n_small_payloads, box_size, walls
+        )
+
+    # Update particle orientations
+    orientations = update_orientation_vectors(
+        orientations, particle_forces, curvity, dt, rot_diffusion, n_particles
+    )
+
+    # Update particle positions
+    for i in range(n_particles):
+        self_propulsion = v0s[i] * orientations[i]
+        force_velocity = mobilities[i] * particle_forces[i]
+        velocities[i] = self_propulsion + force_velocity
+        positions[i] += velocities[i] * dt
+
+    # Update small payloads
+    for i in range(n_small_payloads):
+        small_payload_velocities[i] = small_payload_mobilities[i] * small_payload_forces[i]
+        small_payload_positions[i] += small_payload_velocities[i] * dt
+
+    # Update large payload
+    large_payload_vel = large_payload_mobility * large_payload_force
+    large_payload_pos = large_payload_pos + large_payload_vel * dt
+
+    # Apply periodic boundary conditions
+    positions = positions % box_size
+    small_payload_positions = small_payload_positions % box_size
+    large_payload_pos = large_payload_pos % box_size
+
+    return (positions, orientations, velocities,
+            small_payload_positions, small_payload_velocities,
+            large_payload_pos, large_payload_vel)

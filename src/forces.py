@@ -98,6 +98,95 @@ def compute_hollow_payload_force(pos_particle, pos_payload, particle_radius, pay
 
 
 @njit(fastmath=True)
+def compute_payload_payload_force(pos_a, pos_b, radius_a, radius_b, stiffness, box_size):
+    """Compute repulsive force between two hollow payloads (outer-to-outer collision).
+
+    Two hollow payloads collide when their outer surfaces touch, similar to
+    solid sphere collision.
+
+    Args:
+        pos_a: np.ndarray [x, y], center of payload A
+        pos_b: np.ndarray [x, y], center of payload B
+        radius_a: float, outer radius of payload A
+        radius_b: float, outer radius of payload B
+        stiffness: float, collision stiffness
+        box_size: float, simulation box size for periodic boundaries
+
+    Returns:
+        force_on_a: np.ndarray [fx, fy], force on payload A
+                    (force on B is -force_on_a by Newton's 3rd law)
+    """
+    # Vector from A to B (periodic)
+    r_ab = compute_minimum_distance(pos_a, pos_b, box_size)
+    dist = np.sqrt(np.sum(r_ab**2))
+
+    force = np.zeros(2)
+
+    if dist < 1e-10:
+        # Payloads perfectly overlapping - push apart arbitrarily
+        force = np.array([-stiffness * (radius_a + radius_b), 0.0])
+        return force
+
+    r_hat = r_ab / dist
+    sum_radii = radius_a + radius_b
+
+    if dist < sum_radii:
+        # Overlap detected
+        overlap = sum_radii - dist
+        force_magnitude = stiffness * overlap
+        # Force on A pushes AWAY from B (opposite to r_ab direction)
+        force = -force_magnitude * r_hat
+
+    return force
+
+
+@njit(fastmath=True)
+def compute_payload_enclosure_force(pos_small, pos_large, radius_small, radius_large, stiffness, box_size):
+    """Compute force when small payload outer surface hits large payload inner surface.
+
+    The small payload is INSIDE the large hollow payload. Collision occurs when
+    the small payload's outer edge reaches the large payload's boundary.
+
+    Args:
+        pos_small: np.ndarray [x, y], center of small payload
+        pos_large: np.ndarray [x, y], center of large (enclosing) payload
+        radius_small: float, outer radius of small payload
+        radius_large: float, inner boundary radius of large payload
+        stiffness: float, collision stiffness
+        box_size: float, simulation box size for periodic boundaries
+
+    Returns:
+        force_on_small: np.ndarray [fx, fy], force on small payload
+                        (force on large is -force_on_small by Newton's 3rd law)
+    """
+    # Vector from large center to small center
+    r_vec = compute_minimum_distance(pos_large, pos_small, box_size)
+    dist = np.sqrt(np.sum(r_vec**2))
+
+    force = np.zeros(2)
+
+    if dist < 1e-10:
+        # Small payload at center - no collision possible unless it's huge
+        if radius_small > radius_large:
+            force = np.array([-stiffness * (radius_small - radius_large), 0.0])
+        return force
+
+    r_hat = r_vec / dist  # Unit vector pointing from large center to small center
+
+    # Check if small payload outer edge exceeds large payload boundary
+    # Small payload outer edge distance from large center: dist + radius_small
+    # Large payload boundary: radius_large
+    if dist + radius_small > radius_large:
+        # Overlap: how much small payload protrudes past boundary
+        overlap = (dist + radius_small) - radius_large
+        force_magnitude = stiffness * overlap
+        # Push small payload TOWARD large center (opposite to r_hat)
+        force = -force_magnitude * r_hat
+
+    return force
+
+
+@njit(fastmath=True)
 def compute_wall_forces(pos, radius, walls, stiffness):
     """Compute repulsive forces from all walls on a particle/payload.
 

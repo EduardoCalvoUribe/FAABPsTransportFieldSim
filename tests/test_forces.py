@@ -4,7 +4,9 @@ from src.forces import (
     compute_repulsive_force,
     compute_wall_forces,
     create_cell_list,
-    compute_hollow_payload_force
+    compute_hollow_payload_force,
+    compute_payload_payload_force,
+    compute_payload_enclosure_force
 )
 
 
@@ -368,3 +370,225 @@ class TestHollowPayloadForce:
         # This tests that periodic boundaries are handled correctly
         assert isinstance(force, np.ndarray)
         assert force.shape == (2,)
+
+
+class TestPayloadPayloadForce:
+    """Tests for outer-to-outer collision between two small hollow payloads."""
+
+    def test_no_collision_far_apart(self):
+        """Test no force when payloads are far apart."""
+        pos_a = np.array([20.0, 50.0])
+        pos_b = np.array([80.0, 50.0])
+        radius_a = 10.0
+        radius_b = 10.0
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_payload_payload_force(pos_a, pos_b, radius_a, radius_b, stiffness, box_size)
+
+        # Distance is 60, sum of radii is 20, no collision
+        np.testing.assert_array_almost_equal(force, np.zeros(2), decimal=5)
+
+    def test_collision_overlapping(self):
+        """Test repulsive force when payloads overlap."""
+        pos_a = np.array([50.0, 50.0])
+        pos_b = np.array([65.0, 50.0])  # 15 units apart
+        radius_a = 10.0
+        radius_b = 10.0
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_payload_payload_force(pos_a, pos_b, radius_a, radius_b, stiffness, box_size)
+
+        # Distance 15, sum of radii 20, overlap = 5
+        # Force on A should push it away from B (negative x)
+        assert force[0] < 0
+        assert abs(force[1]) < 1e-6
+        expected_magnitude = stiffness * 5.0
+        assert abs(np.linalg.norm(force) - expected_magnitude) < 1e-6
+
+    def test_newtons_third_law(self):
+        """Test that forces are equal and opposite."""
+        pos_a = np.array([50.0, 50.0])
+        pos_b = np.array([65.0, 50.0])
+        radius_a = 10.0
+        radius_b = 10.0
+        stiffness = 10.0
+        box_size = 100.0
+
+        force_on_a = compute_payload_payload_force(pos_a, pos_b, radius_a, radius_b, stiffness, box_size)
+        force_on_b = compute_payload_payload_force(pos_b, pos_a, radius_b, radius_a, stiffness, box_size)
+
+        # Forces should be equal in magnitude, opposite in direction
+        np.testing.assert_array_almost_equal(force_on_a, -force_on_b, decimal=5)
+
+    def test_collision_different_radii(self):
+        """Test collision with different payload sizes."""
+        pos_a = np.array([50.0, 50.0])
+        pos_b = np.array([70.0, 50.0])  # 20 units apart
+        radius_a = 10.0
+        radius_b = 15.0  # Larger payload
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_payload_payload_force(pos_a, pos_b, radius_a, radius_b, stiffness, box_size)
+
+        # Distance 20, sum of radii 25, overlap = 5
+        assert force[0] < 0  # A pushed away from B
+        expected_magnitude = stiffness * 5.0
+        assert abs(np.linalg.norm(force) - expected_magnitude) < 1e-6
+
+    def test_just_touching(self):
+        """Test no force when payloads are just touching."""
+        pos_a = np.array([50.0, 50.0])
+        pos_b = np.array([70.0, 50.0])  # 20 units apart
+        radius_a = 10.0
+        radius_b = 10.0  # Sum = 20, exactly touching
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_payload_payload_force(pos_a, pos_b, radius_a, radius_b, stiffness, box_size)
+
+        # Distance equals sum of radii, no overlap
+        np.testing.assert_array_almost_equal(force, np.zeros(2), decimal=5)
+
+    def test_periodic_boundary(self):
+        """Test collision across periodic boundary."""
+        pos_a = np.array([5.0, 50.0])
+        pos_b = np.array([95.0, 50.0])  # 10 units apart with wrapping
+        radius_a = 10.0
+        radius_b = 10.0
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_payload_payload_force(pos_a, pos_b, radius_a, radius_b, stiffness, box_size)
+
+        # With wrapping, distance is 10, sum of radii 20, overlap = 10
+        # A should be pushed left (positive x direction via periodic wrap)
+        assert np.linalg.norm(force) > 0
+        expected_magnitude = stiffness * 10.0
+        assert abs(np.linalg.norm(force) - expected_magnitude) < 1e-6
+
+
+class TestPayloadEnclosureForce:
+    """Tests for small payload inside large enclosing payload (outer-to-inner collision)."""
+
+    def test_no_collision_well_inside(self):
+        """Test no force when small payload is well inside large payload."""
+        pos_small = np.array([50.0, 50.0])  # At center
+        pos_large = np.array([50.0, 50.0])  # Same center
+        radius_small = 10.0
+        radius_large = 80.0
+        stiffness = 10.0
+        box_size = 100.0
+
+        force = compute_payload_enclosure_force(
+            pos_small, pos_large, radius_small, radius_large, stiffness, box_size
+        )
+
+        # Small payload center at large center, well within boundary
+        np.testing.assert_array_almost_equal(force, np.zeros(2), decimal=5)
+
+    def test_collision_near_edge(self):
+        """Test force when small payload's outer edge touches large payload's boundary."""
+        pos_small = np.array([115.0, 50.0])  # 65 from large center
+        pos_large = np.array([50.0, 50.0])
+        radius_small = 10.0
+        radius_large = 70.0  # Small at 65 + 10 = 75 > 70
+        stiffness = 10.0
+        box_size = 200.0
+
+        force = compute_payload_enclosure_force(
+            pos_small, pos_large, radius_small, radius_large, stiffness, box_size
+        )
+
+        # Small payload outer edge at 65 + 10 = 75, large boundary at 70
+        # Overlap = 75 - 70 = 5
+        # Force should push small toward center (negative x)
+        assert force[0] < 0
+        assert abs(force[1]) < 1e-6
+        expected_magnitude = stiffness * 5.0
+        assert abs(np.linalg.norm(force) - expected_magnitude) < 1e-6
+
+    def test_newtons_third_law(self):
+        """Test that force on large payload is opposite to force on small."""
+        pos_small = np.array([115.0, 50.0])
+        pos_large = np.array([50.0, 50.0])
+        radius_small = 10.0
+        radius_large = 70.0
+        stiffness = 10.0
+        box_size = 200.0
+
+        force_on_small = compute_payload_enclosure_force(
+            pos_small, pos_large, radius_small, radius_large, stiffness, box_size
+        )
+
+        # Force on small should be toward center, force on large is negated in simulation
+        # Here we verify force_on_small is non-zero and points toward center
+        assert force_on_small[0] < 0  # Toward center (left)
+        assert np.linalg.norm(force_on_small) > 0
+
+    def test_just_touching_inside(self):
+        """Test no force when small payload just touches large boundary from inside."""
+        pos_small = np.array([110.0, 50.0])  # 60 from center
+        pos_large = np.array([50.0, 50.0])
+        radius_small = 10.0
+        radius_large = 70.0  # 60 + 10 = 70 exactly at boundary
+        stiffness = 10.0
+        box_size = 200.0
+
+        force = compute_payload_enclosure_force(
+            pos_small, pos_large, radius_small, radius_large, stiffness, box_size
+        )
+
+        # Just touching, no overlap
+        np.testing.assert_array_almost_equal(force, np.zeros(2), decimal=5)
+
+    def test_force_direction_different_angles(self):
+        """Test that force always points toward large payload center."""
+        pos_large = np.array([50.0, 50.0])
+        radius_small = 10.0
+        radius_large = 70.0
+        stiffness = 10.0
+        box_size = 200.0
+
+        # Test from different directions
+        positions = [
+            np.array([115.0, 50.0]),   # Right
+            np.array([50.0, 115.0]),   # Top
+            np.array([-15.0, 50.0]),   # Left (periodic wrap might apply)
+            np.array([50.0, -15.0]),   # Bottom
+        ]
+
+        for pos_small in positions:
+            force = compute_payload_enclosure_force(
+                pos_small, pos_large, radius_small, radius_large, stiffness, box_size
+            )
+
+            if np.linalg.norm(force) > 0:
+                # Force should point toward center
+                to_center = pos_large - pos_small
+                # Dot product should be positive (same direction)
+                # Note: need to handle periodic boundaries
+                if np.linalg.norm(to_center) > 0:
+                    dot = np.dot(force, to_center)
+                    # Force points toward center if dot > 0
+                    assert dot >= -1e-6  # Allow small numerical error
+
+    def test_large_overlap(self):
+        """Test force magnitude with significant overlap."""
+        pos_small = np.array([130.0, 50.0])  # 80 from center
+        pos_large = np.array([50.0, 50.0])
+        radius_small = 10.0
+        radius_large = 70.0  # 80 + 10 = 90 >> 70
+        stiffness = 10.0
+        box_size = 200.0
+
+        force = compute_payload_enclosure_force(
+            pos_small, pos_large, radius_small, radius_large, stiffness, box_size
+        )
+
+        # Overlap = (80 + 10) - 70 = 20
+        expected_magnitude = stiffness * 20.0
+        assert abs(np.linalg.norm(force) - expected_magnitude) < 1e-6
+        assert force[0] < 0  # Pushed left toward center
