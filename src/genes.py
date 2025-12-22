@@ -61,15 +61,18 @@ def mutate(gene: np.ndarray, mutation_probability: float) -> np.ndarray:
     return mutated_gene
 
 
-def mutate_hyperparams(gene: np.ndarray, mutation_probability: float = 0.3) -> np.ndarray:
+def mutate_hyperparams(gene: np.ndarray, mutation_probability: float = 0.3,
+                       sigma_scale: float = 1.0) -> np.ndarray:
     """
     Mutate hyperparameter gene with parameter-specific logic.
 
-    Gene format: [max_curvity, min_curvity, mid_curvity, rot_diffusion]
+    Gene format: [max_curvity, min_curvity, mid_curvity, rot_diffusion, v0]
 
     Args:
         gene: Hyperparameter gene array
         mutation_probability: Probability of mutating each gene value (0 to 1)
+        sigma_scale: Scale factor for mutation sigma (1.0 = large mutations,
+                     small values = tiny nudges). Decays over generations.
 
     Returns:
         Mutated gene with valid parameter constraints
@@ -79,19 +82,32 @@ def mutate_hyperparams(gene: np.ndarray, mutation_probability: float = 0.3) -> n
 
     mutated = gene.copy()
 
+    # Base sigma values (used when sigma_scale = 1.0)
+    base_sigma_curvity = 0.4
+    base_sigma_log = 0.6
+
+    # Scale sigmas by sigma_scale
+    sigma_curvity = base_sigma_curvity * sigma_scale
+    sigma_log = base_sigma_log * sigma_scale
+
     # Apply mutation to each gene position
     for i in range(len(gene)):
         if np.random.random() < mutation_probability:
             if i < 3:  # curvity params (max, min, mid)
-                # Gaussian mutation with scale 0.2
-                mutated[i] += np.random.normal(0, 0.2)
+                # Gaussian mutation with decaying scale
+                mutated[i] += np.random.normal(0, sigma_curvity)
                 # Clamp to valid range [-1, 1]
                 mutated[i] = np.clip(mutated[i], -1, 1)
-            else:  # rot_diffusion (index 3)
-                # Multiplicative mutation in log space
-                mutated[i] *= np.exp(np.random.normal(0, 0.3))
-                # Clamp to valid range [0.01, 0.3]
-                mutated[i] = np.clip(mutated[i], 0.01, 0.3)
+            elif i == 3:  # rot_diffusion
+                # Multiplicative mutation in log space with decaying scale
+                mutated[i] *= np.exp(np.random.normal(0, sigma_log))
+                # Clamp to valid range [0.001, 0.3]
+                mutated[i] = np.clip(mutated[i], 0.001, 0.3)
+            elif i == 4:  # v0 (self-propulsion speed)
+                # Multiplicative mutation in log space with decaying scale
+                mutated[i] *= np.exp(np.random.normal(0, sigma_log))
+                # Clamp to valid range [0.1, 150.0]
+                mutated[i] = np.clip(mutated[i], 0.1, 150.0)
 
     # Re-sort curvity params to maintain min < mid < max constraint
     curvity_vals = sorted(mutated[:3])
@@ -104,7 +120,9 @@ def mutate_hyperparams(gene: np.ndarray, mutation_probability: float = 0.3) -> n
 
 def crossover_and_mutate(parent1: np.ndarray, parent2: np.ndarray,
                          mutation_probability: float,
-                         use_hyperparam_mutation: bool = False) -> List[np.ndarray]:
+                         population_size: int = 6,
+                         use_hyperparam_mutation: bool = False,
+                         sigma_scale: float = 1.0) -> List[np.ndarray]:
     """
     Perform crossover followed by mutation on two parent genes.
 
@@ -112,23 +130,33 @@ def crossover_and_mutate(parent1: np.ndarray, parent2: np.ndarray,
         parent1: First parent gene
         parent2: Second parent gene
         mutation_probability: Probability of mutating each gene value
+        population_size: Number of offspring to generate
         use_hyperparam_mutation: If True, use mutate_hyperparams() for
-            hyperparameter optimization (gene format: [max_c, min_c, mid_c, rot_diff])
+            hyperparameter optimization (gene format: [max_c, min_c, mid_c, rot_diff, v0])
+        sigma_scale: Scale factor for mutation sigma (1.0 = large mutations,
+                     small values = tiny nudges). Only used with hyperparam mutation.
 
     Returns:
-        List of 6 mutated offspring genes (3 mutations of each crossover result)
+        List of mutated offspring genes
     """
     # Perform crossover
     offspring1, offspring2 = crossover(parent1, parent2)
 
-    # Select mutation function
-    mutation_fn = mutate_hyperparams if use_hyperparam_mutation else mutate
+    # Split population_size between the two crossover offspring
+    n_from_offspring1 = population_size // 2
+    n_from_offspring2 = population_size - n_from_offspring1
 
-    # Create 3 mutations of each offspring
-    mutations_offspring1 = [mutation_fn(offspring1, mutation_probability) for _ in range(3)]
-    mutations_offspring2 = [mutation_fn(offspring2, mutation_probability) for _ in range(3)]
+    # Create mutations of each offspring
+    if use_hyperparam_mutation:
+        mutations_offspring1 = [mutate_hyperparams(offspring1, mutation_probability, sigma_scale)
+                                for _ in range(n_from_offspring1)]
+        mutations_offspring2 = [mutate_hyperparams(offspring2, mutation_probability, sigma_scale)
+                                for _ in range(n_from_offspring2)]
+    else:
+        mutations_offspring1 = [mutate(offspring1, mutation_probability) for _ in range(n_from_offspring1)]
+        mutations_offspring2 = [mutate(offspring2, mutation_probability) for _ in range(n_from_offspring2)]
 
-    # Combine all 6 offspring
+    # Combine all offspring
     all_offspring = mutations_offspring1 + mutations_offspring2
 
     return all_offspring

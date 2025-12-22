@@ -1,0 +1,559 @@
+
+============================================================
+GENETIC ALGORITHM OPTIMIZATION
+============================================================
+Generations: 16
+Population size: 12
+Initial mutation probability: 0.5
+Mutation decay: exponential (to ~1% by final generation)
+Total simulations: 192
+============================================================
+
+
+--- Generation 1/16 ---
+Mutation probability: 0.5000
+
+[Gen 1, Individual 1/12]
+  Gene: max_c=0.500, min_c=-0.500, mid_c=0.000, rot_diff=0.0500, v0=3.750
+  Steps taken: 20925
+
+[Gen 1, Individual 2/12]
+  Gene: max_c=0.215, min_c=-0.870, mid_c=-0.659, rot_diff=0.2241, v0=12.627
+  Steps taken: 4137
+
+[Gen 1, Individual 3/12]
+  Gene: max_c=0.617, min_c=-0.805, mid_c=-0.391, rot_diff=0.0495, v0=0.907
+  Steps taken: 40000
+
+[Gen 1, Individual 4/12]
+  Gene: max_c=-0.010, min_c=-0.931, mid_c=-0.756, rot_diff=0.1789, v0=0.366
+  Steps taken: 40000
+
+[Gen 1, Individual 5/12]
+  Gene: max_c=0.325, min_c=-0.377, mid_c=0.040, rot_diff=0.0226, v0=0.252
+  Steps taken: 40000
+
+[Gen 1, Individual 6/12]
+  Gene: max_c=0.939, min_c=0.550, mid_c=0.879, rot_diff=0.1647, v0=2.000
+  Steps taken: 40000
+
+[Gen 1, Individual 7/12]
+  Gene: max_c=0.844, min_c=-0.823, mid_c=-0.608, rot_diff=0.0013, v0=0.510
+  Steps taken: 40000
+
+[Gen 1, Individual 8/12]
+  Gene: max_c=0.657, min_c=-0.457, mid_c=-0.223, rot_diff=0.0077, v0=0.409
+  Steps taken: 40000
+
+[Gen 1, Individual 9/12]
+  Gene: max_c=0.604, min_c=-0.718, mid_c=0.085, rot_diff=0.0015, v0=14.046
+  Steps taken: 9895
+
+[Gen 1, Individual 10/12]
+  Gene: max_c=0.544, min_c=-0.989, mid_c=-0.603, rot_diff=0.1047, v0=3.453
+  Steps taken: 15284
+
+[Gen 1, Individual 11/12]
+  Gene: max_c=0.543, min_c=-0.852, mid_c=0.458, rot_diff=0.0077, v0=0.179
+  Steps taken: 40000
+
+[Gen 1, Individual 12/12]
+  Gene: max_c=0.726, min_c=-0.338, mid_c=0.247, rot_diff=0.0014, v0=0.475
+  Steps taken: 40000
+
+[Generation 1 Summary]
+  Best: 4137 steps
+  Worst: 40000 steps
+  Best gene: max_c=0.215, min_c=-0.870, mid_c=-0.659, rot_diff=0.2241, v0=12.627
+
+--- Generation 2/16 ---
+Mutation probability: 0.3679
+
+[Gen 2, Individual 1/12]
+  Gene: max_c=0.215, min_c=-0.707, mid_c=0.194, rot_diff=0.2241, v0=12.627
+  Steps taken: 6224
+
+[Gen 2, Individual 2/12]
+  Gene: max_c=0.215, min_c=-0.718, mid_c=-0.201, rot_diff=0.2241, v0=12.627
+  Steps taken: 4792
+
+[Gen 2, Individual 3/12]
+  Gene: max_c=0.395, min_c=-0.752, mid_c=0.085, rot_diff=0.3000, v0=12.627
+  Steps taken: 4427
+
+[Gen 2, Individual 4/12]
+  Gene: max_c=0.604, min_c=-0.854, mid_c=-0.590, rot_diff=0.0014, v0=14.046
+  Steps taken: 4700
+
+[Gen 2, Individual 5/12]
+  Gene: max_c=0.604, min_c=-0.770, mid_c=-0.659, rot_diff=0.0015, v0=14.046
+  Steps taken: 3630
+
+[Gen 2, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.835, rot_diff=0.0015, v0=14.046
+  Steps taken: 3350
+
+[Generation 2 Summary]
+  Best: 3350 steps
+  Worst: 6224 steps
+  Best gene: max_c=0.638, min_c=-0.870, mid_c=-0.835, rot_diff=0.0015, v0=14.046
+
+--- Generation 3/16 ---
+Mutation probability: 0.2708
+
+[Gen 3, Individual 1/12]
+  Gene: max_c=0.638, min_c=-1.000, mid_c=-0.835, rot_diff=0.0012, v0=15.000
+  Steps taken: 3536
+
+[Gen 3, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.835, rot_diff=0.0015, v0=14.046
+  Steps taken: 3207
+
+[Gen 3, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.835, rot_diff=0.0015, v0=14.046
+  Steps taken: 3097
+
+[Gen 3, Individual 4/12]
+  Gene: max_c=0.604, min_c=-0.721, mid_c=-0.659, rot_diff=0.0011, v0=14.046
+  Steps taken: 5273
+
+[Gen 3, Individual 5/12]
+  Gene: max_c=0.604, min_c=-0.659, mid_c=-0.531, rot_diff=0.0015, v0=14.046
+  Steps taken: 4980
+
+[Gen 3, Individual 6/12]
+  Gene: max_c=0.604, min_c=-0.770, mid_c=-0.659, rot_diff=0.0015, v0=14.046
+  Steps taken: 3914
+
+[Generation 3 Summary]
+  Best: 3097 steps
+  Worst: 5273 steps
+  Best gene: max_c=0.638, min_c=-0.870, mid_c=-0.835, rot_diff=0.0015, v0=14.046
+
+--- Generation 4/16 ---
+Mutation probability: 0.1993
+
+[Gen 4, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.667, rot_diff=0.0015, v0=15.000
+  Steps taken: 4324
+
+[Gen 4, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.835, rot_diff=0.0015, v0=14.046
+  Steps taken: 4870
+
+[Gen 4, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.835, mid_c=-0.610, rot_diff=0.0020, v0=14.046
+  Steps taken: 4063
+
+[Gen 4, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.835, rot_diff=0.0015, v0=14.046
+  Steps taken: 4543
+
+[Gen 4, Individual 5/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.835, rot_diff=0.0015, v0=14.046
+  Steps taken: 5492
+
+[Gen 4, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.835, rot_diff=0.0015, v0=14.046
+  Steps taken: 4921
+
+[Generation 4 Summary]
+  Best: 4063 steps
+  Worst: 5492 steps
+  Best gene: max_c=0.638, min_c=-0.835, mid_c=-0.610, rot_diff=0.0020, v0=14.046
+
+--- Generation 5/16 ---
+Mutation probability: 0.1466
+
+[Gen 5, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.667, rot_diff=0.0020, v0=14.046
+  Steps taken: 4349
+
+[Gen 5, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.667, rot_diff=0.0020, v0=14.046
+  Steps taken: 4794
+
+[Gen 5, Individual 3/12]
+  Gene: max_c=0.638, min_c=-1.000, mid_c=-0.667, rot_diff=0.0020, v0=14.046
+  Steps taken: 4213
+
+[Gen 5, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.835, mid_c=-0.610, rot_diff=0.0015, v0=13.768
+  Steps taken: 4494
+
+[Gen 5, Individual 5/12]
+  Gene: max_c=0.638, min_c=-0.945, mid_c=-0.610, rot_diff=0.0013, v0=12.963
+  Steps taken: 6561
+
+[Gen 5, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.835, mid_c=-0.610, rot_diff=0.0013, v0=15.000
+  Steps taken: 4976
+
+[Generation 5 Summary]
+  Best: 4213 steps
+  Worst: 6561 steps
+  Best gene: max_c=0.638, min_c=-1.000, mid_c=-0.667, rot_diff=0.0020, v0=14.046
+
+--- Generation 6/16 ---
+Mutation probability: 0.1079
+
+[Gen 6, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.667, rot_diff=0.0020, v0=14.046
+  Steps taken: 7882
+
+[Gen 6, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.667, rot_diff=0.0020, v0=14.046
+  Steps taken: 4540
+
+[Gen 6, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.829, rot_diff=0.0020, v0=15.000
+  Steps taken: 3324
+
+[Gen 6, Individual 4/12]
+  Gene: max_c=0.638, min_c=-1.000, mid_c=-0.667, rot_diff=0.0020, v0=14.046
+  Steps taken: 3525
+
+[Gen 6, Individual 5/12]
+  Gene: max_c=0.638, min_c=-1.000, mid_c=-0.667, rot_diff=0.0020, v0=14.046
+  Steps taken: 3277
+
+[Gen 6, Individual 6/12]
+  Gene: max_c=0.638, min_c=-1.000, mid_c=-0.667, rot_diff=0.0024, v0=14.046
+  Steps taken: 3931
+
+[Generation 6 Summary]
+  Best: 3277 steps
+  Worst: 7882 steps
+  Best gene: max_c=0.638, min_c=-1.000, mid_c=-0.667, rot_diff=0.0020, v0=14.046
+
+--- Generation 7/16 ---
+Mutation probability: 0.0794
+
+[Gen 7, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.667, rot_diff=0.0020, v0=15.000
+  Steps taken: 2974
+
+[Gen 7, Individual 2/12]
+  Gene: max_c=0.638, min_c=-1.000, mid_c=-0.667, rot_diff=0.0017, v0=15.000
+  Steps taken: 3316
+
+[Gen 7, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 2818
+
+[Gen 7, Individual 4/12]
+  Gene: max_c=0.638, min_c=-1.000, mid_c=-0.829, rot_diff=0.0020, v0=14.046
+  Steps taken: 3177
+
+[Gen 7, Individual 5/12]
+  Gene: max_c=0.638, min_c=-1.000, mid_c=-0.829, rot_diff=0.0021, v0=15.000
+  Steps taken: 3410
+
+[Gen 7, Individual 6/12]
+  Gene: max_c=0.638, min_c=-1.000, mid_c=-0.829, rot_diff=0.0020, v0=14.046
+  Steps taken: 3569
+
+[Generation 7 Summary]
+  Best: 2818 steps
+  Worst: 3569 steps
+  Best gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+
+--- Generation 8/16 ---
+Mutation probability: 0.0584
+
+[Gen 8, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 3039
+
+[Gen 8, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 2944
+
+[Gen 8, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 4027
+
+[Gen 8, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.667, rot_diff=0.0020, v0=15.000
+  Steps taken: 4329
+
+[Gen 8, Individual 5/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.667, rot_diff=0.0020, v0=15.000
+  Steps taken: 4272
+
+[Gen 8, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.667, rot_diff=0.0020, v0=15.000
+  Steps taken: 3593
+
+[Generation 8 Summary]
+  Best: 2944 steps
+  Worst: 4329 steps
+  Best gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+
+--- Generation 9/16 ---
+Mutation probability: 0.0430
+
+[Gen 9, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 3017
+
+[Gen 9, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 3725
+
+[Gen 9, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 7571
+
+[Gen 9, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 5441
+
+[Gen 9, Individual 5/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0021, v0=15.000
+  Steps taken: 5627
+
+[Gen 9, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 3298
+
+[Generation 9 Summary]
+  Best: 3017 steps
+  Worst: 7571 steps
+  Best gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+
+--- Generation 10/16 ---
+Mutation probability: 0.0316
+
+[Gen 10, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 6256
+
+[Gen 10, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 4599
+
+[Gen 10, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 4438
+
+[Gen 10, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 2626
+
+[Gen 10, Individual 5/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 3670
+
+[Gen 10, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 3938
+
+[Generation 10 Summary]
+  Best: 2626 steps
+  Worst: 6256 steps
+  Best gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+
+--- Generation 11/16 ---
+Mutation probability: 0.0233
+
+[Gen 11, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 8417
+
+[Gen 11, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 6378
+
+[Gen 11, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.860, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 5727
+
+[Gen 11, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3295
+
+[Gen 11, Individual 5/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 6663
+
+[Gen 11, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 7198
+
+[Generation 11 Summary]
+  Best: 3295 steps
+  Worst: 8417 steps
+  Best gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+
+--- Generation 12/16 ---
+Mutation probability: 0.0171
+
+[Gen 12, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3269
+
+[Gen 12, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3757
+
+[Gen 12, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3245
+
+[Gen 12, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.860, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 4082
+
+[Gen 12, Individual 5/12]
+  Gene: max_c=0.638, min_c=-0.860, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 3291
+
+[Gen 12, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.860, mid_c=-0.655, rot_diff=0.0020, v0=15.000
+  Steps taken: 4551
+
+[Generation 12 Summary]
+  Best: 3245 steps
+  Worst: 4551 steps
+  Best gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+
+--- Generation 13/16 ---
+Mutation probability: 0.0126
+
+[Gen 13, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 2716
+
+[Gen 13, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 4413
+
+[Gen 13, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3457
+
+[Gen 13, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3159
+
+[Gen 13, Individual 5/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 5900
+
+[Gen 13, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3138
+
+[Generation 13 Summary]
+  Best: 2716 steps
+  Worst: 5900 steps
+  Best gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+
+--- Generation 14/16 ---
+Mutation probability: 0.0093
+
+[Gen 14, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3606
+
+[Gen 14, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 7915
+
+[Gen 14, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3340
+
+[Gen 14, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 4869
+
+[Gen 14, Individual 5/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 4823
+
+[Gen 14, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3309
+
+[Generation 14 Summary]
+  Best: 3309 steps
+  Worst: 7915 steps
+  Best gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+
+--- Generation 15/16 ---
+Mutation probability: 0.0068
+
+[Gen 15, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 5500
+
+[Gen 15, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 2561
+
+[Gen 15, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3286
+
+[Gen 15, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 6107
+
+[Gen 15, Individual 5/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 5188
+
+[Gen 15, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.870, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 4448
+
+[Generation 15 Summary]
+  Best: 2561 steps
+  Worst: 6107 steps
+  Best gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+
+--- Generation 16/16 ---
+Mutation probability: 0.0050
+
+[Gen 16, Individual 1/12]
+  Gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 5999
+
+[Gen 16, Individual 2/12]
+  Gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3874
+
+[Gen 16, Individual 3/12]
+  Gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3852
+
+[Gen 16, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3816
+
+[Gen 16, Individual 5/12]
+  Gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 4887
+
+[Gen 16, Individual 6/12]
+  Gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+  Steps taken: 3076
+
+[Generation 16 Summary]
+  Best: 3076 steps
+  Worst: 5999 steps
+  Best gene: max_c=0.638, min_c=-0.987, mid_c=-0.655, rot_diff=0.0014, v0=15.000
+
+============================================================
+OPTIMIZATION COMPLETE
+============================================================
+Best gene found:
+  max_curvity:          0.637695
+  min_curvity:          -0.987385
+  mid_curvity:          -0.655242
+  rotational_diffusion: 0.001449
+  v0:                   15.000000
+Steps taken: 2561
+============================================================

@@ -24,13 +24,19 @@ DT = 0.01
 
 # Particle parameters
 PARTICLE_RADIUS = 1.0
-PARTICLE_V0 = 3.75              # Self-propulsion speed
+PARTICLE_V0 = 50.417522              # Self-propulsion speed
 PARTICLE_MOBILITY = 1.0
-ROTATIONAL_DIFFUSION = 0.05 # 0.05     # Orientational noise
+ROTATIONAL_DIFFUSION = 0.172470 # 0.05     # Orientational noise
 
-MAX_CURVITY = 1.0
-MIN_CURVITY = -1.0
-MID_CURVITY = 0.0 # 0.5
+MAX_CURVITY = 0.139627
+MIN_CURVITY = -0.847266
+MID_CURVITY = -0.247238 # 0.5
+
+#   max_curvity:          0.139627
+#   min_curvity:          -0.847266
+#   mid_curvity:          -0.247238
+#   rotational_diffusion: 0.172470
+#   v0:                   50.417522
 
 # Payload parameters
 PAYLOAD_RADIUS = 10
@@ -103,9 +109,9 @@ SAVE_DATA = False
 DATA_OUTPUT_PATH = "E:/PostThesis/data/test.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 # Genetic algorithm parameters
-N_GENERATIONS = 8
-POPULATION_SIZE = 8
-MUTATION_PROBABILITY = 0.2
+N_GENERATIONS = 16
+POPULATION_SIZE = 12
+MUTATION_PROBABILITY = 0.5
 OPTIMIZATION_RESULTS_FILE = "optimization_results_2.txt"
 
 
@@ -116,7 +122,7 @@ OPTIMIZATION_RESULTS_FILE = "optimization_results_2.txt"
 def create_random_gene():
     """
     Create a valid random gene for hyperparameter optimization.
-    Gene format: [max_curvity, min_curvity, mid_curvity, rot_diffusion]
+    Gene format: [max_curvity, min_curvity, mid_curvity, rot_diffusion, v0]
     """
     # Generate 3 random curvity values in [-1, 1], sort them
     curvity_vals = sorted(np.random.uniform(-1, 1, 3))
@@ -124,10 +130,13 @@ def create_random_gene():
     min_c = curvity_vals[0]  # smallest
     mid_c = curvity_vals[1]  # middle
 
-    # Log-uniform rot_diffusion in [0.01, 0.3]
+    # Log-uniform rot_diffusion in [0.001, 0.3]
     rot_diff = np.exp(np.random.uniform(np.log(0.001), np.log(0.3)))
 
-    return np.array([max_c, min_c, mid_c, rot_diff])
+    # Log-uniform v0 in [0.1, 15.0]
+    v0 = np.exp(np.random.uniform(np.log(0.1), np.log(15.0)))
+
+    return np.array([max_c, min_c, mid_c, rot_diff, v0])
 
 
 def run_single_simulation(base_params, gene, verbose=True):
@@ -136,7 +145,7 @@ def run_single_simulation(base_params, gene, verbose=True):
 
     Args:
         base_params: Base simulation parameters dict
-        gene: [max_curvity, min_curvity, mid_curvity, rot_diffusion]
+        gene: [max_curvity, min_curvity, mid_curvity, rot_diffusion, v0]
         verbose: If True, print simulation output
 
     Returns:
@@ -150,6 +159,7 @@ def run_single_simulation(base_params, gene, verbose=True):
     params['min_curvity'] = gene[1]
     params['mid_curvity'] = gene[2]
     params['rot_diffusion'] = np.ones(params['n_particles']) * gene[3]
+    params['v0'] = np.ones(params['n_particles']) * gene[4]
 
     # Reset payload position for each run
     params['payload_position'] = PAYLOAD_START_POSITION.copy()
@@ -170,13 +180,21 @@ def run_genetic_optimization(base_params, n_generations=5, population_size=10,
         base_params: Base simulation parameters dict
         n_generations: Number of generations to evolve
         population_size: Number of individuals per generation (should be 10)
-        mutation_probability: Probability of mutation for each gene value
+        mutation_probability: Probability of mutation (constant across generations)
         output_file: Path to save results text file
 
     Returns:
         best_gene: Best performing gene found
         best_steps: Steps taken by best gene
     """
+    # Calculate exponential decay constant for sigma (mutation magnitude)
+    # sigma_scale decays from 1.0 to ~0.01 by the last generation
+    # Formula: sigma_scale(gen) = exp(-decay_constant * gen)
+    if n_generations > 1:
+        sigma_decay_constant = 4.6 / (n_generations - 1)  # Ensures ~1% of initial by last gen
+    else:
+        sigma_decay_constant = 0.0
+
     # Open results file for writing
     results_log = []
 
@@ -190,12 +208,13 @@ def run_genetic_optimization(base_params, n_generations=5, population_size=10,
     log(f"{'='*60}")
     log(f"Generations: {n_generations}")
     log(f"Population size: {population_size}")
-    log(f"Mutation probability: {mutation_probability}")
+    log(f"Mutation probability: {mutation_probability} (constant)")
+    log(f"Sigma decay: exponential (1.0 -> ~1% by final generation)")
     log(f"Total simulations: {n_generations * population_size}")
     log(f"{'='*60}\n")
 
     # Initialize population: gene 0 = defaults, rest = random
-    default_gene = np.array([MAX_CURVITY, MIN_CURVITY, MID_CURVITY, ROTATIONAL_DIFFUSION])
+    default_gene = np.array([MAX_CURVITY, MIN_CURVITY, MID_CURVITY, ROTATIONAL_DIFFUSION, PARTICLE_V0])
     population = [default_gene]
     population += [create_random_gene() for _ in range(population_size - 1)]
 
@@ -203,14 +222,19 @@ def run_genetic_optimization(base_params, n_generations=5, population_size=10,
     best_overall_steps = float('inf')
 
     for gen in range(n_generations):
+        # Calculate decaying sigma scale for this generation
+        # gen=0: sigma_scale=1.0 (large mutations), gen=last: sigma_scale~0.01 (tiny nudges)
+        current_sigma_scale = np.exp(-sigma_decay_constant * gen)
+
         log(f"\n--- Generation {gen + 1}/{n_generations} ---")
+        log(f"Sigma scale: {current_sigma_scale:.4f}")
 
         # Run all simulations and collect results
         results = []
         for i, gene in enumerate(population):
             log(f"\n[Gen {gen+1}, Individual {i+1}/{population_size}]")
             log(f"  Gene: max_c={gene[0]:.3f}, min_c={gene[1]:.3f}, "
-                f"mid_c={gene[2]:.3f}, rot_diff={gene[3]:.4f}")
+                f"mid_c={gene[2]:.3f}, rot_diff={gene[3]:.4f}, v0={gene[4]:.3f}")
 
             steps = run_single_simulation(base_params, gene)
             results.append((gene.copy(), steps))
@@ -232,7 +256,7 @@ def run_genetic_optimization(base_params, n_generations=5, population_size=10,
         log(f"  Best: {gen_best} steps")
         log(f"  Worst: {gen_worst} steps")
         log(f"  Best gene: max_c={results[0][0][0]:.3f}, min_c={results[0][0][1]:.3f}, "
-            f"mid_c={results[0][0][2]:.3f}, rot_diff={results[0][0][3]:.4f}")
+            f"mid_c={results[0][0][2]:.3f}, rot_diff={results[0][0][3]:.4f}, v0={results[0][0][4]:.3f}")
 
         # Select top 2 parents
         parent1 = results[0][0]
@@ -240,20 +264,25 @@ def run_genetic_optimization(base_params, n_generations=5, population_size=10,
 
         # Generate new population via crossover + mutation (except for last generation)
         if gen < n_generations - 1:
+            # Use next generation's sigma scale for offspring
+            next_gen_sigma_scale = np.exp(-sigma_decay_constant * (gen + 1))
             population = crossover_and_mutate(
                 parent1, parent2,
-                mutation_probability,
-                use_hyperparam_mutation=True
+                mutation_probability,  # constant probability
+                population_size=population_size,
+                use_hyperparam_mutation=True,
+                sigma_scale=next_gen_sigma_scale  # decaying sigma
             )
 
     log(f"\n{'='*60}")
     log("OPTIMIZATION COMPLETE")
     log(f"{'='*60}")
     log(f"Best gene found:")
-    log(f"  max_curvity:         {best_overall_gene[0]:.6f}")
-    log(f"  min_curvity:         {best_overall_gene[1]:.6f}")
-    log(f"  mid_curvity:         {best_overall_gene[2]:.6f}")
+    log(f"  max_curvity:          {best_overall_gene[0]:.6f}")
+    log(f"  min_curvity:          {best_overall_gene[1]:.6f}")
+    log(f"  mid_curvity:          {best_overall_gene[2]:.6f}")
     log(f"  rotational_diffusion: {best_overall_gene[3]:.6f}")
+    log(f"  v0:                   {best_overall_gene[4]:.6f}")
     log(f"Steps taken: {best_overall_steps}")
     log(f"{'='*60}\n")
 
