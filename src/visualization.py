@@ -218,7 +218,7 @@ def create_hollow_payload_animation(positions, orientations, velocities, payload
                                      color_neg1=(1.0, 0.0, 0.0), color_0=(0.5, 0.5, 0.5), color_pos1=(0.0, 0.0, 1.0)):
     """Create an animation of the hollow payload transport simulation.
 
-    The hollow payload is rendered as a ring (annulus) with inner and outer radius.
+    The hollow payload is rendered as a circle boundary.
 
     Args:
         color_neg1: RGB tuple for curvity = -1 (default: red)
@@ -232,9 +232,7 @@ def create_hollow_payload_animation(positions, orientations, velocities, payload
 
     # Extract parameters
     box_size = params['box_size']
-    payload_inner_radius = params['payload_inner_radius']
-    payload_outer_radius = params['payload_outer_radius']
-    payload_inner_offset = params.get('payload_inner_offset', np.zeros(2))
+    payload_radius = params['payload_radius']
     n_particles = params['n_particles']
     walls = params.get('walls', np.zeros((0, 5), dtype=np.float64))
 
@@ -271,51 +269,21 @@ def create_hollow_payload_animation(positions, orientations, velocities, payload
     scatter = ax.scatter(
         positions[0, :, 0],
         positions[0, :, 1],
-        s=np.pi * (params['particle_radius'] * 4)**2,  # Scaled up for visibility
+        s=np.pi * (params['particle_radius'] * 1)**2,  # Scaled up for visibility
         c=particle_colors,
         alpha=0.7,
         zorder=5  # Render particles on top of payload
     )
 
-    # Create hollow payload as a ring (using two circles)
-    # Outer circle (gray fill)
-    payload_outer = Circle(
+    # Create hollow payload as a circle boundary (no fill, just edge)
+    payload_circle = Circle(
         (payload_positions[0, 0], payload_positions[0, 1]),
-        radius=payload_outer_radius,
-        color='gray',
-        alpha=0.5
-    )
-    ax.add_patch(payload_outer)
-
-    # Inner circle (white fill to create ring effect) - with offset
-    inner_center = (payload_positions[0, 0] + payload_inner_offset[0],
-                    payload_positions[0, 1] + payload_inner_offset[1])
-    payload_inner = Circle(
-        inner_center,
-        radius=payload_inner_radius,
-        color='white',
-        alpha=1.0
-    )
-    ax.add_patch(payload_inner)
-
-    # Draw the ring edge for visibility
-    payload_outer_edge = Circle(
-        (payload_positions[0, 0], payload_positions[0, 1]),
-        radius=payload_outer_radius,
+        radius=payload_radius,
         fill=False,
         edgecolor='darkgray',
-        linewidth=1.5
+        linewidth=2.5
     )
-    ax.add_patch(payload_outer_edge)
-
-    payload_inner_edge = Circle(
-        inner_center,
-        radius=payload_inner_radius,
-        fill=False,
-        edgecolor='darkgray',
-        linewidth=1.5
-    )
-    ax.add_patch(payload_inner_edge)
+    ax.add_patch(payload_circle)
 
     # Draw walls
     wall_lines = []
@@ -354,7 +322,7 @@ def create_hollow_payload_animation(positions, orientations, velocities, payload
     # Add parameters text
     params_text = ax.text(-0.02, -0.065,
                           f'n_particles: {n_particles}, particle radius: {params["particle_radius"][0]}, '
-                          f'payload: r_in={payload_inner_radius}, r_out={payload_outer_radius}',
+                          f'payload radius: {payload_radius}',
                           transform=ax.transAxes, fontsize=12, verticalalignment='top')
     params_text_2 = ax.text(-0.02, -0.093,
                             f'orientational noise: {params["rot_diffusion"][0]}, '
@@ -366,8 +334,7 @@ def create_hollow_payload_animation(positions, orientations, velocities, payload
 
     def init():
         """Initialize the animation."""
-        artists = [scatter, payload_outer, payload_inner, payload_outer_edge, payload_inner_edge,
-                   trajectory, time_text, params_text, params_text_2]
+        artists = [scatter, payload_circle, trajectory, time_text, params_text, params_text_2]
         artists.extend(wall_lines)
         return artists
 
@@ -379,13 +346,7 @@ def create_hollow_payload_animation(positions, orientations, velocities, payload
             print(f"Progress: Frame {frame}")
 
         # Update hollow payload position
-        center = (payload_positions[frame, 0], payload_positions[frame, 1])
-        inner_center = (payload_positions[frame, 0] + payload_inner_offset[0],
-                        payload_positions[frame, 1] + payload_inner_offset[1])
-        payload_outer.center = center
-        payload_inner.center = inner_center
-        payload_outer_edge.center = center
-        payload_inner_edge.center = inner_center
+        payload_circle.center = (payload_positions[frame, 0], payload_positions[frame, 1])
 
         # Update payload trajectory
         trajectory_end = min(frame + 1, len(payload_positions))
@@ -398,8 +359,7 @@ def create_hollow_payload_animation(positions, orientations, velocities, payload
         scatter.set_offsets(positions[frame])
         scatter.set_color([get_particle_color_based_on_curvity(cv) for cv in curvity_values[frame]])
 
-        artists = [scatter, payload_outer, payload_inner, payload_outer_edge, payload_inner_edge,
-                   trajectory, time_text]
+        artists = [scatter, payload_circle, trajectory, time_text]
         return artists
 
     # Create animation

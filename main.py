@@ -43,7 +43,7 @@ RANDOM_SEED = 42
 # }
 
 CURVITY_DISTRIBUTION = {
-    -0.2: 600,
+    0.2: 600,
 }
 
 # Total particles = sum of all counts

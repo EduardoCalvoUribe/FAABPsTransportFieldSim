@@ -22,7 +22,7 @@ def run_payload_simulation(params):
     walls = params['walls']
 
     # Initialize particle positions, orientations, and velocities
-    positions = np.random.uniform(0, box_size, (n_particles, 2))
+    positions = np.random.uniform((box_size/2)-5, (box_size/2)+5, (n_particles, 2))
     orientations = np.zeros((n_particles, 2))
     velocities = np.zeros((n_particles, 2))
 
@@ -115,7 +115,7 @@ def run_payload_simulation(params):
 def run_hollow_payload_simulation(params):
     """Run the complete hollow payload transport simulation.
 
-    The hollow payload is a ring shape with inner and outer radius.
+    The hollow payload is a single boundary circle.
     Particles can push from inside (outward) or outside (inward).
 
     Optional param 'n_particles_inside': number of particles to initialize inside the hollow.
@@ -133,7 +133,7 @@ def run_hollow_payload_simulation(params):
 
     # Initialize payload location from parameters (needed for particle placement)
     payload_pos = params['payload_position'].copy()
-    payload_inner_radius = params['payload_inner_radius']
+    payload_radius = params['payload_radius']
     payload_vel = np.zeros(2)
 
     positions = np.zeros((n_particles, 2))
@@ -142,23 +142,22 @@ def run_hollow_payload_simulation(params):
 
     # Place particles inside and outside the hollow payload
     n_inside = params.get('n_particles_inside', 0)
-    payload_outer_radius = params['payload_outer_radius']
     particle_r = params['particle_radius'][0] if hasattr(params['particle_radius'], '__len__') else params['particle_radius']
 
-    # Place first n_inside particles inside the hollow region
+    # Place first n_inside particles inside the hollow payload
     if n_inside > 0:
-        print(f"Placing {n_inside} particles inside the hollow region...")
-        max_r = payload_inner_radius - particle_r - 0.5
+        print(f"Placing {n_inside} particles inside the hollow payload...")
+        max_r = payload_radius - particle_r - 0.5
         if max_r > 0:
             for i in range(min(n_inside, n_particles)):
                 r = np.sqrt(np.random.uniform(0, 1)) * max_r
                 theta = np.random.uniform(0, 2 * np.pi)
                 positions[i] = payload_pos + np.array([r * np.cos(theta), r * np.sin(theta)])
         else:
-            print("Warning: Hollow region too small for particles, skipping inside placement")
+            print("Warning: Hollow payload too small for particles, skipping inside placement")
 
     # Place remaining particles outside the payload (rejection sampling)
-    min_dist = payload_outer_radius + particle_r + 0.5
+    min_dist = payload_radius + particle_r + 0.5
     for i in range(n_inside, n_particles):
         while True:
             pos = np.random.uniform(0, box_size, 2)
@@ -196,17 +195,14 @@ def run_hollow_payload_simulation(params):
     start_time = time.time()
     save_idx = 1
 
-    # Get inner offset (default to zero if not provided)
-    payload_inner_offset = params.get('payload_inner_offset', np.zeros(2))
-
     for step in range(1, n_steps + 1):
         # Hollow payload simulation step
         positions, orientations, velocities, payload_pos, payload_vel = simulate_single_step_hollow_payload(
             positions, orientations, velocities, payload_pos, payload_vel,
             params['particle_radius'], params['v0'], params['mobility'], params['payload_mobility'],
             curvity, params['stiffness'],
-            params['box_size'], params['payload_inner_radius'], params['payload_outer_radius'],
-            payload_inner_offset, params['dt'], params['rot_diffusion'],
+            params['box_size'], params['payload_radius'],
+            params['dt'], params['rot_diffusion'],
             n_particles, walls
         )
 

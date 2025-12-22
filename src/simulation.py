@@ -73,13 +73,12 @@ def compute_all_forces(positions, payload_pos, radii, payload_radius, stiffness,
 
 
 @njit(fastmath=True)
-def compute_all_forces_hollow_payload(positions, payload_pos, radii, payload_inner_radius, payload_outer_radius,
-                                       payload_inner_offset, stiffness, n_particles, box_size, walls):
-    """Compute all forces acting on particles and a hollow (ring-shaped) payload.
+def compute_all_forces_hollow_payload(positions, payload_pos, radii, payload_radius,
+                                       stiffness, n_particles, box_size, walls):
+    """Compute all forces acting on particles and a hollow payload.
 
-    The hollow payload can be pushed from inside (particles in the center pushing outward)
-    or from outside (particles pushing inward against the outer surface).
-    The inner circle can be offset from the outer circle center.
+    The hollow payload can be pushed from inside (particles pushing outward)
+    or from outside (particles pushing inward).
     """
     particle_forces = np.zeros((n_particles, 2))
     payload_force = np.zeros(2)
@@ -96,8 +95,7 @@ def compute_all_forces_hollow_payload(positions, payload_pos, radii, payload_inn
         # Only compute forces if particle and payload are not separated by a wall
         if not particles_separated_by_wall_periodic(positions[i], payload_pos, walls, box_size):
             force_particle_payload = compute_hollow_payload_force(
-                positions[i], payload_pos, radii[i],
-                payload_inner_radius, payload_outer_radius, payload_inner_offset, stiffness, box_size
+                positions[i], payload_pos, radii[i], payload_radius, stiffness, box_size
             )
             particle_forces[i] += force_particle_payload
             payload_force -= force_particle_payload  # Newton's third law
@@ -107,8 +105,8 @@ def compute_all_forces_hollow_payload(positions, payload_pos, radii, payload_inn
         wall_force = compute_wall_forces(positions[i], radii[i], walls, stiffness)
         particle_forces[i] += wall_force
 
-    # Compute force between hollow payload and walls (using outer radius)
-    payload_wall_force = compute_wall_forces(payload_pos, payload_outer_radius, walls, stiffness)
+    # Compute force between hollow payload and walls
+    payload_wall_force = compute_wall_forces(payload_pos, payload_radius, walls, stiffness)
     payload_force += payload_wall_force
 
     # Compute forces between particles using cell list (O(N))
@@ -235,16 +233,16 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
 @njit(fastmath=True)
 def simulate_single_step_hollow_payload(positions, orientations, velocities, payload_pos, payload_vel,
                                          radii, v0s, mobilities, payload_mobility, curvity,
-                                         stiffness, box_size, payload_inner_radius, payload_outer_radius,
-                                         payload_inner_offset, dt, rot_diffusion, n_particles, walls):
-    """Simulate a single time step with a hollow (ring-shaped) payload.
+                                         stiffness, box_size, payload_radius,
+                                         dt, rot_diffusion, n_particles, walls):
+    """Simulate a single time step with a hollow payload.
 
-    The inner circle can be offset from the outer circle center via payload_inner_offset.
+    Particles inside push outward, particles outside push inward.
     """
     # Compute forces on particles and hollow payload
     particle_forces, payload_force = compute_all_forces_hollow_payload(
-        positions, payload_pos, radii, payload_inner_radius, payload_outer_radius,
-        payload_inner_offset, stiffness, n_particles, box_size, walls
+        positions, payload_pos, radii, payload_radius,
+        stiffness, n_particles, box_size, walls
     )
 
     # Update particle orientations using fixed curvity

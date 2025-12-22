@@ -30,14 +30,14 @@ RANDOM_SEED = 42
 
 # Simulation parameters
 CURVITY_DISTRIBUTION = {
-    0.1: 100,
+    0.1: 20,
 }
 
 # Total particles = sum of all counts
 N_PARTICLES = sum(CURVITY_DISTRIBUTION.values())
 
-BOX_SIZE = 100
-N_STEPS = 20000
+BOX_SIZE = 300
+N_STEPS = 100000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -48,13 +48,11 @@ PARTICLE_MOBILITY = 1.0
 ROTATIONAL_DIFFUSION = 0.05        # Orientational noise
 
 # Hollow payload parameters
-# The hollow payload is a ring with inner and outer radius
-# Particles inside the hollow center can push outward
+# The hollow payload is a circle boundary
+# Particles inside can push outward
 # Particles outside can push inward
-PAYLOAD_INNER_RADIUS = 24       # Inner radius (the hole)
-PAYLOAD_OUTER_RADIUS = 25       # Outer radius
-PAYLOAD_INNER_OFFSET = np.array([0.0, 0.0])  # Offset of inner circle from outer circle center
-PAYLOAD_MOBILITY = 1 / PAYLOAD_OUTER_RADIUS  # Based on outer radius
+PAYLOAD_RADIUS = 10
+PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
 PAYLOAD_START_POSITION = np.array([BOX_SIZE/2, BOX_SIZE/2])
 
 # Force parameters
@@ -106,9 +104,7 @@ if __name__ == "__main__":
         'dt': DT,
         'n_steps': 10,
         'save_interval': SAVE_INTERVAL,
-        'payload_inner_radius': PAYLOAD_INNER_RADIUS,
-        'payload_outer_radius': PAYLOAD_OUTER_RADIUS,
-        'payload_inner_offset': PAYLOAD_INNER_OFFSET,
+        'payload_radius': PAYLOAD_RADIUS,
         'payload_mobility': PAYLOAD_MOBILITY,
         'payload_position': PAYLOAD_START_POSITION,
         'stiffness': STIFFNESS,
@@ -136,14 +132,12 @@ if __name__ == "__main__":
     params = {
         # Global parameters
         'n_particles': N_PARTICLES,
-        'n_particles_inside': 100,  # First 300 particles go inside
+        'n_particles_inside': 100,  # First 100 particles go inside
         'box_size': BOX_SIZE,
         'dt': DT,
         'n_steps': N_STEPS,
         'save_interval': SAVE_INTERVAL,
-        'payload_inner_radius': PAYLOAD_INNER_RADIUS,
-        'payload_outer_radius': PAYLOAD_OUTER_RADIUS,
-        'payload_inner_offset': PAYLOAD_INNER_OFFSET,
+        'payload_radius': PAYLOAD_RADIUS,
         'payload_mobility': PAYLOAD_MOBILITY,
         'payload_position': PAYLOAD_START_POSITION,
         'stiffness': STIFFNESS,
@@ -187,9 +181,7 @@ if __name__ == "__main__":
             payload_positions=payload_positions,
             payload_velocities=payload_velocities,
             curvity_values=curvity_values,
-            payload_inner_radius=PAYLOAD_INNER_RADIUS,
-            payload_outer_radius=PAYLOAD_OUTER_RADIUS,
-            payload_inner_offset=PAYLOAD_INNER_OFFSET,
+            payload_radius=PAYLOAD_RADIUS,
             box_size=BOX_SIZE,
             dt=DT
         )
