@@ -26,18 +26,19 @@ def K_to_c(x1, y1, x2, y2, K):
 #####################################################
 
 # Set random seed for reproducibility
-RANDOM_SEED = 42
+RANDOM_SEED = 40
 
 # Simulation parameters
 CURVITY_DISTRIBUTION = {
-    0.1: 20,
+    -0.6: 1,
+    -0.1: 1,
 }
 
 # Total particles = sum of all counts
 N_PARTICLES = sum(CURVITY_DISTRIBUTION.values())
 
-BOX_SIZE = 300
-N_STEPS = 100000
+BOX_SIZE = 20
+N_STEPS = 20000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -45,18 +46,18 @@ DT = 0.01
 PARTICLE_RADIUS = 1.0
 PARTICLE_V0 = 3.75              # Self-propulsion speed
 PARTICLE_MOBILITY = 1.0
-ROTATIONAL_DIFFUSION = 0.05        # Orientational noise
+ROTATIONAL_DIFFUSION = 0.0        # Orientational noise
 
 # Hollow payload parameters
 # The hollow payload is a circle boundary
 # Particles inside can push outward
 # Particles outside can push inward
-PAYLOAD_RADIUS = 10
+PAYLOAD_RADIUS = 2
 PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
 PAYLOAD_START_POSITION = np.array([BOX_SIZE/2, BOX_SIZE/2])
 
 # Force parameters
-STIFFNESS = 25.0
+STIFFNESS = 100.0
 
 # Wall configuration (set to None for no walls)
 WALLS = None

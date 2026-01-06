@@ -22,7 +22,7 @@ def run_payload_simulation(params):
     walls = params['walls']
 
     # Initialize particle positions, orientations, and velocities
-    positions = np.random.uniform((box_size/2)-5, (box_size/2)+5, (n_particles, 2))
+    positions = np.random.uniform((box_size/2)-1, (box_size/2)+1, (n_particles, 2))
     orientations = np.zeros((n_particles, 2))
     velocities = np.zeros((n_particles, 2))
 

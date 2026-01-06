@@ -269,7 +269,7 @@ def create_hollow_payload_animation(positions, orientations, velocities, payload
     scatter = ax.scatter(
         positions[0, :, 0],
         positions[0, :, 1],
-        s=np.pi * (params['particle_radius'] * 1)**2,  # Scaled up for visibility
+        s=np.pi * (params['particle_radius'] * 10)**2,  # Scaled up for visibility
         c=particle_colors,
         alpha=0.7,
         zorder=5  # Render particles on top of payload
