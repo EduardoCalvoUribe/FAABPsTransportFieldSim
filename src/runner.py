@@ -25,7 +25,22 @@ def run_payload_simulation(params):
 
     # Extract walls
     walls = params['walls']
-    
+
+    # Extract maze parameters
+    use_maze = params.get('use_maze_image', False)
+    if use_maze and params.get('maze_array') is not None:
+        maze_array = params['maze_array']
+        maze_grad_x = params['maze_grad_x']
+        maze_grad_y = params['maze_grad_y']
+        maze_stiffness = params['maze_stiffness']
+    else:
+        # Dummy arrays for numba compatibility
+        use_maze = False
+        maze_array = np.zeros((2, 2), dtype=np.float64)
+        maze_grad_x = np.zeros((2, 2), dtype=np.float64)
+        maze_grad_y = np.zeros((2, 2), dtype=np.float64)
+        maze_stiffness = 0.0
+
     # Extract curvity params
     max_curvity = params['max_curvity']
     min_curvity = params['min_curvity']
@@ -91,7 +106,8 @@ def run_payload_simulation(params):
             polarity, particle_scores, params['stiffness'],
             params['box_size'], params['payload_radius'], params['dt'], params['rot_diffusion'],
             n_particles, step, goal_position, particle_view_range, score_and_polarity_update_interval, walls,
-            params['directedness'], max_curvity, min_curvity, mid_curvity
+            params['directedness'], max_curvity, min_curvity, mid_curvity,
+            use_maze, maze_array, maze_grad_x, maze_grad_y, maze_stiffness
         )
 
         # Check if payload reached goal

@@ -11,13 +11,14 @@ import time
 
 def create_payload_animation(positions, orientations, velocities, payload_positions, params,
                             curvity_values, output_file='visualizations/payload_animation_00.mp4',
-                            show_vectors=False, polarity=None, particle_scores=None):
+                            show_vectors=False, polarity=None, particle_scores=None, maze_array=None):
     """Create an animation of the payload transport simulation.
 
     Args:
         show_vectors: If True, display the polarity vectors as arrows attached to particles
         polarity: Array of polarity vectors over time (n_frames, n_particles, 2)
         particle_scores: Array of particle scores over time (n_frames, n_particles). If provided, colors particles by score instead of curvity.
+        maze_array: 2D array of maze values (0=open, 1=wall). If provided, displays as background.
     """
 
     print("Creating animation...")
@@ -39,6 +40,20 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     ax.set_ylim(0, box_size)
     ax.set_title('FAABP Cooperative Transport Simulation')
     ax.grid(True, alpha=0.3)
+
+    # Draw maze background if provided
+    if maze_array is not None:
+        # Display maze: 0 (white/open) to 1 (black/wall)
+        # Use gray colormap, extent maps array to simulation coordinates
+        ax.imshow(
+            maze_array,
+            extent=[0, box_size, 0, box_size],
+            origin='lower',
+            cmap='Greys',
+            alpha=0.7,
+            vmin=0, vmax=1,
+            zorder=0  # Draw behind everything
+        )
 
     # Color mapping functions
     # STANDARD: Color mapping: curvity -1 (dark blue) -> 0 (gray) -> +1 (red)

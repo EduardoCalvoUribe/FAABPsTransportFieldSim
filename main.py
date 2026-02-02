@@ -5,6 +5,7 @@ import os
 from src.runner import run_payload_simulation
 from src.visualization import create_payload_animation
 from src.genes import crossover_and_mutate
+from src.maze_scan import load_maze_from_image, compute_maze_gradients
 
 
 #####################################################
@@ -16,15 +17,15 @@ RANDOM_SEED = 42
 
 # max_c=0.864, min_c=-1.000, mid_c=-0.482, rot_diff=0.1030
 # Simulation parameters
-N_PARTICLES = 200
-BOX_SIZE = 100
-N_STEPS = 40000
+N_PARTICLES = 300
+BOX_SIZE = 100 #500
+N_STEPS = 1000
 SAVE_INTERVAL = 10
 DT = 0.01
 
 # Particle parameters
 PARTICLE_RADIUS = 1.0
-PARTICLE_V0 = 50.417522              # Self-propulsion speed
+PARTICLE_V0 = 3.75 # 50.417522              # Self-propulsion speed
 PARTICLE_MOBILITY = 1.0
 ROTATIONAL_DIFFUSION = 0.172470 # 0.05     # Orientational noise
 
@@ -41,19 +42,26 @@ MID_CURVITY = -0.247238 # 0.5
 # Payload parameters
 PAYLOAD_RADIUS = 10
 PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
-PAYLOAD_START_POSITION = np.array([16.6, 16.6])
+PAYLOAD_START_POSITION = np.array([16.6, 16.6]) # np.array([475.0, 475.0]) # np.array([16.6, 16.6])
 
 # Force parameters
-STIFFNESS = 25.0
+STIFFNESS = 0.0 # 25.0
 
 # Goal parameters
-GOAL_POSITION = np.array([83.3, 83.3])  # Top-left corner
+GOAL_POSITION = np.array([75.0, 175.0]) # np.array([83.3, 83.3])
 PARTICLE_VIEW_RANGE = 0.2 * BOX_SIZE  # Range for goal detection
 SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
 DIRECTEDNESS = 1                    # 0 = pure vicsek alignment, 1 = pure gradient following
 END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
 
-# Wall configuration (set to None for no walls)
+# Maze image configuration (alternative to line walls)
+USE_MAZE_IMAGE = False               # If True, use maze image as force field instead of line walls
+MAZE_IMAGE_FILENAME = "ImageGenerator.png"     # Image file in /images folder
+MAZE_UPSCALE_FACTOR = 4             # Upscale image before blur for smoother gradients
+MAZE_BLUR_SIGMA = 2.0               # Gaussian blur sigma for maze (applied after upscale)
+MAZE_STIFFNESS = 100.0              # Force strength for maze walls
+
+# Wall configuration (set to None for no walls, ignored if USE_MAZE_IMAGE is True)
 # Example walls:
 WALLS = np.array([
     # Boundary walls
@@ -97,22 +105,24 @@ WALLS = np.array([
     # [0, 33.3, 66.6, 33.3],
     # [33.3, 66.6, 100.0, 66.3]
 ], dtype=np.float64)
+# WALLS = None
 
 
 # Visualization parameters
-SHOW_VECTORS = True              # Display v vectors as arrows
-COLOR_BY_SCORE = True           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "E:/PostThesis/visualizations/small_start.mp4"           # If None, uses timestamp. Otherwise specify path.
+SHOW_VECTORS = False              # Display v vectors as arrows
+COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
+OUTPUT_FILENAME = "C:/Users/educa/Videos/quicktest.mp4"
+# "D:/PostThesis/visualizations/quick_test_3.mp4"           # If None, uses timestamp. Otherwise specify path.
 
 # Data saving (set to True to save simulation data)
 SAVE_DATA = False
-DATA_OUTPUT_PATH = "E:/PostThesis/data/test.npz"                    # If None, uses timestamp. Otherwise specify path.
+DATA_OUTPUT_PATH = "D:/PostThesis/data/test.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 # Genetic algorithm parameters
 N_GENERATIONS = 16
 POPULATION_SIZE = 12
 MUTATION_PROBABILITY = 0.5
-OPTIMIZATION_RESULTS_FILE = "optimization_results_2.txt"
+OPTIMIZATION_RESULTS_FILE = "optimization_results_a.txt"
 
 
 #####################################################
@@ -339,11 +349,31 @@ if __name__ == "__main__":
         'rot_diffusion': np.ones(compile_n_particles) * ROTATIONAL_DIFFUSION,
         'max_curvity': MAX_CURVITY,
         'min_curvity': MIN_CURVITY,
-        'mid_curvity': MID_CURVITY
+        'mid_curvity': MID_CURVITY,
+        # Maze params (dummy for compilation)
+        'use_maze_image': False,
+        'maze_array': np.zeros((2, 2), dtype=np.float64),
+        'maze_grad_x': np.zeros((2, 2), dtype=np.float64),
+        'maze_grad_y': np.zeros((2, 2), dtype=np.float64),
+        'maze_stiffness': 0.0
     }
 
     run_payload_simulation(compile_params)
     print("JIT compilation complete.\n")
+
+    #####################################################
+    # LOAD MAZE IMAGE (if enabled)                      #
+    #####################################################
+
+    if USE_MAZE_IMAGE:
+        print("Loading maze image...")
+        maze_array = load_maze_from_image(MAZE_IMAGE_FILENAME, sigma=MAZE_BLUR_SIGMA, upscale_factor=MAZE_UPSCALE_FACTOR)
+        maze_grad_x, maze_grad_y = compute_maze_gradients(maze_array)
+        print(f"Maze loaded: {maze_array.shape}, values [{maze_array.min():.3f}, {maze_array.max():.3f}]")
+    else:
+        maze_array = None
+        maze_grad_x = None
+        maze_grad_y = None
 
     #####################################################
     # BUILD SIMULATION PARAMETERS                       #
@@ -370,6 +400,13 @@ if __name__ == "__main__":
 
         # Wall parameters
         'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),
+
+        # Maze parameters
+        'use_maze_image': USE_MAZE_IMAGE,
+        'maze_array': maze_array,
+        'maze_grad_x': maze_grad_x,
+        'maze_grad_y': maze_grad_y,
+        'maze_stiffness': MAZE_STIFFNESS,
 
         # Particle-specific parameters (arrays)
         'v0': np.ones(N_PARTICLES) * PARTICLE_V0,
@@ -429,9 +466,15 @@ if __name__ == "__main__":
         output_file=OUTPUT_FILENAME,
         show_vectors=SHOW_VECTORS,
         polarity=saved_polarity,
-        particle_scores=saved_particle_scores if COLOR_BY_SCORE else None
+        particle_scores=saved_particle_scores if COLOR_BY_SCORE else None,
+        maze_array=maze_array
     )
     
     print("Simulation and visualization completed successfully!")
 
     print("Genetic optimization completed successfully!")
+
+# if __name__ == "__main__":
+#     from src.maze_scan import load_maze_from_svg
+#     m = load_maze_from_svg('ImageGenerator.png')
+#     print(m.shape, m.min(), m.max())

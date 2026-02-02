@@ -69,7 +69,7 @@ def compute_all_forces(positions, payload_pos, radii, payload_radius, stiffness,
                                 positions[i], positions[j], radii[i], radii[j], stiffness, box_size
                             )
                     j = list_next[j] # Check create_cell_list() for more details
-
+    
     return particle_forces, payload_force
 
 @njit(fastmath=True)
@@ -477,16 +477,137 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
 
 
 @njit(fastmath=True)
+def compute_maze_force(pos_x, pos_y, maze_array, grad_x, grad_y, box_size, stiffness):
+    """Compute repulsive force from maze field at given position."""
+    height, width = maze_array.shape
+
+    # Map simulation coordinates to maze array indices
+    ix = pos_x / box_size * (width - 1)
+    iy = pos_y / box_size * (height - 1)
+
+    # Clamp to valid indices
+    ix = max(0.0, min(ix, width - 1.0))
+    iy = max(0.0, min(iy, height - 1.0))
+
+    # Get integer indices for sampling
+    ix0 = int(ix)
+    iy0 = int(iy)
+    ix1 = min(ix0 + 1, width - 1)
+    iy1 = min(iy0 + 1, height - 1)
+
+    # Bilinear interpolation weights
+    fx = ix - ix0
+    fy = iy - iy0
+
+    # Bilinearly interpolate maze value
+    maze_val = (
+        (1 - fx) * (1 - fy) * maze_array[iy0, ix0] +
+        fx * (1 - fy) * maze_array[iy0, ix1] +
+        (1 - fx) * fy * maze_array[iy1, ix0] +
+        fx * fy * maze_array[iy1, ix1]
+    )
+
+    # Bilinearly interpolate gradient
+    gx = (
+        (1 - fx) * (1 - fy) * grad_x[iy0, ix0] +
+        fx * (1 - fy) * grad_x[iy0, ix1] +
+        (1 - fx) * fy * grad_x[iy1, ix0] +
+        fx * fy * grad_x[iy1, ix1]
+    )
+    gy = (
+        (1 - fx) * (1 - fy) * grad_y[iy0, ix0] +
+        fx * (1 - fy) * grad_y[iy0, ix1] +
+        (1 - fx) * fy * grad_y[iy1, ix0] +
+        fx * fy * grad_y[iy1, ix1]
+    )
+
+    # Force = -gradient * maze_value * stiffness
+    force = np.zeros(2)
+    force[0] = -gx * maze_val * stiffness
+    force[1] = -gy * maze_val * stiffness
+
+    return force
+
+
+@njit(fastmath=True)
+def compute_maze_force_with_radius(pos_x, pos_y, radius, maze_array, grad_x, grad_y, box_size, stiffness, n_samples=16):
+    """Compute repulsive force from maze field, accounting for object radius.
+
+    Samples multiple points around the circumference and returns the force
+    with maximum magnitude. This ensures that objects with non-zero radius
+    are properly pushed away from walls when their edge (not just center)
+    overlaps with the maze walls.
+
+    Args:
+        pos_x, pos_y: Center position of the object
+        radius: Radius of the object
+        maze_array: 2D array of maze values (0=empty, 1=wall)
+        grad_x, grad_y: Gradient arrays of the maze
+        box_size: Simulation box size
+        stiffness: Force stiffness
+        n_samples: Number of points to sample around circumference
+
+    Returns:
+        force: np.ndarray [fx, fy], force with maximum magnitude from all samples
+    """
+    max_force = np.zeros(2)
+    max_force_magnitude = 0.0
+
+    # First check center point
+    center_force = compute_maze_force(pos_x, pos_y, maze_array, grad_x, grad_y, box_size, stiffness)
+    center_magnitude = np.sqrt(center_force[0]**2 + center_force[1]**2)
+    if center_magnitude > max_force_magnitude:
+        max_force_magnitude = center_magnitude
+        max_force[0] = center_force[0]
+        max_force[1] = center_force[1]
+
+    # Sample points around circumference
+    for i in range(n_samples):
+        angle = 2.0 * np.pi * i / n_samples
+        sample_x = pos_x + radius * np.cos(angle)
+        sample_y = pos_y + radius * np.sin(angle)
+
+        # Compute force at this sample point
+        force = compute_maze_force(sample_x, sample_y, maze_array, grad_x, grad_y, box_size, stiffness)
+
+        # Check if this force has greater magnitude
+        magnitude = np.sqrt(force[0]**2 + force[1]**2)
+        if magnitude > max_force_magnitude:
+            max_force_magnitude = magnitude
+            max_force[0] = force[0]
+            max_force[1] = force[1]
+
+    return max_force
+
+
+@njit(fastmath=True)
 def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel,
                          radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
-                         step, goal_position, particle_view_range, score_and_polarity_update_interval, walls, directedness, 
-                         max_curvity, min_curvity, mid_curvity):
+                         step, goal_position, particle_view_range, score_and_polarity_update_interval, walls, directedness,
+                         max_curvity, min_curvity, mid_curvity,
+                         use_maze, maze_array, maze_grad_x, maze_grad_y, maze_stiffness):
     """Simulate a single time step"""
     # Compute forces on particles and payload
     particle_forces, payload_force = compute_all_forces(
         positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls
     )
+
+    # Add maze forces if enabled
+    if use_maze:
+        for i in range(n_particles):
+            maze_force = compute_maze_force(
+                positions[i, 0], positions[i, 1],
+                maze_array, maze_grad_x, maze_grad_y, box_size, maze_stiffness
+            )
+            particle_forces[i] += maze_force
+
+        # Apply maze force to payload (accounting for payload radius)
+        payload_maze_force = compute_maze_force_with_radius(
+            payload_pos[0], payload_pos[1], payload_radius,
+            maze_array, maze_grad_x, maze_grad_y, box_size, maze_stiffness
+        )
+        payload_force += payload_maze_force
 
     # Update polarity vectors and scores based on goal (at update interval)
     if step % score_and_polarity_update_interval == 0:
