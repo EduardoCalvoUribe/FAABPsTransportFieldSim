@@ -131,9 +131,10 @@ def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion,
 
 @njit(fastmath=True)
 def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel,
-                         radii, v0s, mobilities, payload_mobility, curvity,
+                         payload_orientation, radii, v0s, mobilities, payload_mobility,
+                         payload_v0, payload_rot_diffusion, curvity,
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles, walls):
-    """Simulate a single time step with fixed curvity values"""
+    """Simulate a single time step with fixed curvity values and active payload (curvity=0)"""
     # Compute forces on particles and payload
     particle_forces, payload_force = compute_all_forces(
         positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls
@@ -158,12 +159,28 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
         # Update position
         positions[i] += velocities[i] * dt
 
-    # Update payload
-    payload_vel = payload_mobility * payload_force
+    # Update payload orientation (active Brownian particle with curvity=0: no torque, only rotational diffusion)
+    orientation_change = np.zeros(2)
+    if payload_rot_diffusion > 0:
+        noise_magnitude = np.sqrt(2 * payload_rot_diffusion * dt)
+        noise_x = np.random.normal(0, noise_magnitude)
+        noise_y = np.random.normal(0, noise_magnitude)
+        noise_vector = np.array([noise_x, noise_y])
+        # Project noise perpendicular to orientation
+        noise_dot_n = noise_vector[0] * payload_orientation[0] + noise_vector[1] * payload_orientation[1]
+        noise_perp = np.array([
+            noise_vector[0] - noise_dot_n * payload_orientation[0],
+            noise_vector[1] - noise_dot_n * payload_orientation[1]
+        ])
+        orientation_change += noise_perp
+    payload_orientation = normalize(payload_orientation + orientation_change)
+
+    # Update payload velocity: active self-propulsion + force-induced motion
+    payload_vel = payload_v0 * payload_orientation + payload_mobility * payload_force
     payload_pos += payload_vel * dt
 
     # Apply periodic boundary conditions
     positions = positions % box_size
     payload_pos = payload_pos % box_size
 
-    return positions, orientations, velocities, payload_pos, payload_vel
+    return positions, orientations, velocities, payload_pos, payload_vel, payload_orientation

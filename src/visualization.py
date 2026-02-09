@@ -11,8 +11,8 @@ from .circles import parametric_curve
 # Animation and visualization functions             #
 #####################################################
 
-def create_payload_animation(positions, orientations, velocities, payload_positions, params,
-                            curvity_values, output_file='visualizations/payload_animation_00.mp4',
+def create_payload_animation(positions, orientations, velocities, payload_positions, payload_orientations,
+                            params, curvity_values, output_file='visualizations/payload_animation_00.mp4',
                             color_neg1=(1.0, 0.0, 0.0), color_0=(0.5, 0.5, 0.5), color_pos1=(0.0, 0.0, 1.0)):
     """Create an animation of the payload transport simulation.
 
@@ -71,7 +71,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     scatter = ax.scatter(
         positions[0, :, 0],
         positions[0, :, 1],
-        s=np.pi * (params['particle_radius'] * 2)**2,  # Area of circle
+        s=np.pi * (params['particle_radius'] * 6)**2,  # Area of circle
         c=particle_colors,
         alpha=0.7
     )
@@ -84,6 +84,14 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         alpha=0.7
     )
     ax.add_patch(payload)
+
+    # Create payload orientation arrow
+    arrow_length = payload_radius * 0.8
+    payload_arrow, = ax.plot(
+        [payload_positions[0, 0], payload_positions[0, 0] + arrow_length * payload_orientations[0, 0]],
+        [payload_positions[0, 1], payload_positions[0, 1] + arrow_length * payload_orientations[0, 1]],
+        color='black', linewidth=2, zorder=6
+    )
 
     # Draw walls
     wall_lines = []
@@ -133,7 +141,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
 
     def init():
         """Initialize the animation."""
-        artists = [scatter, payload, trajectory, time_text, params_text, params_text_2]
+        artists = [scatter, payload, payload_arrow, trajectory, time_text, params_text, params_text_2]
         # Add wall lines (they don't change, but include for completeness)
         artists.extend(wall_lines)
         return artists
@@ -150,6 +158,11 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         # Update payload
         payload.center = (payload_positions[frame, 0], payload_positions[frame, 1])
 
+        # Update payload orientation arrow
+        px, py = payload_positions[frame, 0], payload_positions[frame, 1]
+        ox, oy = payload_orientations[frame, 0], payload_orientations[frame, 1]
+        payload_arrow.set_data([px, px + arrow_length * ox], [py, py + arrow_length * oy])
+
         # Update payload trajectory
         trajectory_end = min(frame + 1, len(payload_positions))
         trajectory.set_data(
@@ -162,7 +175,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         # Color by curvity
         scatter.set_color([get_particle_color_based_on_curvity(cv) for cv in curvity_values[frame]])
 
-        artists = [scatter, payload, trajectory, time_text]
+        artists = [scatter, payload, payload_arrow, trajectory, time_text]
         return artists
 
     # Create animation

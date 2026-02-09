@@ -43,31 +43,29 @@ RANDOM_SEED = 42
 # }
 
 CURVITY_DISTRIBUTION = {
-    0: 200,
-    0.25: 200,
-    0.5: 200,
-    0.75: 200,
-    1: 200,
+    -0.5: 500,
 }
 
 # Total particles = sum of all counts
 N_PARTICLES = sum(CURVITY_DISTRIBUTION.values())
 
-BOX_SIZE = 300
-N_STEPS = 20000
+BOX_SIZE = 100
+N_STEPS = 10000
 SAVE_INTERVAL = 10
 DT = 0.01
 
 # Particle parameters
 PARTICLE_RADIUS = 1.0
-PARTICLE_V0 = 3.75              # Self-propulsion speed
+PARTICLE_V0 = 0.375              # Self-propulsion speed
 PARTICLE_MOBILITY = 1.0
-ROTATIONAL_DIFFUSION = 0 #0.05     # Orientational noise
+ROTATIONAL_DIFFUSION = 0.005 #0.05     # Orientational noise
 
 # Payload parameters
-PAYLOAD_RADIUS = 20
+PAYLOAD_RADIUS = 10
 PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
-PAYLOAD_START_POSITION = np.array([BOX_SIZE/2, 5 * BOX_SIZE/6])
+PAYLOAD_V0 = 0.6 # 0.375                      # Payload self-propulsion speed
+PAYLOAD_ROT_DIFFUSION = 0.005              # Payload rotational diffusion
+PAYLOAD_START_POSITION = np.array([BOX_SIZE/2, BOX_SIZE/2])
 
 # Force parameters
 STIFFNESS = 25.0
@@ -79,30 +77,12 @@ STIFFNESS = 25.0
 #   - c = ±1: semicircle
 # To use standard curvature K=1/R, use the K_to_c() helper function:
 #   - Example: [x1, y1, x2, y2, K_to_c(x1, y1, x2, y2, K=1/50)]
-WALLS = np.array([
-    # Boundary walls (straight, c=0)
-    [0, 0, 0, BOX_SIZE, 0],
-    [0, 0, BOX_SIZE, 0, 0],
-    [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE, 0],
-    [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0, 0],
-    # Inverted Y shape walls (straight, c=0)
-    # [2 * BOX_SIZE/6, BOX_SIZE, 4 * BOX_SIZE/6, BOX_SIZE, 0], #top wall
-    [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 2.2 * BOX_SIZE/6, BOX_SIZE, 0], #top left
-    [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, 3.8 * BOX_SIZE/6, BOX_SIZE, 0], #top right
-    [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 0, 4 * BOX_SIZE/7, 0], # left shoulder
-    [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, BOX_SIZE, 4 * BOX_SIZE/7, 0], # right shoulder
-    # [0, 4 * BOX_SIZE/7, 0, 0, 0], #bot left
-    # [BOX_SIZE, 4*BOX_SIZE/7, BOX_SIZE, 0, 0], #bot right
-    # [0, 0, BOX_SIZE, 0, 0], #bot
-    [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 2 * BOX_SIZE/7, 0, 0], #inner left
-    [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 0], #inner top
-    [5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 0, 0], #inner right
-], dtype=np.float64)
-# circle:
+# circle
 WALLS = np.array([
     [BOX_SIZE/4, BOX_SIZE/2, 3*BOX_SIZE/4, BOX_SIZE/2, 1],
     [BOX_SIZE/4, BOX_SIZE/2, 3*BOX_SIZE/4, BOX_SIZE/2, -1],
 ])
+WALLS = None
 
 # Example using K (standard curvature):
 # R = 100  # radius
@@ -116,12 +96,12 @@ WALLS = np.array([
 
 
 # Visualization parameters
-OUTPUT_FILENAME = "E:/PostThesis/visualizations/env_wall_test.mp4"           # If None, uses timestamp. Otherwise specify path.
+OUTPUT_FILENAME = "D:/PostThesis/visualizations/activepayload2.mp4"           # If None, uses timestamp. Otherwise specify path.
 # OUTPUT_FILENAME = "C:/Users/educa/Videos/ye/test.mp4"
 
 # Data saving (set to True to save simulation data)
 SAVE_DATA = False
-DATA_OUTPUT_PATH = "E:/PostThesis/data/env_wall_test.npz"                    # If None, uses timestamp. Otherwise specify path.
+DATA_OUTPUT_PATH = "D:/PostThesis/data/env_wall_test.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 
 #####################
@@ -154,6 +134,8 @@ if __name__ == "__main__":
         'save_interval': SAVE_INTERVAL,
         'payload_radius': PAYLOAD_RADIUS,
         'payload_mobility': PAYLOAD_MOBILITY,
+        'payload_v0': PAYLOAD_V0,
+        'payload_rot_diffusion': PAYLOAD_ROT_DIFFUSION,
         'payload_position': PAYLOAD_START_POSITION,
         'stiffness': STIFFNESS,
         'walls': WALLS if WALLS is not None else np.zeros((0, 5), dtype=np.float64),
@@ -186,6 +168,8 @@ if __name__ == "__main__":
         'save_interval': SAVE_INTERVAL,
         'payload_radius': PAYLOAD_RADIUS,
         'payload_mobility': PAYLOAD_MOBILITY,
+        'payload_v0': PAYLOAD_V0,
+        'payload_rot_diffusion': PAYLOAD_ROT_DIFFUSION,
         'payload_position': PAYLOAD_START_POSITION,
         'stiffness': STIFFNESS,
 
@@ -205,7 +189,7 @@ if __name__ == "__main__":
     #####################################################
 
     positions, orientations, velocities, payload_positions, payload_velocities, \
-    curvity_values, runtime = run_payload_simulation(params)
+    payload_orientations, curvity_values, runtime = run_payload_simulation(params)
 
     #####################################################
     # SAVE DATA (optional)                              #
@@ -222,7 +206,7 @@ if __name__ == "__main__":
         save_simulation_data(
             data_file,
             positions, orientations, velocities, payload_positions, payload_velocities,
-            params, curvity_values
+            payload_orientations, params, curvity_values
         )
 
     #####################################################
@@ -238,8 +222,8 @@ if __name__ == "__main__":
 
     # Create animation
     create_payload_animation(
-        positions, orientations, velocities, payload_positions, params,
-        curvity_values, output_file
+        positions, orientations, velocities, payload_positions, payload_orientations,
+        params, curvity_values, output_file
     )
 
     print("\nPayload simulation and animation completed successfully!")

@@ -24,10 +24,13 @@ class TestIntegration:
         velocities = np.zeros((n_particles, 2))
         payload_pos = np.array([50.0, 50.0])
         payload_vel = np.zeros(2)
+        payload_orientation = np.array([1.0, 0.0])
         radii = np.ones(n_particles) * 1.0
         v0s = np.ones(n_particles) * 3.0
         mobilities = np.ones(n_particles) * 1.0
         payload_mobility = 0.1
+        payload_v0 = 1.0
+        payload_rot_diffusion = 0.0
         curvity = np.array([1.0, -1.0, 0.0])  # Static curvity values
         stiffness = 10.0
         payload_radius = 5.0
@@ -35,9 +38,9 @@ class TestIntegration:
         rot_diffusion = np.zeros(n_particles)
         walls = np.zeros((0, 4))
 
-        new_positions, new_orientations, new_velocities, new_payload_pos, new_payload_vel = simulate_single_step(
-            positions, orientations, velocities, payload_pos, payload_vel,
-            radii, v0s, mobilities, payload_mobility, curvity,
+        new_positions, new_orientations, new_velocities, new_payload_pos, new_payload_vel, new_payload_orientation = simulate_single_step(
+            positions, orientations, velocities, payload_pos, payload_vel, payload_orientation,
+            radii, v0s, mobilities, payload_mobility, payload_v0, payload_rot_diffusion, curvity,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles, walls
         )
 
@@ -47,6 +50,7 @@ class TestIntegration:
         assert new_velocities.shape == (n_particles, 2)
         assert new_payload_pos.shape == (2,)
         assert new_payload_vel.shape == (2,)
+        assert new_payload_orientation.shape == (2,)
 
         # Check that positions are within box (periodic boundaries)
         assert np.all(new_positions >= 0)
@@ -71,10 +75,13 @@ class TestIntegration:
         velocities = np.zeros((n_particles, 2))
         payload_pos = np.array([25.0, 25.0])
         payload_vel = np.zeros(2)
+        payload_orientation = np.array([0.0, 1.0])
         radii = np.ones(n_particles) * 1.0
         v0s = np.ones(n_particles) * 3.0
         mobilities = np.ones(n_particles) * 1.0
         payload_mobility = 0.1
+        payload_v0 = 1.0
+        payload_rot_diffusion = 0.0
         curvity = np.array([1.0, -1.0, 0.0, 1.0, -1.0])  # Static curvity values
         stiffness = 10.0
         payload_radius = 5.0
@@ -87,9 +94,9 @@ class TestIntegration:
             [40, 10, 10, 10]
         ])
 
-        new_positions, new_orientations, new_velocities, new_payload_pos, new_payload_vel = simulate_single_step(
-            positions, orientations, velocities, payload_pos, payload_vel,
-            radii, v0s, mobilities, payload_mobility, curvity,
+        new_positions, new_orientations, new_velocities, new_payload_pos, new_payload_vel, new_payload_orientation = simulate_single_step(
+            positions, orientations, velocities, payload_pos, payload_vel, payload_orientation,
+            radii, v0s, mobilities, payload_mobility, payload_v0, payload_rot_diffusion, curvity,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles, walls
         )
 
@@ -113,10 +120,13 @@ class TestIntegration:
         velocities = np.zeros((n_particles, 2))
         payload_pos = np.array([50.0, 50.0])
         payload_vel = np.zeros(2)
+        payload_orientation = np.array([1.0, 0.0])
         radii = np.ones(n_particles) * 1.0
         v0s = np.ones(n_particles) * 10.0  # High velocity
         mobilities = np.ones(n_particles) * 1.0
         payload_mobility = 0.1
+        payload_v0 = 1.0
+        payload_rot_diffusion = 0.0
         curvity = np.array([1.0])
         stiffness = 10.0
         payload_radius = 5.0
@@ -124,9 +134,9 @@ class TestIntegration:
         rot_diffusion = np.zeros(n_particles)
         walls = np.zeros((0, 4))
 
-        new_positions, _, _, _, _ = simulate_single_step(
-            positions, orientations, velocities, payload_pos, payload_vel,
-            radii, v0s, mobilities, payload_mobility, curvity,
+        new_positions, _, _, _, _, _ = simulate_single_step(
+            positions, orientations, velocities, payload_pos, payload_vel, payload_orientation,
+            radii, v0s, mobilities, payload_mobility, payload_v0, payload_rot_diffusion, curvity,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles, walls
         )
 
