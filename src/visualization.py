@@ -13,6 +13,7 @@ from .circles import parametric_curve
 
 def create_payload_animation(positions, orientations, velocities, payload_positions, payload_orientations,
                             params, curvity_values, output_file='visualizations/payload_animation_00.mp4',
+                            payload_velocities=None,
                             color_neg1=(1.0, 0.0, 0.0), color_0=(0.5, 0.5, 0.5), color_pos1=(0.0, 0.0, 1.0)):
     """Create an animation of the payload transport simulation.
 
@@ -135,13 +136,27 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     params_text_2 = ax.text(-0.02, -0.093, f'orientational noise: {params["rot_diffusion"][0]}, particle mobility: {params["mobility"][0]}, payload mobility: {params["payload_mobility"]}', transform=ax.transAxes, fontsize=12,
                         verticalalignment='top')
 
+    # Compute payload speed from velocities (or from positions as fallback)
+    if payload_velocities is not None:
+        payload_speed = np.linalg.norm(payload_velocities, axis=1)
+    else:
+        # Estimate from consecutive positions
+        dt_save = params['dt'] * params['save_interval']
+        diffs = np.diff(payload_positions, axis=0)
+        speed_from_pos = np.linalg.norm(diffs, axis=1) / dt_save
+        payload_speed = np.concatenate(([0.0], speed_from_pos))
+
     # Add time counter
     time_text = ax.text(0.02, 0.98, 'Frame: 0', transform=ax.transAxes, fontsize=12,
                         verticalalignment='top')
 
+    # Add payload speed text
+    speed_text = ax.text(0.02, 0.94, f'Payload speed: {payload_speed[0]:.4f}', transform=ax.transAxes, fontsize=12,
+                        verticalalignment='top')
+
     def init():
         """Initialize the animation."""
-        artists = [scatter, payload, payload_arrow, trajectory, time_text, params_text, params_text_2]
+        artists = [scatter, payload, payload_arrow, trajectory, time_text, speed_text, params_text, params_text_2]
         # Add wall lines (they don't change, but include for completeness)
         artists.extend(wall_lines)
         return artists
@@ -150,6 +165,9 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         """Update the animation for each frame."""
         # Update time counter
         time_text.set_text(f'Frame: {frame}')
+
+        # Update payload speed
+        speed_text.set_text(f'Payload speed: {payload_speed[frame]:.4f}')
 
         # Report progress periodically
         if frame % 50 == 0:
@@ -175,7 +193,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         # Color by curvity
         scatter.set_color([get_particle_color_based_on_curvity(cv) for cv in curvity_values[frame]])
 
-        artists = [scatter, payload, payload_arrow, trajectory, time_text]
+        artists = [scatter, payload, payload_arrow, trajectory, time_text, speed_text]
         return artists
 
     # Create animation

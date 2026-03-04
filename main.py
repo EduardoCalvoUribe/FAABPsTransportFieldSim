@@ -43,28 +43,28 @@ RANDOM_SEED = 42
 # }
 
 CURVITY_DISTRIBUTION = {
-    -0.5: 500,
+    -0.3: 300,
 }
 
 # Total particles = sum of all counts
 N_PARTICLES = sum(CURVITY_DISTRIBUTION.values())
 
 BOX_SIZE = 100
-N_STEPS = 10000
+N_STEPS = 2000
 SAVE_INTERVAL = 10
 DT = 0.01
 
 # Particle parameters
 PARTICLE_RADIUS = 1.0
-PARTICLE_V0 = 0.375              # Self-propulsion speed
+PARTICLE_V0 = 1.0              # Self-propulsion speed
 PARTICLE_MOBILITY = 1.0
-ROTATIONAL_DIFFUSION = 0.005 #0.05     # Orientational noise
+ROTATIONAL_DIFFUSION = 0.05 #0.05     # Orientational noise
 
 # Payload parameters
 PAYLOAD_RADIUS = 10
 PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
-PAYLOAD_V0 = 0.6 # 0.375                      # Payload self-propulsion speed
-PAYLOAD_ROT_DIFFUSION = 0.005              # Payload rotational diffusion
+PAYLOAD_V0 = 0.0 # 0.6 # 0.375                      # Payload self-propulsion speed
+PAYLOAD_ROT_DIFFUSION = 0.0 #0.005              # Payload rotational diffusion
 PAYLOAD_START_POSITION = np.array([BOX_SIZE/2, BOX_SIZE/2])
 
 # Force parameters
@@ -223,7 +223,7 @@ if __name__ == "__main__":
     # Create animation
     create_payload_animation(
         positions, orientations, velocities, payload_positions, payload_orientations,
-        params, curvity_values, output_file
+        params, curvity_values, output_file, payload_velocities=payload_velocities
     )
 
     print("\nPayload simulation and animation completed successfully!")
