@@ -16,21 +16,21 @@ RANDOM_SEED = 42
 
 # max_c=0.864, min_c=-1.000, mid_c=-0.482, rot_diff=0.1030
 # Simulation parameters
-N_PARTICLES = 200
-BOX_SIZE = 100
-N_STEPS = 40000
+N_PARTICLES = 600
+BOX_SIZE = 300
+N_STEPS = 100000
 SAVE_INTERVAL = 10
 DT = 0.01
 
 # Particle parameters
 PARTICLE_RADIUS = 1.0
-PARTICLE_V0 = 50.417522              # Self-propulsion speed
+PARTICLE_V0 = 5.0              # Self-propulsion speed
 PARTICLE_MOBILITY = 1.0
-ROTATIONAL_DIFFUSION = 0.172470 # 0.05     # Orientational noise
+ROTATIONAL_DIFFUSION = 0.2 #0.05 #0.172470     # Orientational noise
 
-MAX_CURVITY = 0.139627
-MIN_CURVITY = -0.847266
-MID_CURVITY = -0.247238 # 0.5
+MAX_CURVITY = 0.5 #0.139627 #1
+MIN_CURVITY = -1.0 #-0.847266 #-1
+MID_CURVITY = -0.247238 #0
 
 #   max_curvity:          0.139627
 #   min_curvity:          -0.847266
@@ -39,19 +39,21 @@ MID_CURVITY = -0.247238 # 0.5
 #   v0:                   50.417522
 
 # Payload parameters
-PAYLOAD_RADIUS = 10
+PAYLOAD_RADIUS = 20
 PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
-PAYLOAD_START_POSITION = np.array([16.6, 16.6])
+PAYLOAD_START_POSITION = np.array([50.0, 40.0])
 
 # Force parameters
 STIFFNESS = 25.0
 
 # Goal parameters
-GOAL_POSITION = np.array([83.3, 83.3])  # Top-left corner
-PARTICLE_VIEW_RANGE = 0.2 * BOX_SIZE  # Range for goal detection
+GOAL_POSITION = np.array([150.0, 280.0]) # np.array([83.3, 83.3])  # Top-left corner
+PARTICLE_VIEW_RANGE = 0.2 * BOX_SIZE * (1/1.414213)  # Range for goal detection
 SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
 DIRECTEDNESS = 1                    # 0 = pure vicsek alignment, 1 = pure gradient following
 END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
+POLARITY_NUDGE_INTERVAL = 5        # Every N steps, nudge heading toward polarity
+POLARITY_NUDGE_STRENGTH = 0.01       # Angular nudge magnitude (radians)
 
 # Wall configuration (set to None for no walls)
 # Example walls:
@@ -68,51 +70,51 @@ WALLS = np.array([
     [BOX_SIZE*0.75, BOX_SIZE, BOX_SIZE*0.75, BOX_SIZE*0.45], # top right wall
 ], dtype=np.float64)
 # WALLS = None
-WALLS = np.array([
-    # Boundary walls
-    [0, 0, 0, BOX_SIZE],
-    [0, 0, BOX_SIZE, 0],
-    [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
-    [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
-    # Inverted Y shape walls
-    # [2 * BOX_SIZE/6, BOX_SIZE, 4 * BOX_SIZE/6, BOX_SIZE], #top wall
-    [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 2.2 * BOX_SIZE/6, BOX_SIZE], #top left
-    [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, 3.8 * BOX_SIZE/6, BOX_SIZE], #top right
-    [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 0, 4 * BOX_SIZE/7], # left shoulder
-    [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, BOX_SIZE, 4 * BOX_SIZE/7], # right shoulder
-    # [0, 4 * BOX_SIZE/7, 0, 0], #bot left
-    # [BOX_SIZE, 4*BOX_SIZE/7, BOX_SIZE, 0], #bot right
-    # [0, 0, BOX_SIZE, 0], #bot
-    [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 2 * BOX_SIZE/7, 0], #inner left
-    [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7], #inner top
-    [5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 0], #inner right
-], dtype=np.float64)
-WALLS = np.array([
-    # Boundary walls
-    [0, 0, 0, BOX_SIZE],
-    [0, 0, BOX_SIZE, 0],
-    [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
-    [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
-    # walls inside
-    # [0, 33.3, 66.6, 33.3],
-    # [33.3, 66.6, 100.0, 66.3]
-], dtype=np.float64)
+# WALLS = np.array([
+#     # Boundary walls
+#     [0, 0, 0, BOX_SIZE],
+#     [0, 0, BOX_SIZE, 0],
+#     [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
+#     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
+#     # Inverted Y shape walls
+#     # [2 * BOX_SIZE/6, BOX_SIZE, 4 * BOX_SIZE/6, BOX_SIZE], #top wall
+#     [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 2.2 * BOX_SIZE/6, BOX_SIZE], #top left
+#     [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, 3.8 * BOX_SIZE/6, BOX_SIZE], #top right
+#     [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 0, 4 * BOX_SIZE/7], # left shoulder
+#     [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, BOX_SIZE, 4 * BOX_SIZE/7], # right shoulder
+#     # [0, 4 * BOX_SIZE/7, 0, 0], #bot left
+#     # [BOX_SIZE, 4*BOX_SIZE/7, BOX_SIZE, 0], #bot right
+#     # [0, 0, BOX_SIZE, 0], #bot
+#     [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 2 * BOX_SIZE/7, 0], #inner left
+#     [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7], #inner top
+#     [5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 0], #inner right
+# ], dtype=np.float64)
+# WALLS = np.array([
+#     # Boundary walls
+#     [0, 0, 0, BOX_SIZE],
+#     [0, 0, BOX_SIZE, 0],
+#     [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
+#     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
+#     # walls inside
+#     # [0, 33.3, 66.6, 33.3],
+#     # [33.3, 66.6, 100.0, 66.3]
+# ], dtype=np.float64)
 
 
 # Visualization parameters
 SHOW_VECTORS = True              # Display v vectors as arrows
-COLOR_BY_SCORE = True           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "E:/PostThesis/visualizations/small_start.mp4"           # If None, uses timestamp. Otherwise specify path.
-
+COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
+OUTPUT_FILENAME = "D:/PostThesis/visualizations/test5_5.mp4"           # If None, uses timestamp. Otherwise specify path.
+# OUTPUT_FILENAME = "c:/Users/educa/Downloads/test2.mp4"
 # Data saving (set to True to save simulation data)
 SAVE_DATA = False
-DATA_OUTPUT_PATH = "E:/PostThesis/data/test.npz"                    # If None, uses timestamp. Otherwise specify path.
+DATA_OUTPUT_PATH = "D:/PostThesis/data/test.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 # Genetic algorithm parameters
 N_GENERATIONS = 16
 POPULATION_SIZE = 12
 MUTATION_PROBABILITY = 0.5
-OPTIMIZATION_RESULTS_FILE = "optimization_results_2.txt"
+OPTIMIZATION_RESULTS_FILE = "test.txt"
 
 
 #####################################################
@@ -331,6 +333,8 @@ if __name__ == "__main__":
         'score_and_polarity_update_interval': SCORE_AND_POLARITY_UPDATE_INTERVAL,
         'directedness': DIRECTEDNESS,
         'end_when_goal_reached': END_WHEN_GOAL_REACHED,
+        'polarity_nudge_interval': POLARITY_NUDGE_INTERVAL,
+        'polarity_nudge_strength': POLARITY_NUDGE_STRENGTH,
         'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),
         'v0': np.ones(compile_n_particles) * PARTICLE_V0,
         'curvity': np.zeros(compile_n_particles),
@@ -367,6 +371,8 @@ if __name__ == "__main__":
         'score_and_polarity_update_interval': SCORE_AND_POLARITY_UPDATE_INTERVAL,
         'directedness': DIRECTEDNESS,
         'end_when_goal_reached': END_WHEN_GOAL_REACHED,
+        'polarity_nudge_interval': POLARITY_NUDGE_INTERVAL,
+        'polarity_nudge_strength': POLARITY_NUDGE_STRENGTH,
 
         # Wall parameters
         'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),

@@ -31,6 +31,10 @@ def run_payload_simulation(params):
     min_curvity = params['min_curvity']
     mid_curvity = params['mid_curvity']
 
+    # Extract polarity nudge params
+    polarity_nudge_interval = params['polarity_nudge_interval']
+    polarity_nudge_strength = params['polarity_nudge_strength']
+
     # Initialize particle positions, orientations, and velocities
     positions = np.random.uniform(0, box_size, (n_particles, 2))
     orientations = np.zeros((n_particles, 2))
@@ -91,7 +95,8 @@ def run_payload_simulation(params):
             polarity, particle_scores, params['stiffness'],
             params['box_size'], params['payload_radius'], params['dt'], params['rot_diffusion'],
             n_particles, step, goal_position, particle_view_range, score_and_polarity_update_interval, walls,
-            params['directedness'], max_curvity, min_curvity, mid_curvity
+            params['directedness'], max_curvity, min_curvity, mid_curvity,
+            polarity_nudge_interval, polarity_nudge_strength
         )
 
         # Check if payload reached goal

@@ -42,33 +42,36 @@ def compute_all_forces(positions, payload_pos, radii, payload_radius, stiffness,
     payload_wall_force = compute_wall_forces(payload_pos, payload_radius, walls, stiffness)
     payload_force += payload_wall_force
 
+    # NON-INTERACTING
     # Compute forces between particles using cell list (now O(N))
     # For each particle
-    for i in range(n_particles):
-        # Find which cell it belongs to
-        cell_x = int(positions[i, 0] / cell_size)
-        cell_y = int(positions[i, 1] / cell_size)
+    # for i in range(n_particles):
+    #     # Find which cell it belongs to
+    #     cell_x = int(positions[i, 0] / cell_size)
+    #     cell_y = int(positions[i, 1] / cell_size)
 
-        # Check neighboring cells (including own cell)
-        for dx in range(-1, 2):  # -1, 0, 1
-            for dy in range(-1, 2):  # -1, 0, 1
-                # Get neighboring cell (periodic boundaries)
-                neigh_x = (cell_x + dx) % n_cells
-                neigh_y = (cell_y + dy) % n_cells
-                # neigh_cell_id = neigh_y * n_cells + neigh_x  #in case you use row-major ordering
+    #     # Check neighboring cells (including own cell)
+    #     for dx in range(-1, 2):  # -1, 0, 1
+    #         for dy in range(-1, 2):  # -1, 0, 1
+    #             # Get neighboring cell (periodic boundaries)
+    #             neigh_x = (cell_x + dx) % n_cells
+    #             neigh_y = (cell_y + dy) % n_cells
+    #             # neigh_cell_id = neigh_y * n_cells + neigh_x  #in case you use row-major ordering
 
-                # Get the first particle in the neighboring cell
-                j = head[neigh_x, neigh_y] # head[neigh_cell_id]
+    #             # Get the first particle in the neighboring cell
+    #             j = head[neigh_x, neigh_y] # head[neigh_cell_id]
 
-                # Looping through all particles in this cell
-                while j != -1:
-                    if i != j:
-                        # Only compute forces if particles are not separated by a wall (periodic shortest path)
-                        if not particles_separated_by_wall_periodic(positions[i], positions[j], walls, box_size):
-                            particle_forces[i] += compute_repulsive_force(
-                                positions[i], positions[j], radii[i], radii[j], stiffness, box_size
-                            )
-                    j = list_next[j] # Check create_cell_list() for more details
+    #             # Looping through all particles in this cell
+    #             while j != -1:
+    #                 if i != j:
+    #                     # Only compute forces if particles are not separated by a wall (periodic shortest path)
+    #                     if not particles_separated_by_wall_periodic(positions[i], positions[j], walls, box_size):
+    #                         particle_forces[i] += compute_repulsive_force(
+    #                             positions[i], positions[j], radii[i], radii[j], stiffness, box_size
+    #                         )
+    #                 j = list_next[j] # Check create_cell_list() for more details
+
+
 
     return particle_forces, payload_force
 
@@ -125,6 +128,54 @@ def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion,
 
     return new_orientations
 
+
+
+@njit(fastmath=True)
+def nudge_orientations_toward_polarity(orientations, polarity, nudge_strength, n_particles):
+    """Angularly nudge each particle's orientation toward its polarity vector.
+
+    If angle between orientation and polarity <= 90° (dot >= 0): nudge toward polarity.
+    If angle > 90° (dot < 0): nudge toward -polarity instead.
+
+    The nudge rotates the orientation by exactly nudge_strength radians toward the target.
+    """
+    new_orientations = np.zeros_like(orientations)
+
+    for i in range(n_particles):
+        e_x = orientations[i, 0]
+        e_y = orientations[i, 1]
+
+        dot = e_x * polarity[i, 0] + e_y * polarity[i, 1]
+
+        # Choose target direction based on alignment
+        if dot >= 0:
+            t_x = polarity[i, 0]
+            t_y = polarity[i, 1]
+        else:
+            t_x = -polarity[i, 0]
+            t_y = -polarity[i, 1]
+
+        # Perpendicular component of target relative to orientation: t - (t·e)*e
+        dot_te = t_x * e_x + t_y * e_y
+        perp_x = t_x - dot_te * e_x
+        perp_y = t_y - dot_te * e_y
+
+        perp_norm = math.sqrt(perp_x * perp_x + perp_y * perp_y)
+
+        if perp_norm > 1e-10:
+            perp_hat_x = perp_x / perp_norm
+            perp_hat_y = perp_y / perp_norm
+
+            # Rotate orientation by nudge_strength radians toward target
+            cos_a = math.cos(nudge_strength)
+            sin_a = math.sin(nudge_strength)
+            new_orientations[i, 0] = cos_a * e_x + sin_a * perp_hat_x
+            new_orientations[i, 1] = cos_a * e_y + sin_a * perp_hat_y
+        else:
+            new_orientations[i, 0] = e_x
+            new_orientations[i, 1] = e_y
+
+    return new_orientations
 
 
 @njit(fastmath=True)
@@ -480,8 +531,9 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
 def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel,
                          radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
-                         step, goal_position, particle_view_range, score_and_polarity_update_interval, walls, directedness, 
-                         max_curvity, min_curvity, mid_curvity):
+                         step, goal_position, particle_view_range, score_and_polarity_update_interval, walls, directedness,
+                         max_curvity, min_curvity, mid_curvity,
+                         polarity_nudge_interval, polarity_nudge_strength):
     """Simulate a single time step"""
     # Compute forces on particles and payload
     particle_forces, payload_force = compute_all_forces(
@@ -507,6 +559,12 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
     orientations = update_orientation_vectors(
         orientations, particle_forces, curvity, dt, rot_diffusion, n_particles
     )
+
+    # Polarity nudge: angularly push heading toward polarity every nudge interval
+    if step % polarity_nudge_interval == 0:
+        orientations = nudge_orientations_toward_polarity(
+            orientations, polarity, polarity_nudge_strength, n_particles
+        )
 
     # Update particle positions and apply goal-based modulation if enabled
     for i in range(n_particles):
