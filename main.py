@@ -7,9 +7,7 @@ from src.visualization import create_payload_animation
 from src.genes import crossover_and_mutate
 
 
-#####################################################
-# HYPERPARAMETERS - Configure everything here       #
-#####################################################
+# Hyperparameters
 
 # Set random seed for reproducibility
 RANDOM_SEED = 42
@@ -53,7 +51,7 @@ SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity
 DIRECTEDNESS = 1                    # 0 = pure vicsek alignment, 1 = pure gradient following
 END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
 
-# Wall configuration (set to None for no walls)
+# Wall configuration
 # Example walls:
 WALLS = np.array([
     # Boundary walls
@@ -104,7 +102,7 @@ SHOW_VECTORS = True              # Display v vectors as arrows
 COLOR_BY_SCORE = True           # If True: color by score, if False: color by curvity
 OUTPUT_FILENAME = "E:/PostThesis/visualizations/small_start.mp4"           # If None, uses timestamp. Otherwise specify path.
 
-# Data saving (set to True to save simulation data)
+# Data saving
 SAVE_DATA = False
 DATA_OUTPUT_PATH = "E:/PostThesis/data/test.npz"                    # If None, uses timestamp. Otherwise specify path.
 
@@ -115,9 +113,7 @@ MUTATION_PROBABILITY = 0.5
 OPTIMIZATION_RESULTS_FILE = "optimization_results_2.txt"
 
 
-#####################################################
-# Genetic Algorithm Helper Functions                #
-#####################################################
+# Genetic Algorithm Helper Functions                
 
 def create_random_gene():
     """
@@ -294,9 +290,7 @@ def run_genetic_optimization(base_params, n_generations=5, population_size=10,
     return best_overall_gene, best_overall_steps
 
 
-#####################
-# Main execution    #
-#####################
+# Main execution
 
 if __name__ == "__main__":
 
@@ -308,9 +302,7 @@ if __name__ == "__main__":
         os.makedirs('./data', exist_ok=True)
     os.makedirs('./visualizations', exist_ok=True)
 
-    #####################################################
-    # JIT COMPILATION                                   #
-    #####################################################
+    # JIT COMPILATION
 
     print("Compiling JIT functions...")
 
@@ -345,9 +337,7 @@ if __name__ == "__main__":
     run_payload_simulation(compile_params)
     print("JIT compilation complete.\n")
 
-    #####################################################
-    # BUILD SIMULATION PARAMETERS                       #
-    #####################################################
+    # BUILD SIMULATION PARAMETERS
 
     params = {
         # Global parameters
@@ -383,9 +373,7 @@ if __name__ == "__main__":
         'mid_curvity': MID_CURVITY
     }
 
-    #####################################################
-    # RUN GENETIC OPTIMIZATION                          #
-    #####################################################
+    # RUN GENETIC OPTIMIZATION
 
     # best_gene, best_steps = run_genetic_optimization(
     #     params,
@@ -395,9 +383,7 @@ if __name__ == "__main__":
     #     output_file=OPTIMIZATION_RESULTS_FILE
     # )
     
-    #####################################################
-    # RUN SIMULATION (NORMAL MODE - NO OPTIMIZATION)    #
-    #####################################################
+    # RUN SIMULATION
 
     # Run the simulation
     result = run_payload_simulation(params)
