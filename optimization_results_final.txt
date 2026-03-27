@@ -1,0 +1,918 @@
+
+============================================================
+GENETIC ALGORITHM OPTIMIZATION
+============================================================
+Generations: 16
+Population size: 12
+Mutation probability: 0.5 (constant)
+Sigma decay: exponential (1.0 -> ~1% by final generation)
+Total simulations: 192
+============================================================
+
+
+--- Generation 1/16 ---
+Sigma scale: 1.0000
+
+[Gen 1, Individual 1/12]
+  Gene: max_c=1.000, min_c=-1.000, mid_c=0.000, rot_diff=0.0500
+  Steps taken: 12396
+
+[Gen 1, Individual 2/12]
+  Gene: max_c=-0.299, min_c=-0.904, mid_c=-0.550, rot_diff=0.0017
+  Steps taken: 40000
+
+[Gen 1, Individual 3/12]
+  Gene: max_c=0.501, min_c=-0.479, mid_c=0.207, rot_diff=0.0036
+  Steps taken: 40000
+
+[Gen 1, Individual 4/12]
+  Gene: max_c=0.571, min_c=-0.990, mid_c=0.071, rot_diff=0.0066
+  Steps taken: 40000
+
+[Gen 1, Individual 5/12]
+  Gene: max_c=0.929, min_c=-0.961, mid_c=0.119, rot_diff=0.0097
+  Steps taken: 40000
+
+[Gen 1, Individual 6/12]
+  Gene: max_c=0.591, min_c=-0.807, mid_c=-0.236, rot_diff=0.0095
+  Steps taken: 16943
+
+[Gen 1, Individual 7/12]
+  Gene: max_c=0.976, min_c=0.115, mid_c=0.776, rot_diff=0.0018
+  Steps taken: 40000
+
+[Gen 1, Individual 8/12]
+  Gene: max_c=-0.501, min_c=-0.662, mid_c=-0.512, rot_diff=0.2086
+  Steps taken: 33569
+
+[Gen 1, Individual 9/12]
+  Gene: max_c=0.959, min_c=-0.893, mid_c=0.913, rot_diff=0.0277
+  Steps taken: 40000
+
+[Gen 1, Individual 10/12]
+  Gene: max_c=-0.421, min_c=-0.974, mid_c=-0.637, rot_diff=0.1432
+  Steps taken: 24108
+
+[Gen 1, Individual 11/12]
+  Gene: max_c=0.663, min_c=0.165, mid_c=0.369, rot_diff=0.2682
+  Steps taken: 40000
+
+[Gen 1, Individual 12/12]
+  Gene: max_c=0.193, min_c=-0.769, mid_c=-0.583, rot_diff=0.0075
+  Steps taken: 40000
+
+[Generation 1 Summary]
+  Best: 12396 steps
+  Worst: 40000 steps
+  Best gene: max_c=1.000, min_c=-1.000, mid_c=0.000, rot_diff=0.0500
+
+--- Generation 2/16 ---
+Sigma scale: 0.7359
+
+[Gen 2, Individual 1/12]
+  Gene: max_c=0.591, min_c=-1.000, mid_c=-0.067, rot_diff=0.0099
+  Steps taken: 29473
+
+[Gen 2, Individual 2/12]
+  Gene: max_c=0.591, min_c=-0.686, mid_c=0.000, rot_diff=0.0095
+  Steps taken: 40000
+
+[Gen 2, Individual 3/12]
+  Gene: max_c=0.591, min_c=-1.000, mid_c=0.000, rot_diff=0.0095
+  Steps taken: 40000
+
+[Gen 2, Individual 4/12]
+  Gene: max_c=0.591, min_c=-1.000, mid_c=0.000, rot_diff=0.0095
+  Steps taken: 40000
+
+[Gen 2, Individual 5/12]
+  Gene: max_c=0.834, min_c=-1.000, mid_c=0.008, rot_diff=0.0095
+  Steps taken: 28763
+
+[Gen 2, Individual 6/12]
+  Gene: max_c=0.591, min_c=-0.832, mid_c=0.000, rot_diff=0.0095
+  Steps taken: 40000
+
+[Gen 2, Individual 7/12]
+  Gene: max_c=1.000, min_c=-0.807, mid_c=-0.236, rot_diff=0.0901
+  Steps taken: 15044
+
+[Gen 2, Individual 8/12]
+  Gene: max_c=1.000, min_c=-1.000, mid_c=-0.475, rot_diff=0.0495
+  Steps taken: 12656
+
+[Gen 2, Individual 9/12]
+  Gene: max_c=1.000, min_c=-0.807, mid_c=-0.236, rot_diff=0.0500
+  Steps taken: 12880
+
+[Gen 2, Individual 10/12]
+  Gene: max_c=1.000, min_c=-0.807, mid_c=-0.429, rot_diff=0.0884
+  Steps taken: 13390
+
+[Gen 2, Individual 11/12]
+  Gene: max_c=0.910, min_c=-0.807, mid_c=-0.236, rot_diff=0.0500
+  Steps taken: 13472
+
+[Gen 2, Individual 12/12]
+  Gene: max_c=1.000, min_c=-0.783, mid_c=-0.513, rot_diff=0.0500
+  Steps taken: 13784
+
+[Generation 2 Summary]
+  Best: 12656 steps
+  Worst: 40000 steps
+  Best gene: max_c=1.000, min_c=-1.000, mid_c=-0.475, rot_diff=0.0495
+
+--- Generation 3/16 ---
+Sigma scale: 0.5415
+
+[Gen 3, Individual 1/12]
+  Gene: max_c=1.000, min_c=-1.000, mid_c=-0.236, rot_diff=0.0312
+  Steps taken: 9989
+
+[Gen 3, Individual 2/12]
+  Gene: max_c=1.000, min_c=-1.000, mid_c=-0.236, rot_diff=0.0307
+  Steps taken: 12499
+
+[Gen 3, Individual 3/12]
+  Gene: max_c=0.829, min_c=-1.000, mid_c=-0.236, rot_diff=0.0495
+  Steps taken: 14404
+
+[Gen 3, Individual 4/12]
+  Gene: max_c=1.000, min_c=-1.000, mid_c=-0.157, rot_diff=0.0637
+  Steps taken: 10224
+
+[Gen 3, Individual 5/12]
+  Gene: max_c=1.000, min_c=-1.000, mid_c=-0.236, rot_diff=0.0710
+  Steps taken: 10313
+
+[Gen 3, Individual 6/12]
+  Gene: max_c=1.000, min_c=-1.000, mid_c=-0.600, rot_diff=0.0957
+  Steps taken: 12182
+
+[Gen 3, Individual 7/12]
+  Gene: max_c=1.000, min_c=-0.807, mid_c=-0.419, rot_diff=0.0500
+  Steps taken: 9817
+
+[Gen 3, Individual 8/12]
+  Gene: max_c=1.000, min_c=-0.871, mid_c=-0.392, rot_diff=0.0500
+  Steps taken: 10769
+
+[Gen 3, Individual 9/12]
+  Gene: max_c=0.815, min_c=-0.807, mid_c=-0.402, rot_diff=0.0500
+  Steps taken: 10201
+
+[Gen 3, Individual 10/12]
+  Gene: max_c=0.740, min_c=-0.675, mid_c=-0.475, rot_diff=0.0500
+  Steps taken: 9610
+
+[Gen 3, Individual 11/12]
+  Gene: max_c=1.000, min_c=-0.807, mid_c=-0.376, rot_diff=0.0618
+  Steps taken: 13663
+
+[Gen 3, Individual 12/12]
+  Gene: max_c=1.000, min_c=-0.807, mid_c=-0.656, rot_diff=0.0837
+  Steps taken: 8204
+
+[Generation 3 Summary]
+  Best: 8204 steps
+  Worst: 14404 steps
+  Best gene: max_c=1.000, min_c=-0.807, mid_c=-0.656, rot_diff=0.0837
+
+--- Generation 4/16 ---
+Sigma scale: 0.3985
+
+[Gen 4, Individual 1/12]
+  Gene: max_c=0.740, min_c=-0.718, mid_c=-0.583, rot_diff=0.1304
+  Steps taken: 7833
+
+[Gen 4, Individual 2/12]
+  Gene: max_c=0.740, min_c=-0.675, mid_c=-0.621, rot_diff=0.0856
+  Steps taken: 10600
+
+[Gen 4, Individual 3/12]
+  Gene: max_c=0.740, min_c=-0.694, mid_c=-0.675, rot_diff=0.0718
+  Steps taken: 9419
+
+[Gen 4, Individual 4/12]
+  Gene: max_c=0.740, min_c=-0.807, mid_c=-0.656, rot_diff=0.0887
+  Steps taken: 7780
+
+[Gen 4, Individual 5/12]
+  Gene: max_c=0.690, min_c=-0.675, mid_c=-0.566, rot_diff=0.1216
+  Steps taken: 8956
+
+[Gen 4, Individual 6/12]
+  Gene: max_c=0.740, min_c=-0.675, mid_c=-0.656, rot_diff=0.0837
+  Steps taken: 14480
+
+[Gen 4, Individual 7/12]
+  Gene: max_c=1.000, min_c=-0.873, mid_c=-0.676, rot_diff=0.0500
+  Steps taken: 9080
+
+[Gen 4, Individual 8/12]
+  Gene: max_c=1.000, min_c=-0.989, mid_c=-0.584, rot_diff=0.0500
+  Steps taken: 12675
+
+[Gen 4, Individual 9/12]
+  Gene: max_c=0.730, min_c=-0.807, mid_c=-0.352, rot_diff=0.0500
+  Steps taken: 17340
+
+[Gen 4, Individual 10/12]
+  Gene: max_c=1.000, min_c=-0.807, mid_c=-0.475, rot_diff=0.0534
+  Steps taken: 10898
+
+[Gen 4, Individual 11/12]
+  Gene: max_c=1.000, min_c=-0.807, mid_c=-0.502, rot_diff=0.0500
+  Steps taken: 9652
+
+[Gen 4, Individual 12/12]
+  Gene: max_c=1.000, min_c=-1.000, mid_c=-0.475, rot_diff=0.0398
+  Steps taken: 15563
+
+[Generation 4 Summary]
+  Best: 7780 steps
+  Worst: 17340 steps
+  Best gene: max_c=0.740, min_c=-0.807, mid_c=-0.656, rot_diff=0.0887
+
+--- Generation 5/16 ---
+Sigma scale: 0.2933
+
+[Gen 5, Individual 1/12]
+  Gene: max_c=0.740, min_c=-0.718, mid_c=-0.583, rot_diff=0.0716
+  Steps taken: 8498
+
+[Gen 5, Individual 2/12]
+  Gene: max_c=0.713, min_c=-0.718, mid_c=-0.563, rot_diff=0.1190
+  Steps taken: 10244
+
+[Gen 5, Individual 3/12]
+  Gene: max_c=0.740, min_c=-0.718, mid_c=-0.583, rot_diff=0.0887
+  Steps taken: 9368
+
+[Gen 5, Individual 4/12]
+  Gene: max_c=0.740, min_c=-0.718, mid_c=-0.583, rot_diff=0.0933
+  Steps taken: 8969
+
+[Gen 5, Individual 5/12]
+  Gene: max_c=0.783, min_c=-0.718, mid_c=-0.583, rot_diff=0.0887
+  Steps taken: 8760
+
+[Gen 5, Individual 6/12]
+  Gene: max_c=0.601, min_c=-0.718, mid_c=-0.656, rot_diff=0.0887
+  Steps taken: 14995
+
+[Gen 5, Individual 7/12]
+  Gene: max_c=0.821, min_c=-0.807, mid_c=-0.739, rot_diff=0.1304
+  Steps taken: 8106
+
+[Gen 5, Individual 8/12]
+  Gene: max_c=0.630, min_c=-0.807, mid_c=-0.708, rot_diff=0.1634
+  Steps taken: 9748
+
+[Gen 5, Individual 9/12]
+  Gene: max_c=0.679, min_c=-0.807, mid_c=-0.675, rot_diff=0.1304
+  Steps taken: 9754
+
+[Gen 5, Individual 10/12]
+  Gene: max_c=0.740, min_c=-0.807, mid_c=-0.656, rot_diff=0.1304
+  Steps taken: 9808
+
+[Gen 5, Individual 11/12]
+  Gene: max_c=0.682, min_c=-0.807, mid_c=-0.656, rot_diff=0.1376
+  Steps taken: 8566
+
+[Gen 5, Individual 12/12]
+  Gene: max_c=0.740, min_c=-0.807, mid_c=-0.656, rot_diff=0.1304
+  Steps taken: 13013
+
+[Generation 5 Summary]
+  Best: 8106 steps
+  Worst: 14995 steps
+  Best gene: max_c=0.821, min_c=-0.807, mid_c=-0.739, rot_diff=0.1304
+
+--- Generation 6/16 ---
+Sigma scale: 0.2158
+
+[Gen 6, Individual 1/12]
+  Gene: max_c=0.616, min_c=-0.739, mid_c=-0.692, rot_diff=0.0733
+  Steps taken: 8862
+
+[Gen 6, Individual 2/12]
+  Gene: max_c=0.657, min_c=-0.807, mid_c=-0.678, rot_diff=0.0716
+  Steps taken: 10162
+
+[Gen 6, Individual 3/12]
+  Gene: max_c=0.740, min_c=-0.807, mid_c=-0.739, rot_diff=0.0716
+  Steps taken: 9550
+
+[Gen 6, Individual 4/12]
+  Gene: max_c=0.740, min_c=-0.864, mid_c=-0.776, rot_diff=0.0614
+  Steps taken: 20095
+
+[Gen 6, Individual 5/12]
+  Gene: max_c=0.666, min_c=-0.807, mid_c=-0.685, rot_diff=0.0839
+  Steps taken: 12626
+
+[Gen 6, Individual 6/12]
+  Gene: max_c=0.656, min_c=-0.979, mid_c=-0.625, rot_diff=0.0664
+  Steps taken: 11548
+
+[Gen 6, Individual 7/12]
+  Gene: max_c=0.821, min_c=-0.718, mid_c=-0.583, rot_diff=0.1474
+  Steps taken: 9317
+
+[Gen 6, Individual 8/12]
+  Gene: max_c=0.792, min_c=-0.667, mid_c=-0.583, rot_diff=0.1442
+  Steps taken: 9411
+
+[Gen 6, Individual 9/12]
+  Gene: max_c=0.937, min_c=-0.718, mid_c=-0.583, rot_diff=0.1410
+  Steps taken: 11247
+
+[Gen 6, Individual 10/12]
+  Gene: max_c=0.821, min_c=-0.718, mid_c=-0.600, rot_diff=0.1514
+  Steps taken: 9701
+
+[Gen 6, Individual 11/12]
+  Gene: max_c=0.821, min_c=-0.718, mid_c=-0.583, rot_diff=0.1312
+  Steps taken: 13623
+
+[Gen 6, Individual 12/12]
+  Gene: max_c=0.821, min_c=-0.743, mid_c=-0.718, rot_diff=0.1387
+  Steps taken: 8789
+
+[Generation 6 Summary]
+  Best: 8789 steps
+  Worst: 20095 steps
+  Best gene: max_c=0.821, min_c=-0.743, mid_c=-0.718, rot_diff=0.1387
+
+--- Generation 7/16 ---
+Sigma scale: 0.1588
+
+[Gen 7, Individual 1/12]
+  Gene: max_c=0.821, min_c=-0.723, mid_c=-0.711, rot_diff=0.0787
+  Steps taken: 11378
+
+[Gen 7, Individual 2/12]
+  Gene: max_c=0.846, min_c=-0.747, mid_c=-0.743, rot_diff=0.0696
+  Steps taken: 9522
+
+[Gen 7, Individual 3/12]
+  Gene: max_c=0.728, min_c=-0.743, mid_c=-0.692, rot_diff=0.0733
+  Steps taken: 8069
+
+[Gen 7, Individual 4/12]
+  Gene: max_c=0.771, min_c=-0.748, mid_c=-0.743, rot_diff=0.0644
+  Steps taken: 9802
+
+[Gen 7, Individual 5/12]
+  Gene: max_c=0.821, min_c=-0.743, mid_c=-0.732, rot_diff=0.0745
+  Steps taken: 10566
+
+[Gen 7, Individual 6/12]
+  Gene: max_c=0.821, min_c=-0.751, mid_c=-0.692, rot_diff=0.0733
+  Steps taken: 14091
+
+[Gen 7, Individual 7/12]
+  Gene: max_c=0.569, min_c=-0.756, mid_c=-0.718, rot_diff=0.1387
+  Steps taken: 9007
+
+[Gen 7, Individual 8/12]
+  Gene: max_c=0.620, min_c=-0.796, mid_c=-0.704, rot_diff=0.1852
+  Steps taken: 8984
+
+[Gen 7, Individual 9/12]
+  Gene: max_c=0.611, min_c=-0.767, mid_c=-0.740, rot_diff=0.1487
+  Steps taken: 9485
+
+[Gen 7, Individual 10/12]
+  Gene: max_c=0.616, min_c=-0.739, mid_c=-0.718, rot_diff=0.1387
+  Steps taken: 10272
+
+[Gen 7, Individual 11/12]
+  Gene: max_c=0.526, min_c=-0.739, mid_c=-0.631, rot_diff=0.1392
+  Steps taken: 9409
+
+[Gen 7, Individual 12/12]
+  Gene: max_c=0.489, min_c=-0.741, mid_c=-0.686, rot_diff=0.1387
+  Steps taken: 10822
+
+[Generation 7 Summary]
+  Best: 8069 steps
+  Worst: 14091 steps
+  Best gene: max_c=0.728, min_c=-0.743, mid_c=-0.692, rot_diff=0.0733
+
+--- Generation 8/16 ---
+Sigma scale: 0.1169
+
+[Gen 8, Individual 1/12]
+  Gene: max_c=0.586, min_c=-0.796, mid_c=-0.692, rot_diff=0.0749
+  Steps taken: 9127
+
+[Gen 8, Individual 2/12]
+  Gene: max_c=0.550, min_c=-0.796, mid_c=-0.692, rot_diff=0.0669
+  Steps taken: 11795
+
+[Gen 8, Individual 3/12]
+  Gene: max_c=0.535, min_c=-0.796, mid_c=-0.692, rot_diff=0.0775
+  Steps taken: 10207
+
+[Gen 8, Individual 4/12]
+  Gene: max_c=0.620, min_c=-0.713, mid_c=-0.708, rot_diff=0.0733
+  Steps taken: 11496
+
+[Gen 8, Individual 5/12]
+  Gene: max_c=0.620, min_c=-0.847, mid_c=-0.692, rot_diff=0.0733
+  Steps taken: 14697
+
+[Gen 8, Individual 6/12]
+  Gene: max_c=0.620, min_c=-0.796, mid_c=-0.743, rot_diff=0.0649
+  Steps taken: 15832
+
+[Gen 8, Individual 7/12]
+  Gene: max_c=0.753, min_c=-0.743, mid_c=-0.704, rot_diff=0.1852
+  Steps taken: 8956
+
+[Gen 8, Individual 8/12]
+  Gene: max_c=0.728, min_c=-0.827, mid_c=-0.737, rot_diff=0.1779
+  Steps taken: 12160
+
+[Gen 8, Individual 9/12]
+  Gene: max_c=0.728, min_c=-0.746, mid_c=-0.704, rot_diff=0.1765
+  Steps taken: 10110
+
+[Gen 8, Individual 10/12]
+  Gene: max_c=0.716, min_c=-0.757, mid_c=-0.685, rot_diff=0.1715
+  Steps taken: 8863
+
+[Gen 8, Individual 11/12]
+  Gene: max_c=0.718, min_c=-0.704, mid_c=-0.639, rot_diff=0.1852
+  Steps taken: 12474
+
+[Gen 8, Individual 12/12]
+  Gene: max_c=0.683, min_c=-0.743, mid_c=-0.653, rot_diff=0.2073
+  Steps taken: 8624
+
+[Generation 8 Summary]
+  Best: 8624 steps
+  Worst: 15832 steps
+  Best gene: max_c=0.683, min_c=-0.743, mid_c=-0.653, rot_diff=0.2073
+
+--- Generation 9/16 ---
+Sigma scale: 0.0860
+
+[Gen 9, Individual 1/12]
+  Gene: max_c=0.683, min_c=-0.757, mid_c=-0.685, rot_diff=0.2073
+  Steps taken: 9325
+
+[Gen 9, Individual 2/12]
+  Gene: max_c=0.637, min_c=-0.693, mid_c=-0.650, rot_diff=0.1967
+  Steps taken: 12967
+
+[Gen 9, Individual 3/12]
+  Gene: max_c=0.652, min_c=-0.749, mid_c=-0.681, rot_diff=0.2073
+  Steps taken: 9721
+
+[Gen 9, Individual 4/12]
+  Gene: max_c=0.660, min_c=-0.798, mid_c=-0.685, rot_diff=0.2073
+  Steps taken: 11645
+
+[Gen 9, Individual 5/12]
+  Gene: max_c=0.647, min_c=-0.757, mid_c=-0.680, rot_diff=0.2073
+  Steps taken: 11005
+
+[Gen 9, Individual 6/12]
+  Gene: max_c=0.683, min_c=-0.731, mid_c=-0.721, rot_diff=0.1927
+  Steps taken: 11923
+
+[Gen 9, Individual 7/12]
+  Gene: max_c=0.716, min_c=-0.743, mid_c=-0.658, rot_diff=0.1715
+  Steps taken: 10197
+
+[Gen 9, Individual 8/12]
+  Gene: max_c=0.726, min_c=-0.726, mid_c=-0.662, rot_diff=0.1715
+  Steps taken: 13384
+
+[Gen 9, Individual 9/12]
+  Gene: max_c=0.695, min_c=-0.739, mid_c=-0.653, rot_diff=0.1715
+  Steps taken: 8801
+
+[Gen 9, Individual 10/12]
+  Gene: max_c=0.716, min_c=-0.743, mid_c=-0.653, rot_diff=0.1715
+  Steps taken: 9418
+
+[Gen 9, Individual 11/12]
+  Gene: max_c=0.729, min_c=-0.743, mid_c=-0.689, rot_diff=0.1715
+  Steps taken: 16957
+
+[Gen 9, Individual 12/12]
+  Gene: max_c=0.674, min_c=-0.787, mid_c=-0.653, rot_diff=0.1715
+  Steps taken: 14302
+
+[Generation 9 Summary]
+  Best: 8801 steps
+  Worst: 16957 steps
+  Best gene: max_c=0.695, min_c=-0.739, mid_c=-0.653, rot_diff=0.1715
+
+--- Generation 10/16 ---
+Sigma scale: 0.0633
+
+[Gen 10, Individual 1/12]
+  Gene: max_c=0.740, min_c=-0.719, mid_c=-0.685, rot_diff=0.2104
+  Steps taken: 12713
+
+[Gen 10, Individual 2/12]
+  Gene: max_c=0.695, min_c=-0.739, mid_c=-0.660, rot_diff=0.1966
+  Steps taken: 9008
+
+[Gen 10, Individual 3/12]
+  Gene: max_c=0.695, min_c=-0.736, mid_c=-0.685, rot_diff=0.2177
+  Steps taken: 9958
+
+[Gen 10, Individual 4/12]
+  Gene: max_c=0.692, min_c=-0.739, mid_c=-0.665, rot_diff=0.2073
+  Steps taken: 9895
+
+[Gen 10, Individual 5/12]
+  Gene: max_c=0.723, min_c=-0.689, mid_c=-0.685, rot_diff=0.2073
+  Steps taken: 12130
+
+[Gen 10, Individual 6/12]
+  Gene: max_c=0.709, min_c=-0.745, mid_c=-0.685, rot_diff=0.2073
+  Steps taken: 11445
+
+[Gen 10, Individual 7/12]
+  Gene: max_c=0.652, min_c=-0.757, mid_c=-0.653, rot_diff=0.1715
+  Steps taken: 14788
+
+[Gen 10, Individual 8/12]
+  Gene: max_c=0.662, min_c=-0.733, mid_c=-0.656, rot_diff=0.1715
+  Steps taken: 8963
+
+[Gen 10, Individual 9/12]
+  Gene: max_c=0.652, min_c=-0.762, mid_c=-0.653, rot_diff=0.1715
+  Steps taken: 9763
+
+[Gen 10, Individual 10/12]
+  Gene: max_c=0.683, min_c=-0.757, mid_c=-0.682, rot_diff=0.1715
+  Steps taken: 10157
+
+[Gen 10, Individual 11/12]
+  Gene: max_c=0.713, min_c=-0.736, mid_c=-0.590, rot_diff=0.1715
+  Steps taken: 10101
+
+[Gen 10, Individual 12/12]
+  Gene: max_c=0.683, min_c=-0.782, mid_c=-0.653, rot_diff=0.1688
+  Steps taken: 14638
+
+[Generation 10 Summary]
+  Best: 8963 steps
+  Worst: 14788 steps
+  Best gene: max_c=0.662, min_c=-0.733, mid_c=-0.656, rot_diff=0.1715
+
+--- Generation 11/16 ---
+Sigma scale: 0.0466
+
+[Gen 11, Individual 1/12]
+  Gene: max_c=0.642, min_c=-0.739, mid_c=-0.677, rot_diff=0.1689
+  Steps taken: 10810
+
+[Gen 11, Individual 2/12]
+  Gene: max_c=0.658, min_c=-0.735, mid_c=-0.660, rot_diff=0.1671
+  Steps taken: 12249
+
+[Gen 11, Individual 3/12]
+  Gene: max_c=0.640, min_c=-0.742, mid_c=-0.647, rot_diff=0.1696
+  Steps taken: 10020
+
+[Gen 11, Individual 4/12]
+  Gene: max_c=0.662, min_c=-0.739, mid_c=-0.670, rot_diff=0.1715
+  Steps taken: 10171
+
+[Gen 11, Individual 5/12]
+  Gene: max_c=0.662, min_c=-0.739, mid_c=-0.660, rot_diff=0.1715
+  Steps taken: 8122
+
+[Gen 11, Individual 6/12]
+  Gene: max_c=0.662, min_c=-0.739, mid_c=-0.660, rot_diff=0.1746
+  Steps taken: 12193
+
+[Gen 11, Individual 7/12]
+  Gene: max_c=0.681, min_c=-0.727, mid_c=-0.656, rot_diff=0.1986
+  Steps taken: 11096
+
+[Gen 11, Individual 8/12]
+  Gene: max_c=0.695, min_c=-0.733, mid_c=-0.673, rot_diff=0.1966
+  Steps taken: 11482
+
+[Gen 11, Individual 9/12]
+  Gene: max_c=0.685, min_c=-0.733, mid_c=-0.639, rot_diff=0.1966
+  Steps taken: 11684
+
+[Gen 11, Individual 10/12]
+  Gene: max_c=0.695, min_c=-0.719, mid_c=-0.639, rot_diff=0.1966
+  Steps taken: 11463
+
+[Gen 11, Individual 11/12]
+  Gene: max_c=0.695, min_c=-0.733, mid_c=-0.650, rot_diff=0.1993
+  Steps taken: 11088
+
+[Gen 11, Individual 12/12]
+  Gene: max_c=0.695, min_c=-0.733, mid_c=-0.656, rot_diff=0.1966
+  Steps taken: 12035
+
+[Generation 11 Summary]
+  Best: 8122 steps
+  Worst: 12249 steps
+  Best gene: max_c=0.662, min_c=-0.739, mid_c=-0.660, rot_diff=0.1715
+
+--- Generation 12/16 ---
+Sigma scale: 0.0343
+
+[Gen 12, Individual 1/12]
+  Gene: max_c=0.640, min_c=-0.742, mid_c=-0.660, rot_diff=0.1696
+  Steps taken: 13304
+
+[Gen 12, Individual 2/12]
+  Gene: max_c=0.640, min_c=-0.725, mid_c=-0.660, rot_diff=0.1696
+  Steps taken: 9484
+
+[Gen 12, Individual 3/12]
+  Gene: max_c=0.640, min_c=-0.739, mid_c=-0.660, rot_diff=0.1696
+  Steps taken: 11397
+
+[Gen 12, Individual 4/12]
+  Gene: max_c=0.640, min_c=-0.739, mid_c=-0.660, rot_diff=0.1666
+  Steps taken: 15051
+
+[Gen 12, Individual 5/12]
+  Gene: max_c=0.640, min_c=-0.739, mid_c=-0.629, rot_diff=0.1681
+  Steps taken: 14776
+
+[Gen 12, Individual 6/12]
+  Gene: max_c=0.640, min_c=-0.739, mid_c=-0.660, rot_diff=0.1690
+  Steps taken: 12439
+
+[Gen 12, Individual 7/12]
+  Gene: max_c=0.670, min_c=-0.742, mid_c=-0.680, rot_diff=0.1715
+  Steps taken: 10927
+
+[Gen 12, Individual 8/12]
+  Gene: max_c=0.662, min_c=-0.726, mid_c=-0.647, rot_diff=0.1715
+  Steps taken: 11303
+
+[Gen 12, Individual 9/12]
+  Gene: max_c=0.662, min_c=-0.740, mid_c=-0.647, rot_diff=0.1715
+  Steps taken: 9863
+
+[Gen 12, Individual 10/12]
+  Gene: max_c=0.662, min_c=-0.741, mid_c=-0.640, rot_diff=0.1727
+  Steps taken: 9063
+
+[Gen 12, Individual 11/12]
+  Gene: max_c=0.660, min_c=-0.744, mid_c=-0.651, rot_diff=0.1715
+  Steps taken: 11914
+
+[Gen 12, Individual 12/12]
+  Gene: max_c=0.659, min_c=-0.723, mid_c=-0.647, rot_diff=0.1675
+  Steps taken: 16569
+
+[Generation 12 Summary]
+  Best: 9063 steps
+  Worst: 16569 steps
+  Best gene: max_c=0.662, min_c=-0.741, mid_c=-0.640, rot_diff=0.1727
+
+--- Generation 13/16 ---
+Sigma scale: 0.0252
+
+[Gen 13, Individual 1/12]
+  Gene: max_c=0.640, min_c=-0.741, mid_c=-0.640, rot_diff=0.1696
+  Steps taken: 11943
+
+[Gen 13, Individual 2/12]
+  Gene: max_c=0.640, min_c=-0.741, mid_c=-0.627, rot_diff=0.1645
+  Steps taken: 8168
+
+[Gen 13, Individual 3/12]
+  Gene: max_c=0.640, min_c=-0.730, mid_c=-0.640, rot_diff=0.1648
+  Steps taken: 9779
+
+[Gen 13, Individual 4/12]
+  Gene: max_c=0.642, min_c=-0.741, mid_c=-0.640, rot_diff=0.1696
+  Steps taken: 8747
+
+[Gen 13, Individual 5/12]
+  Gene: max_c=0.643, min_c=-0.740, mid_c=-0.640, rot_diff=0.1696
+  Steps taken: 9024
+
+[Gen 13, Individual 6/12]
+  Gene: max_c=0.642, min_c=-0.733, mid_c=-0.643, rot_diff=0.1684
+  Steps taken: 13208
+
+[Gen 13, Individual 7/12]
+  Gene: max_c=0.662, min_c=-0.725, mid_c=-0.668, rot_diff=0.1727
+  Steps taken: 9417
+
+[Gen 13, Individual 8/12]
+  Gene: max_c=0.662, min_c=-0.725, mid_c=-0.660, rot_diff=0.1707
+  Steps taken: 10757
+
+[Gen 13, Individual 9/12]
+  Gene: max_c=0.662, min_c=-0.725, mid_c=-0.639, rot_diff=0.1745
+  Steps taken: 11712
+
+[Gen 13, Individual 10/12]
+  Gene: max_c=0.661, min_c=-0.725, mid_c=-0.660, rot_diff=0.1727
+  Steps taken: 11028
+
+[Gen 13, Individual 11/12]
+  Gene: max_c=0.662, min_c=-0.711, mid_c=-0.649, rot_diff=0.1744
+  Steps taken: 9773
+
+[Gen 13, Individual 12/12]
+  Gene: max_c=0.667, min_c=-0.725, mid_c=-0.660, rot_diff=0.1747
+  Steps taken: 10799
+
+[Generation 13 Summary]
+  Best: 8168 steps
+  Worst: 13208 steps
+  Best gene: max_c=0.640, min_c=-0.741, mid_c=-0.627, rot_diff=0.1645
+
+--- Generation 14/16 ---
+Sigma scale: 0.0186
+
+[Gen 14, Individual 1/12]
+  Gene: max_c=0.639, min_c=-0.741, mid_c=-0.640, rot_diff=0.1645
+  Steps taken: 12635
+
+[Gen 14, Individual 2/12]
+  Gene: max_c=0.642, min_c=-0.733, mid_c=-0.640, rot_diff=0.1686
+  Steps taken: 8224
+
+[Gen 14, Individual 3/12]
+  Gene: max_c=0.633, min_c=-0.736, mid_c=-0.642, rot_diff=0.1649
+  Steps taken: 8357
+
+[Gen 14, Individual 4/12]
+  Gene: max_c=0.640, min_c=-0.741, mid_c=-0.640, rot_diff=0.1645
+  Steps taken: 11225
+
+[Gen 14, Individual 5/12]
+  Gene: max_c=0.642, min_c=-0.742, mid_c=-0.640, rot_diff=0.1653
+  Steps taken: 14353
+
+[Gen 14, Individual 6/12]
+  Gene: max_c=0.640, min_c=-0.741, mid_c=-0.640, rot_diff=0.1642
+  Steps taken: 12887
+
+[Gen 14, Individual 7/12]
+  Gene: max_c=0.648, min_c=-0.741, mid_c=-0.627, rot_diff=0.1702
+  Steps taken: 10399
+
+[Gen 14, Individual 8/12]
+  Gene: max_c=0.650, min_c=-0.741, mid_c=-0.627, rot_diff=0.1695
+  Steps taken: 9540
+
+[Gen 14, Individual 9/12]
+  Gene: max_c=0.640, min_c=-0.744, mid_c=-0.627, rot_diff=0.1696
+  Steps taken: 12112
+
+[Gen 14, Individual 10/12]
+  Gene: max_c=0.640, min_c=-0.741, mid_c=-0.626, rot_diff=0.1696
+  Steps taken: 9009
+
+[Gen 14, Individual 11/12]
+  Gene: max_c=0.640, min_c=-0.729, mid_c=-0.627, rot_diff=0.1715
+  Steps taken: 9445
+
+[Gen 14, Individual 12/12]
+  Gene: max_c=0.643, min_c=-0.741, mid_c=-0.627, rot_diff=0.1696
+  Steps taken: 9700
+
+[Generation 14 Summary]
+  Best: 8224 steps
+  Worst: 14353 steps
+  Best gene: max_c=0.642, min_c=-0.733, mid_c=-0.640, rot_diff=0.1686
+
+--- Generation 15/16 ---
+Sigma scale: 0.0137
+
+[Gen 15, Individual 1/12]
+  Gene: max_c=0.633, min_c=-0.745, mid_c=-0.639, rot_diff=0.1641
+  Steps taken: 9023
+
+[Gen 15, Individual 2/12]
+  Gene: max_c=0.625, min_c=-0.733, mid_c=-0.639, rot_diff=0.1649
+  Steps taken: 7968
+
+[Gen 15, Individual 3/12]
+  Gene: max_c=0.633, min_c=-0.733, mid_c=-0.640, rot_diff=0.1649
+  Steps taken: 12630
+
+[Gen 15, Individual 4/12]
+  Gene: max_c=0.632, min_c=-0.733, mid_c=-0.640, rot_diff=0.1649
+  Steps taken: 11230
+
+[Gen 15, Individual 5/12]
+  Gene: max_c=0.632, min_c=-0.733, mid_c=-0.643, rot_diff=0.1649
+  Steps taken: 11824
+
+[Gen 15, Individual 6/12]
+  Gene: max_c=0.633, min_c=-0.718, mid_c=-0.640, rot_diff=0.1649
+  Steps taken: 9856
+
+[Gen 15, Individual 7/12]
+  Gene: max_c=0.644, min_c=-0.736, mid_c=-0.640, rot_diff=0.1706
+  Steps taken: 10199
+
+[Gen 15, Individual 8/12]
+  Gene: max_c=0.642, min_c=-0.739, mid_c=-0.638, rot_diff=0.1696
+  Steps taken: 10002
+
+[Gen 15, Individual 9/12]
+  Gene: max_c=0.644, min_c=-0.731, mid_c=-0.644, rot_diff=0.1686
+  Steps taken: 9305
+
+[Gen 15, Individual 10/12]
+  Gene: max_c=0.642, min_c=-0.736, mid_c=-0.640, rot_diff=0.1686
+  Steps taken: 16516
+
+[Gen 15, Individual 11/12]
+  Gene: max_c=0.642, min_c=-0.740, mid_c=-0.650, rot_diff=0.1686
+  Steps taken: 10822
+
+[Gen 15, Individual 12/12]
+  Gene: max_c=0.642, min_c=-0.736, mid_c=-0.642, rot_diff=0.1686
+  Steps taken: 10786
+
+[Generation 15 Summary]
+  Best: 7968 steps
+  Worst: 16516 steps
+  Best gene: max_c=0.625, min_c=-0.733, mid_c=-0.639, rot_diff=0.1649
+
+--- Generation 16/16 ---
+Sigma scale: 0.0101
+
+[Gen 16, Individual 1/12]
+  Gene: max_c=0.633, min_c=-0.738, mid_c=-0.638, rot_diff=0.1667
+  Steps taken: 8836
+
+[Gen 16, Individual 2/12]
+  Gene: max_c=0.633, min_c=-0.733, mid_c=-0.638, rot_diff=0.1641
+  Steps taken: 8482
+
+[Gen 16, Individual 3/12]
+  Gene: max_c=0.633, min_c=-0.738, mid_c=-0.639, rot_diff=0.1641
+  Steps taken: 12246
+
+[Gen 16, Individual 4/12]
+  Gene: max_c=0.638, min_c=-0.733, mid_c=-0.639, rot_diff=0.1641
+  Steps taken: 10724
+
+[Gen 16, Individual 5/12]
+  Gene: max_c=0.631, min_c=-0.733, mid_c=-0.631, rot_diff=0.1629
+  Steps taken: 14671
+
+[Gen 16, Individual 6/12]
+  Gene: max_c=0.633, min_c=-0.730, mid_c=-0.636, rot_diff=0.1641
+  Steps taken: 10964
+
+[Gen 16, Individual 7/12]
+  Gene: max_c=0.625, min_c=-0.745, mid_c=-0.641, rot_diff=0.1649
+  Steps taken: 8650
+
+[Gen 16, Individual 8/12]
+  Gene: max_c=0.625, min_c=-0.747, mid_c=-0.640, rot_diff=0.1650
+  Steps taken: 8367
+
+[Gen 16, Individual 9/12]
+  Gene: max_c=0.625, min_c=-0.747, mid_c=-0.630, rot_diff=0.1666
+  Steps taken: 8799
+
+[Gen 16, Individual 10/12]
+  Gene: max_c=0.629, min_c=-0.750, mid_c=-0.637, rot_diff=0.1649
+  Steps taken: 11560
+
+[Gen 16, Individual 11/12]
+  Gene: max_c=0.622, min_c=-0.743, mid_c=-0.645, rot_diff=0.1659
+  Steps taken: 10224
+
+[Gen 16, Individual 12/12]
+  Gene: max_c=0.625, min_c=-0.746, mid_c=-0.639, rot_diff=0.1635
+  Steps taken: 10956
+
+[Generation 16 Summary]
+  Best: 8367 steps
+  Worst: 14671 steps
+  Best gene: max_c=0.625, min_c=-0.747, mid_c=-0.640, rot_diff=0.1650
+
+============================================================
+OPTIMIZATION COMPLETE
+============================================================
+Best gene found:
+  max_curvity:          0.739742
+  min_curvity:          -0.807466
+  mid_curvity:          -0.656309
+  rotational_diffusion: 0.088708
+Steps taken: 7780
+============================================================

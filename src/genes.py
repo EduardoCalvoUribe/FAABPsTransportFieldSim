@@ -66,7 +66,7 @@ def mutate_hyperparams(gene: np.ndarray, mutation_probability: float = 0.3,
     """
     Mutate hyperparameter gene with parameter-specific logic.
 
-    Gene format: [max_curvity, min_curvity, mid_curvity, rot_diffusion, v0]
+    Gene format: [max_curvity, min_curvity, mid_curvity, rot_diffusion]
 
     Args:
         gene: Hyperparameter gene array
@@ -103,11 +103,6 @@ def mutate_hyperparams(gene: np.ndarray, mutation_probability: float = 0.3,
                 mutated[i] *= np.exp(np.random.normal(0, sigma_log))
                 # Clamp to valid range [0.001, 0.3]
                 mutated[i] = np.clip(mutated[i], 0.001, 0.3)
-            elif i == 4:  # v0 (self-propulsion speed)
-                # Multiplicative mutation in log space with decaying scale
-                mutated[i] *= np.exp(np.random.normal(0, sigma_log))
-                # Clamp to valid range [0.1, 150.0]
-                mutated[i] = np.clip(mutated[i], 0.1, 150.0)
 
     # Re-sort curvity params to maintain min < mid < max constraint
     curvity_vals = sorted(mutated[:3])
@@ -132,7 +127,7 @@ def crossover_and_mutate(parent1: np.ndarray, parent2: np.ndarray,
         mutation_probability: Probability of mutating each gene value
         population_size: Number of offspring to generate
         use_hyperparam_mutation: If True, use mutate_hyperparams() for
-            hyperparameter optimization (gene format: [max_c, min_c, mid_c, rot_diff, v0])
+            hyperparameter optimization (gene format: [max_c, min_c, mid_c, rot_diff])
         sigma_scale: Scale factor for mutation sigma (1.0 = large mutations,
                      small values = tiny nudges). Only used with hyperparam mutation.
 

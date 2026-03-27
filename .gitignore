@@ -4,6 +4,4 @@ __pycache__
 /visualizations/
 /backup/
 /logs/
-/.claude/
 /.pytest_cache/
-CLAUDE.md
