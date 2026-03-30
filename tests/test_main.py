@@ -43,14 +43,13 @@ class TestIntegration:
         particle_view_range = 20.0
         score_and_polarity_update_interval = 10
         walls = np.zeros((0, 4))
-        directedness = 1.0
 
         new_positions, new_orientations, new_velocities, new_payload_pos, new_payload_vel, curvity = simulate_single_step(
             positions, orientations, velocities, payload_pos, payload_vel,
             radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
             step, goal_position, particle_view_range, score_and_polarity_update_interval,
-            walls, directedness
+            walls
         )
 
         # Check that arrays have correct shapes
@@ -104,14 +103,12 @@ class TestIntegration:
             [box_size, box_size, 0, box_size],
             [box_size, box_size, box_size, 0]
         ])
-        directedness = 0.5
-
         new_positions, new_orientations, new_velocities, new_payload_pos, new_payload_vel, curvity = simulate_single_step(
             positions, orientations, velocities, payload_pos, payload_vel,
             radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
             step, goal_position, particle_view_range, score_and_polarity_update_interval,
-            walls, directedness
+            walls
         )
 
         # Verify output shapes
@@ -159,7 +156,6 @@ class TestIntegration:
         particle_view_range = 20.0
         score_and_polarity_update_interval = 5
         walls = np.zeros((0, 4))
-        directedness = 1.0
 
         # Run at step that should NOT update (step 1, interval 5)
         _, _, _, _, _, _ = simulate_single_step(
@@ -167,7 +163,7 @@ class TestIntegration:
             radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
             1, goal_position, particle_view_range, score_and_polarity_update_interval,
-            walls, directedness
+            walls
         )
 
         scores_before_update = particle_scores.copy()
@@ -178,7 +174,7 @@ class TestIntegration:
             radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
             5, goal_position, particle_view_range, score_and_polarity_update_interval,
-            walls, directedness
+            walls
         )
 
         # Scores should have been updated (particles close to goal should have lower scores)
@@ -211,14 +207,13 @@ class TestIntegration:
         particle_view_range = 20.0
         score_and_polarity_update_interval = 10
         walls = np.zeros((0, 4))
-        directedness = 1.0
 
         new_positions, _, _, _, _, _ = simulate_single_step(
             positions, orientations, velocities, payload_pos, payload_vel,
             radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
             step, goal_position, particle_view_range, score_and_polarity_update_interval,
-            walls, directedness
+            walls
         )
 
         # Particle should wrap around to other side

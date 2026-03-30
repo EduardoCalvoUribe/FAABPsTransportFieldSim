@@ -50,7 +50,6 @@ STIFFNESS = 25.0
 GOAL_POSITION = np.array([150.0, 280.0]) # np.array([83.3, 83.3])  # Top-left corner
 PARTICLE_VIEW_RANGE = 0.2 * BOX_SIZE * (1/1.414213)  # Range for goal detection
 SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
-DIRECTEDNESS = 1                    # 0 = pure vicsek alignment, 1 = pure gradient following
 END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
 POLARITY_NUDGE_INTERVAL = 5        # Every N steps, nudge heading toward polarity
 POLARITY_NUDGE_STRENGTH = 0.01       # Angular nudge magnitude (radians)
@@ -331,7 +330,6 @@ if __name__ == "__main__":
         'goal_position': GOAL_POSITION,
         'particle_view_range': PARTICLE_VIEW_RANGE,
         'score_and_polarity_update_interval': SCORE_AND_POLARITY_UPDATE_INTERVAL,
-        'directedness': DIRECTEDNESS,
         'end_when_goal_reached': END_WHEN_GOAL_REACHED,
         'polarity_nudge_interval': POLARITY_NUDGE_INTERVAL,
         'polarity_nudge_strength': POLARITY_NUDGE_STRENGTH,
@@ -369,7 +367,6 @@ if __name__ == "__main__":
         'goal_position': GOAL_POSITION,
         'particle_view_range': PARTICLE_VIEW_RANGE,
         'score_and_polarity_update_interval': SCORE_AND_POLARITY_UPDATE_INTERVAL,
-        'directedness': DIRECTEDNESS,
         'end_when_goal_reached': END_WHEN_GOAL_REACHED,
         'polarity_nudge_interval': POLARITY_NUDGE_INTERVAL,
         'polarity_nudge_strength': POLARITY_NUDGE_STRENGTH,

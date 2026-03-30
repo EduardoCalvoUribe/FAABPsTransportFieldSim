@@ -273,50 +273,6 @@ def has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls):
             return True
 
 
-@njit(fastmath=True)
-def compute_polarity_weighted_vicsek(neighbor_indices, neighbor_scores, all_polarity):
-    """Component 1: Score-weighted alignment with neighbors.
-
-    Lower scores = higher weight (stronger influence).
-    Uses exponential weighting: weight = exp(-(score - min_score)).
-
-    Args:
-        neighbor_indices: list of neighbor particle indices
-        neighbor_scores: scores of neighbor particles
-        all_polarity: polarity vectors of all particles
-
-    Returns:
-        weighted_polarity: normalized score-weighted average polarity vector
-    """
-    min_score = min(neighbor_scores)
-    weighted_polarity = np.zeros(2)
-    total_weight = 0.0
-
-    for idx in range(len(neighbor_indices)):
-        j = neighbor_indices[idx]
-        score_j = neighbor_scores[idx]
-
-        # Weight based on relative score difference from minimum
-        # Particles with min_score get weight=1.0, others get exponentially smaller weights
-        score_diff = score_j - min_score
-        weight = np.exp(-score_diff)  # Exponential decay based on score difference
-
-        weighted_polarity += weight * all_polarity[j]
-        total_weight += weight
-
-    # Normalize the weighted average
-    if total_weight > 0:
-        weighted_polarity = weighted_polarity / total_weight
-
-    # Normalize to unit vector
-    norm_weighted = np.sqrt(np.sum(weighted_polarity**2))
-    if norm_weighted > 0:
-        weighted_polarity = weighted_polarity / norm_weighted
-    else:
-        weighted_polarity = np.array([0.0, 0.0])
-
-    return weighted_polarity
-
 
 @njit(fastmath=True)
 def compute_polarity_toward_minscore_pos(pos_i, neighbor_scores, neighbor_positions, box_size):
@@ -411,8 +367,8 @@ def compute_polarity_toward_minscore_ang(pos_i, neighbor_scores, neighbor_positi
 
 
 @njit(fastmath=True)
-def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size, current_score, head, list_next, n_cells, all_polarity, payload_pos, payload_radius, walls, directedness):
-    """Compute polarity vector by balancing score-weighted alignment and gradient following.
+def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size, current_score, head, list_next, n_cells, all_polarity, payload_pos, payload_radius, walls):
+    """Compute polarity vector pointing toward lowest-score neighbor.
 
     Score calculation:
     - If goal is within range r: point to goal, return score 0
@@ -420,10 +376,7 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
     - If no neighbors in range: score = 9999
 
     Polarity calculation:
-    - Balances two components based on directedness parameter:
-      1. Score-weighted alignment: neighbors' polarity vectors weighted by exp(-(s_j - s_min)) (weight: 1 - directedness)
-      2. Gradient following: direction toward lowest-score neighbor position (weight: directedness)
-    - directedness ∈ [0, 1]: 0 = pure score-weighted Vicsek, 1 = pure gradient descent
+    - Points toward the position of the lowest-score neighbor(s)
 
     Uses bounding box optimization for neighbor search.
 
@@ -504,18 +457,11 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
     min_score = min(neighbor_scores)
     new_score = min_score + 1
 
-    # Component 1: Score-weighted alignment with neighbors
-    weighted_polarity = compute_polarity_weighted_vicsek(neighbor_indices, neighbor_scores, all_polarity)
+    # Direction toward particle with lowest score
+    combined_polarity = compute_polarity_toward_minscore_pos(pos_i, neighbor_scores, neighbor_positions, box_size)
 
-    # Component 2: Direction toward particle with lowest score
-    gradient_polarity = compute_polarity_toward_minscore_pos(pos_i, neighbor_scores, neighbor_positions, box_size)
-
-    # ALTERNATIVE Component 2: Uncomment to use average angle method instead
-    # gradient_polarity = compute_polarity_toward_minscore_ang(pos_i, neighbor_scores, neighbor_positions, box_size)
-
-    # Combine components based on directedness parameter
-    # (1-d): score-weighted alignment, (d): direct gradient following
-    combined_polarity = (1.0 - directedness) * weighted_polarity + directedness * gradient_polarity
+    # ALTERNATIVE: Uncomment to use average angle method instead
+    # combined_polarity = compute_polarity_toward_minscore_ang(pos_i, neighbor_scores, neighbor_positions, box_size)
 
     # Normalize final vector
     norm = np.sqrt(np.sum(combined_polarity**2))
@@ -531,7 +477,7 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
 def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel,
                          radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
-                         step, goal_position, particle_view_range, score_and_polarity_update_interval, walls, directedness,
+                         step, goal_position, particle_view_range, score_and_polarity_update_interval, walls,
                          max_curvity, min_curvity, mid_curvity,
                          polarity_nudge_interval, polarity_nudge_strength):
     """Simulate a single time step"""
@@ -550,7 +496,7 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
             polarity[i], particle_scores[i] = point_polarity_to_goal(
                 positions[i], goal_position, positions, particle_scores, i, n_particles,
                 particle_view_range, box_size, particle_scores[i], head_goal, list_next_goal, n_cells_goal,
-                polarity, payload_pos, payload_radius, walls, directedness
+                polarity, payload_pos, payload_radius, walls
             )
 
     curvity = compute_curvity_from_polarity(orientations, polarity, n_particles, max_curvity, min_curvity, mid_curvity)

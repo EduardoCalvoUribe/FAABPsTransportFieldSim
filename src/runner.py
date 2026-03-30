@@ -95,7 +95,7 @@ def run_payload_simulation(params):
             polarity, particle_scores, params['stiffness'],
             params['box_size'], params['payload_radius'], params['dt'], params['rot_diffusion'],
             n_particles, step, goal_position, particle_view_range, score_and_polarity_update_interval, walls,
-            params['directedness'], max_curvity, min_curvity, mid_curvity,
+            max_curvity, min_curvity, mid_curvity,
             polarity_nudge_interval, polarity_nudge_strength
         )
 
@@ -197,7 +197,6 @@ def save_simulation_data(filename, positions, orientations, velocities, payload_
         goal_position=params['goal_position'],
         particle_view_range=params['particle_view_range'],
         score_and_polarity_update_interval=params['score_and_polarity_update_interval'],
-        directedness=params['directedness'],
         # Wall parameters
         walls=params['walls']
     )

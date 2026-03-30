@@ -5,7 +5,6 @@ from src.simulation import (
     update_orientation_vectors,
     compute_curvity_from_polarity,
     has_line_of_sight,
-    compute_polarity_weighted_vicsek,
     compute_polarity_toward_minscore_pos,
     compute_polarity_toward_minscore_ang,
     point_polarity_to_goal
@@ -104,41 +103,6 @@ class TestLineOfSight:
 class TestPolarityComputation:
     """Tests for polarity vector computations."""
 
-    def test_compute_polarity_weighted_vicsek(self):
-        """Test score-weighted alignment computation."""
-        neighbor_indices = np.array([0, 1, 2])
-        neighbor_scores = np.array([5, 5, 10])  # Two with min score, one higher
-        all_polarity = np.array([
-            [1.0, 0.0],
-            [1.0, 0.0],
-            [0.0, 1.0]
-        ])
-
-        result = compute_polarity_weighted_vicsek(neighbor_indices, neighbor_scores, all_polarity)
-
-        # Lower scores should dominate
-        # Score 5 particles (weight=1) point in [1,0]
-        # Score 10 particle (weight=exp(-5)) points in [0,1]
-        # Result should be closer to [1,0] than [0,1]
-        assert result[0] > result[1]
-        # Result should be normalized
-        assert abs(np.linalg.norm(result) - 1.0) < 1e-6
-
-    def test_compute_polarity_weighted_vicsek_all_same_score(self):
-        """Test when all neighbors have same score."""
-        neighbor_indices = np.array([0, 1])
-        neighbor_scores = np.array([5, 5])
-        all_polarity = np.array([
-            [1.0, 0.0],
-            [0.0, 1.0]
-        ])
-
-        result = compute_polarity_weighted_vicsek(neighbor_indices, neighbor_scores, all_polarity)
-
-        # Equal weighting, should average to diagonal
-        expected = np.array([1.0, 1.0]) / np.sqrt(2)
-        np.testing.assert_array_almost_equal(result, expected, decimal=5)
-
     def test_compute_polarity_toward_minscore_pos(self):
         """Test direction toward minimum score particle."""
         pos_i = np.array([0.0, 0.0])
@@ -210,7 +174,6 @@ class TestGoalDirectedPolarity:
         payload_pos = np.array([50.0, 50.0])  # Not blocking
         payload_radius = 5.0
         walls = np.zeros((0, 4))
-        directedness = 1.0
 
         # Create simple cell list
         cell_size = r
@@ -222,7 +185,7 @@ class TestGoalDirectedPolarity:
         polarity, score = point_polarity_to_goal(
             pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size,
             current_score, head, list_next, n_cells, all_polarity, payload_pos, payload_radius,
-            walls, directedness
+            walls
         )
 
         # Should point directly at goal and have score 0
@@ -244,7 +207,6 @@ class TestGoalDirectedPolarity:
         payload_pos = np.array([0.0, 0.0])
         payload_radius = 5.0
         walls = np.zeros((0, 4))
-        directedness = 1.0
 
         cell_size = r
         head = np.ones((10, 10), dtype=np.int64) * -1
@@ -256,7 +218,7 @@ class TestGoalDirectedPolarity:
         polarity, score = point_polarity_to_goal(
             pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size,
             current_score, head, list_next, n_cells, all_polarity, payload_pos, payload_radius,
-            walls, directedness
+            walls
         )
 
         # No neighbors, should return score 9999
