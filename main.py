@@ -2,8 +2,32 @@ import numpy as np
 import time
 import os
 
+from src import wilson
 from src.runner import run_payload_simulation
 from src.visualization import create_payload_animation
+
+
+def maze_to_walls(passages, grid_size, box_size, include_boundary=True):
+    cell = box_size / grid_size
+    walls = []
+    if include_boundary:
+        walls += [
+            [0,        0,        0,        box_size],
+            [0,        0,        box_size, 0       ],
+            [box_size, box_size, 0,        box_size],
+            [box_size, box_size, box_size, 0       ],
+        ]
+    for r in range(grid_size - 1):
+        for c in range(grid_size):
+            if (r + 1, c) not in passages.get((r, c), set()):
+                y = (r + 1) * cell
+                walls.append([c * cell, y, (c + 1) * cell, y])
+    for r in range(grid_size):
+        for c in range(grid_size - 1):
+            if (r, c + 1) not in passages.get((r, c), set()):
+                x = (c + 1) * cell
+                walls.append([x, r * cell, x, (r + 1) * cell])
+    return np.array(walls, dtype=np.float64)
 
 
 #####################################################
@@ -33,34 +57,27 @@ MID_CURVITY = -0.25 #0
 # Payload parameters
 PAYLOAD_RADIUS = 20
 PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
-PAYLOAD_START_POSITION = np.array([50.0, 40.0])
+PAYLOAD_START_POSITION = np.array([30.0, 30.0])
 
 # Force parameters
 STIFFNESS = 25.0
 
 # Goal parameters
-GOAL_POSITION = np.array([150.0, 280.0]) # np.array([83.3, 83.3])  # Top-left corner
+GOAL_POSITION = np.array([270.0, 270.0]) # np.array([83.3, 83.3])  # Top-left corner
 PARTICLE_VIEW_RANGE = 0.2 * BOX_SIZE * (1/1.414213)  # Range for goal detection
 SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
 END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
 POLARITY_NUDGE_INTERVAL = 5        # Every N steps, nudge heading toward polarity
 POLARITY_NUDGE_STRENGTH = 0.01       # Angular nudge magnitude (radians)
 
-# Wall configuration (set to None for no walls)
-# Example walls:
-WALLS = np.array([
-    # Boundary walls
-    [0, 0, 0, BOX_SIZE],
-    [0, 0, BOX_SIZE, 0],
-    [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
-    [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
-    # Maze walls
-    # [BOX_SIZE*0.33, BOX_SIZE*0.66, BOX_SIZE, BOX_SIZE*0.66],
-    [0, BOX_SIZE*0.25, BOX_SIZE*0.55, BOX_SIZE*0.25], # bottom wall
-    [BOX_SIZE*0.375, BOX_SIZE, BOX_SIZE*0.375, BOX_SIZE*0.45], # top left wall
-    [BOX_SIZE*0.75, BOX_SIZE, BOX_SIZE*0.75, BOX_SIZE*0.45], # top right wall
-], dtype=np.float64)
-# WALLS = None
+# Wall configuration — generated from a Wilson maze
+MAZE_GRID_SIZE = 5  # W×W grid; larger = more cells, narrower corridors
+WALLS = maze_to_walls(
+    wilson.generate(MAZE_GRID_SIZE, seed=42),
+    MAZE_GRID_SIZE,
+    BOX_SIZE,
+)
+# WALLS = None  # uncomment to disable walls entirely
 # WALLS = np.array([
 #     # Boundary walls
 #     [0, 0, 0, BOX_SIZE],
@@ -95,7 +112,7 @@ WALLS = np.array([
 # Visualization parameters
 SHOW_VECTORS = True              # Display v vectors as arrows
 COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "D:/PostThesis/visualizations/test5_5.mp4"           # If None, uses timestamp. Otherwise specify path.
+OUTPUT_FILENAME = "D:/PostThesis/visualizations/genmaze0.mp4"           # If None, uses timestamp. Otherwise specify path.
 # OUTPUT_FILENAME = "c:/Users/educa/Downloads/test2.mp4"
 # Data saving (set to True to save simulation data)
 SAVE_DATA = False
