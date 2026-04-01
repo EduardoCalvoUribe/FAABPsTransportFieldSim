@@ -81,7 +81,7 @@ class TestWallForces:
         """Test wall force when particle collides with wall."""
         pos = np.array([0.5, 5.0])
         radius = 1.0
-        walls = np.array([[0, 0, 0, 10]])  # Wall along y-axis at x=0
+        walls = np.array([[0, 0, 0, 10, 0]], dtype=np.float64)  # Wall along y-axis at x=0
         stiffness = 10.0
 
         force = compute_wall_forces(pos, radius, walls, stiffness)
@@ -97,7 +97,7 @@ class TestWallForces:
         """Test no force when particle doesn't collide with wall."""
         pos = np.array([5.0, 5.0])
         radius = 1.0
-        walls = np.array([[0, 0, 0, 10]])
+        walls = np.array([[0, 0, 0, 10, 0]], dtype=np.float64)
         stiffness = 10.0
 
         force = compute_wall_forces(pos, radius, walls, stiffness)
@@ -109,9 +109,9 @@ class TestWallForces:
         pos = np.array([0.5, 0.5])
         radius = 1.0
         walls = np.array([
-            [0, 0, 0, 10],   # Left wall
-            [0, 0, 10, 0]    # Bottom wall
-        ])
+            [0, 0, 0, 10, 0],   # Left wall
+            [0, 0, 10, 0, 0]    # Bottom wall
+        ], dtype=np.float64)
         stiffness = 10.0
 
         force = compute_wall_forces(pos, radius, walls, stiffness)
@@ -124,7 +124,7 @@ class TestWallForces:
         """Test with no walls present."""
         pos = np.array([5.0, 5.0])
         radius = 1.0
-        walls = np.zeros((0, 4))
+        walls = np.zeros((0, 5), dtype=np.float64)
         stiffness = 10.0
 
         force = compute_wall_forces(pos, radius, walls, stiffness)

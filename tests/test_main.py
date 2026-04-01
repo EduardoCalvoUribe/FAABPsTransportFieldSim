@@ -42,7 +42,7 @@ class TestIntegration:
         goal_position = np.array([10.0, 10.0])
         particle_view_range = 20.0
         score_and_polarity_update_interval = 10
-        walls = np.zeros((0, 4))
+        walls = np.zeros((0, 5), dtype=np.float64)
 
         new_positions, new_orientations, new_velocities, new_payload_pos, new_payload_vel, curvity = simulate_single_step(
             positions, orientations, velocities, payload_pos, payload_vel,
@@ -98,11 +98,11 @@ class TestIntegration:
         particle_view_range = 15.0
         score_and_polarity_update_interval = 5
         walls = np.array([
-            [0, 0, 0, box_size],
-            [0, 0, box_size, 0],
-            [box_size, box_size, 0, box_size],
-            [box_size, box_size, box_size, 0]
-        ])
+            [0, 0, 0, box_size, 0],
+            [0, 0, box_size, 0, 0],
+            [box_size, box_size, 0, box_size, 0],
+            [box_size, box_size, box_size, 0, 0]
+        ], dtype=np.float64)
         new_positions, new_orientations, new_velocities, new_payload_pos, new_payload_vel, curvity = simulate_single_step(
             positions, orientations, velocities, payload_pos, payload_vel,
             radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
@@ -155,7 +155,7 @@ class TestIntegration:
         goal_position = np.array([10.0, 10.0])
         particle_view_range = 20.0
         score_and_polarity_update_interval = 5
-        walls = np.zeros((0, 4))
+        walls = np.zeros((0, 5), dtype=np.float64)
 
         # Run at step that should NOT update (step 1, interval 5)
         _, _, _, _, _, _ = simulate_single_step(
@@ -206,7 +206,7 @@ class TestIntegration:
         goal_position = np.array([50.0, 50.0])
         particle_view_range = 20.0
         score_and_polarity_update_interval = 10
-        walls = np.zeros((0, 4))
+        walls = np.zeros((0, 5), dtype=np.float64)
 
         new_positions, _, _, _, _, _ = simulate_single_step(
             positions, orientations, velocities, payload_pos, payload_vel,

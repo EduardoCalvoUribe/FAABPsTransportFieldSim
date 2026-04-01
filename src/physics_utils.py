@@ -15,6 +15,185 @@ def normalize(v):
         return v / norm
     return v
 
+
+##############################
+# Arc geometry helpers       #
+##############################
+
+@njit(fastmath=True)
+def _angle_ccw(ax, ay, bx, by):
+    """CCW angle in [0, 2π) to rotate from vector (ax,ay) to vector (bx,by)."""
+    cross = ax * by - ay * bx
+    dot = ax * bx + ay * by
+    a = math.atan2(cross, dot)
+    if a < 0.0:
+        a += 2.0 * math.pi
+    return a
+
+
+@njit(fastmath=True)
+def _point_on_arc(qx, qy, cx, cy, p1x, p1y, p2x, p2y):
+    """Check if Q (on the circle) lies on the minor arc from P1 to P2 with center C.
+
+    Convention: the arc is the shorter one (subtending ≤ 180° at center C).
+    Returns True if Q is on the arc (including endpoints), False otherwise.
+    """
+    v1x, v1y = p1x - cx, p1y - cy
+    v2x, v2y = p2x - cx, p2y - cy
+    vqx, vqy = qx - cx, qy - cy
+
+    span_ccw = _angle_ccw(v1x, v1y, v2x, v2y)
+
+    if span_ccw <= math.pi + 1e-9:
+        # Minor arc goes CCW from P1 to P2
+        to_q = _angle_ccw(v1x, v1y, vqx, vqy)
+        return to_q <= span_ccw + 1e-9
+    else:
+        # Minor arc goes CW from P1 to P2
+        span_cw = 2.0 * math.pi - span_ccw
+        to_q_cw = _angle_ccw(vqx, vqy, v1x, v1y)
+        return to_q_cw <= span_cw + 1e-9
+
+
+@njit(fastmath=True)
+def _arc_center(x1, y1, x2, y2, c):
+    """Compute the center of the circular arc defined by endpoints and curvature c.
+
+    c = chord_length / (2 * radius), with sign determining which side the arc bulges:
+      c > 0: arc bulges left of p1→p2 direction
+      c < 0: arc bulges right
+
+    Returns (cx, cy, R): arc center coordinates and radius.
+    """
+    chx, chy = x2 - x1, y2 - y1
+    chord_len = math.sqrt(chx * chx + chy * chy)
+    R = chord_len / (2.0 * abs(c))
+    half_chord = chord_len / 2.0
+    h_sq = R * R - half_chord * half_chord
+    h = math.sqrt(h_sq) if h_sq > 0.0 else 0.0
+
+    # CW perpendicular to chord direction: rotate chord 90° clockwise = (chy, -chx)/chord_len
+    cw_perp_x = chy / chord_len
+    cw_perp_y = -chx / chord_len
+
+    mid_x = (x1 + x2) * 0.5
+    mid_y = (y1 + y2) * 0.5
+
+    sc = 1.0 if c > 0.0 else -1.0
+    cx = mid_x + sc * h * cw_perp_x
+    cy = mid_y + sc * h * cw_perp_y
+    return cx, cy, R
+
+
+@njit(fastmath=True)
+def point_to_curve_distance(px, py, x1, y1, x2, y2, c):
+    """Minimum distance from point (px,py) to a wall defined by two endpoints and curvature c.
+
+    When c ≈ 0: the wall is a straight segment (delegates to point_to_segment_distance).
+    When c ≠ 0: the wall is a circular arc.
+
+    Returns (distance, closest_x, closest_y).
+    """
+    if abs(c) < 1e-9:
+        return point_to_segment_distance(px, py, x1, y1, x2, y2)
+
+    chx, chy = x2 - x1, y2 - y1
+    chord_len = math.sqrt(chx * chx + chy * chy)
+    if chord_len < 1e-10:
+        return point_to_segment_distance(px, py, x1, y1, x2, y2)
+
+    cx, cy, R = _arc_center(x1, y1, x2, y2, c)
+
+    # Project particle radially onto the circle
+    dx, dy = px - cx, py - cy
+    dist_to_center = math.sqrt(dx * dx + dy * dy)
+
+    if dist_to_center < 1e-10:
+        # Particle at center; fall back to nearer endpoint
+        d1 = math.sqrt((px - x1) ** 2 + (py - y1) ** 2)
+        d2 = math.sqrt((px - x2) ** 2 + (py - y2) ** 2)
+        if d1 <= d2:
+            return d1, x1, y1
+        return d2, x2, y2
+
+    # Projection on circle surface (outward from center)
+    proj_x = cx + R * dx / dist_to_center
+    proj_y = cy + R * dy / dist_to_center
+
+    if _point_on_arc(proj_x, proj_y, cx, cy, x1, y1, x2, y2):
+        distance = abs(dist_to_center - R)
+        # Return a virtual closest point that always yields the outward normal
+        # (pos - closest)/distance == (particle - center)/dist_to_center
+        outward_x = dx / dist_to_center
+        outward_y = dy / dist_to_center
+        closest_x = px - distance * outward_x
+        closest_y = py - distance * outward_y
+        return distance, closest_x, closest_y
+
+    # Projection not on arc: closest is one of the endpoints
+    d1 = math.sqrt((px - x1) ** 2 + (py - y1) ** 2)
+    d2 = math.sqrt((px - x2) ** 2 + (py - y2) ** 2)
+    if d1 <= d2:
+        return d1, x1, y1
+    return d2, x2, y2
+
+
+@njit(fastmath=True)
+def line_intersects_arc(ax, ay, bx, by, x1, y1, x2, y2, c):
+    """Check if line segment A→B intersects a wall arc defined by endpoints and curvature c.
+
+    When c ≈ 0: delegates to line_segments_intersect.
+    When c ≠ 0: finds line-circle intersections and checks if they fall on the arc.
+    """
+    if abs(c) < 1e-9:
+        return line_segments_intersect(ax, ay, bx, by, x1, y1, x2, y2)
+
+    chx, chy = x2 - x1, y2 - y1
+    chord_len = math.sqrt(chx * chx + chy * chy)
+    if chord_len < 1e-10:
+        return False
+
+    cx, cy, R = _arc_center(x1, y1, x2, y2, c)
+
+    # Quadratic coefficients for line-circle intersection
+    # L(t) = (ax,ay) + t*(dx,dy), |L(t) - (cx,cy)|^2 = R^2
+    dx, dy = bx - ax, by - ay
+    fx, fy = ax - cx, ay - cy
+
+    a_q = dx * dx + dy * dy
+    if a_q < 1e-20:
+        return False  # Degenerate segment (point)
+
+    b_q = 2.0 * (fx * dx + fy * dy)
+    c_q = fx * fx + fy * fy - R * R
+
+    disc = b_q * b_q - 4.0 * a_q * c_q
+    if disc < 0.0:
+        return False
+
+    sqrt_disc = math.sqrt(disc)
+
+    t1 = (-b_q - sqrt_disc) / (2.0 * a_q)
+    if 0.0 <= t1 <= 1.0:
+        ix = ax + t1 * dx
+        iy = ay + t1 * dy
+        if _point_on_arc(ix, iy, cx, cy, x1, y1, x2, y2):
+            return True
+
+    t2 = (-b_q + sqrt_disc) / (2.0 * a_q)
+    if 0.0 <= t2 <= 1.0:
+        ix = ax + t2 * dx
+        iy = ay + t2 * dy
+        if _point_on_arc(ix, iy, cx, cy, x1, y1, x2, y2):
+            return True
+
+    return False
+
+
+##############################
+# Straight-wall helpers      #
+##############################
+
 @njit(fastmath=True)
 def line_segments_intersect(p1_x, p1_y, p2_x, p2_y, p3_x, p3_y, p4_x, p4_y):
     """Check if line segment (p1, p2) intersects with line segment (p3, p4).
@@ -103,16 +282,18 @@ def line_intersects_any_wall(p1_x, p1_y, p2_x, p2_y, walls):
     Args:
         p1_x, p1_y: Start point coordinates
         p2_x, p2_y: End point coordinates
-        walls: np.ndarray of shape (n_walls, 4) with [x1, y1, x2, y2] per wall
+        walls: np.ndarray of shape (n_walls, 5) with [x1, y1, x2, y2, c] per wall,
+               where c is the arc curvature (0 = straight segment).
 
     Returns:
         bool: True if line intersects any wall, False otherwise
     """
     n_walls = walls.shape[0]
     for i in range(n_walls):
-        if line_segments_intersect(p1_x, p1_y, p2_x, p2_y,
-                                   walls[i, 0], walls[i, 1],
-                                   walls[i, 2], walls[i, 3]):
+        if line_intersects_arc(p1_x, p1_y, p2_x, p2_y,
+                               walls[i, 0], walls[i, 1],
+                               walls[i, 2], walls[i, 3],
+                               walls[i, 4]):
             return True
     return False
 

@@ -125,9 +125,9 @@ class TestWallIntersections:
     def test_line_intersects_any_wall(self):
         """Test checking line intersection with walls."""
         walls = np.array([
-            [0, 0, 10, 10],
-            [0, 10, 10, 0]
-        ])
+            [0, 0, 10, 10, 0],
+            [0, 10, 10, 0, 0]
+        ], dtype=np.float64)
         # Line through middle should hit both walls
         assert line_intersects_any_wall(5, 0, 5, 10, walls) == True
         # Line outside should miss
@@ -135,12 +135,12 @@ class TestWallIntersections:
 
     def test_line_intersects_no_walls(self):
         """Test with no walls present."""
-        walls = np.zeros((0, 4))
+        walls = np.zeros((0, 5), dtype=np.float64)
         assert line_intersects_any_wall(0, 0, 10, 10, walls) == False
 
     def test_particles_separated_by_wall(self):
         """Test if wall blocks particles."""
-        walls = np.array([[5, 0, 5, 10]])
+        walls = np.array([[5, 0, 5, 10, 0]], dtype=np.float64)
         pos_i = np.array([0.0, 5.0])
         pos_j = np.array([10.0, 5.0])
         # Wall at x=5 blocks particles at x=0 and x=10
@@ -148,7 +148,7 @@ class TestWallIntersections:
 
     def test_particles_not_separated_by_wall(self):
         """Test particles not separated by wall."""
-        walls = np.array([[5, 0, 5, 10]])
+        walls = np.array([[5, 0, 5, 10, 0]], dtype=np.float64)
         pos_i = np.array([0.0, 5.0])
         pos_j = np.array([4.0, 5.0])
         # Both particles on same side of wall
@@ -156,7 +156,7 @@ class TestWallIntersections:
 
     def test_particles_separated_by_wall_periodic(self):
         """Test wall blocking with periodic boundaries."""
-        walls = np.array([[50, 0, 50, 100]])  # Wall at x=50
+        walls = np.array([[50, 0, 50, 100, 0]], dtype=np.float64)  # Wall at x=50
         pos_i = np.array([5.0, 50.0])
         pos_j = np.array([95.0, 50.0])
         box_size = 100.0

@@ -29,7 +29,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     payload_radius = params['payload_radius']
     n_particles = params['n_particles']
     goal_position = params['goal_position']
-    walls = params.get('walls', np.zeros((0, 4), dtype=np.float64))
+    walls = params.get('walls', np.zeros((0, 5), dtype=np.float64))
 
     # Create figure and axis
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -108,16 +108,42 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     goal, = ax.plot(goal_position[0], goal_position[1], 'g*', markersize=15, markeredgewidth=1.5, markeredgecolor='darkgreen')
     # Green star marker for goal point
 
-    # Draw walls
+    # Draw walls (straight or curved)
+    def _arc_plot_points(x1, y1, x2, y2, c, n_pts=64):
+        """Return (xs, ys) arrays to draw a wall arc. Falls back to segment when c≈0."""
+        if abs(c) < 1e-9:
+            return [x1, x2], [y1, y2]
+        chx, chy = x2 - x1, y2 - y1
+        chord_len = np.sqrt(chx**2 + chy**2)
+        if chord_len < 1e-10:
+            return [x1, x2], [y1, y2]
+        R = chord_len / (2.0 * abs(c))
+        h = np.sqrt(max(R**2 - (chord_len / 2)**2, 0.0))
+        cw_perp = np.array([chy, -chx]) / chord_len
+        mid = np.array([(x1 + x2) / 2, (y1 + y2) / 2])
+        sc = 1.0 if c > 0 else -1.0
+        center = mid + sc * h * cw_perp
+        theta1 = np.arctan2(y1 - center[1], x1 - center[0])
+        theta2 = np.arctan2(y2 - center[1], x2 - center[0])
+        span_ccw = (theta2 - theta1) % (2 * np.pi)
+        if span_ccw <= np.pi:
+            thetas = np.linspace(theta1, theta1 + span_ccw, n_pts)
+        else:
+            span_cw = 2 * np.pi - span_ccw
+            thetas = np.linspace(theta1, theta1 - span_cw, n_pts)
+        return (center[0] + R * np.cos(thetas)).tolist(), (center[1] + R * np.sin(thetas)).tolist()
+
     wall_lines = []
     for i in range(walls.shape[0]):
+        xs, ys = _arc_plot_points(
+            walls[i, 0], walls[i, 1], walls[i, 2], walls[i, 3], walls[i, 4]
+        )
         line, = ax.plot(
-            [walls[i, 0], walls[i, 2]],  # x-coordinates: [x1, x2]
-            [walls[i, 1], walls[i, 3]],  # y-coordinates: [y1, y2]
+            xs, ys,
             color='black',
             linewidth=4,
             solid_capstyle='round',
-            zorder=10  # Draw on top of particles
+            zorder=10
         )
         wall_lines.append(line)
 

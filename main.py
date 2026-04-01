@@ -7,26 +7,46 @@ from src.runner import run_payload_simulation
 from src.visualization import create_payload_animation
 
 
+def K_to_c(K, x1, y1, x2, y2):
+    """Convert standard curvature K = 1/R to the chord-normalised curvature c = chord/(2R).
+
+    Args:
+        K: signed curvature (positive = bulges left of p1→p2, negative = right)
+        x1, y1, x2, y2: wall endpoints (needed to compute chord length)
+
+    Returns:
+        c: chord-normalised curvature; pass as the 5th column of a wall row.
+    """
+    chord = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    return K * chord / 2.0
+
+
 def maze_to_walls(passages, grid_size, box_size, include_boundary=True):
     cell = box_size / grid_size
     walls = []
     if include_boundary:
         walls += [
-            [0,        0,        0,        box_size],
-            [0,        0,        box_size, 0       ],
-            [box_size, box_size, 0,        box_size],
-            [box_size, box_size, box_size, 0       ],
+            [0,        cell/2-5,        0,        box_size-(cell/2)+5, 0],
+            [cell/2-5,        0,        box_size-(cell/2)+5, 0,        0],
+            [box_size-(cell/2)+5, box_size, cell/2-5,        box_size, 0],
+            [box_size, box_size-(cell/2)+5, box_size, cell/2-5,        0],   
+        ]
+        walls += [
+            [0,        cell/2,        cell/2,        0,            -0.707107], # 0.707107 = sqrt(2)/2. this c value results in a quarter circle
+            [box_size-(cell/2),        0,        box_size, cell/2, -0.707107],
+            [cell/2, box_size, 0, box_size-(cell/2),        -0.707107],   
+            [box_size-(cell/2), box_size, box_size,        box_size-(cell/2), 0.707107],
         ]
     for r in range(grid_size - 1):
         for c in range(grid_size):
             if (r + 1, c) not in passages.get((r, c), set()):
                 y = (r + 1) * cell
-                walls.append([c * cell, y, (c + 1) * cell, y])
+                walls.append([c * cell, y, (c + 1) * cell, y, 0])
     for r in range(grid_size):
         for c in range(grid_size - 1):
             if (r, c + 1) not in passages.get((r, c), set()):
                 x = (c + 1) * cell
-                walls.append([x, r * cell, x, (r + 1) * cell])
+                walls.append([x, r * cell, x, (r + 1) * cell, 0])
     return np.array(walls, dtype=np.float64)
 
 
@@ -40,7 +60,7 @@ RANDOM_SEED = 42
 # Simulation parameters
 N_PARTICLES = 600
 BOX_SIZE = 300
-N_STEPS = 1000
+N_STEPS = 10000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -79,40 +99,40 @@ WALLS = maze_to_walls(
 )
 # WALLS = None  # uncomment to disable walls entirely
 # WALLS = np.array([
-#     # Boundary walls
-#     [0, 0, 0, BOX_SIZE],
-#     [0, 0, BOX_SIZE, 0],
-#     [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
-#     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
+#     # Boundary walls                                                    c
+#     [0, 0, 0, BOX_SIZE,                                                 0],
+#     [0, 0, BOX_SIZE, 0,                                                 0],
+#     [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE,                                   0],
+#     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0,                                   0],
 #     # Inverted Y shape walls
-#     # [2 * BOX_SIZE/6, BOX_SIZE, 4 * BOX_SIZE/6, BOX_SIZE], #top wall
-#     [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 2.2 * BOX_SIZE/6, BOX_SIZE], #top left
-#     [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, 3.8 * BOX_SIZE/6, BOX_SIZE], #top right
-#     [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 0, 4 * BOX_SIZE/7], # left shoulder
-#     [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, BOX_SIZE, 4 * BOX_SIZE/7], # right shoulder
-#     # [0, 4 * BOX_SIZE/7, 0, 0], #bot left
-#     # [BOX_SIZE, 4*BOX_SIZE/7, BOX_SIZE, 0], #bot right
-#     # [0, 0, BOX_SIZE, 0], #bot
-#     [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 2 * BOX_SIZE/7, 0], #inner left
-#     [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7], #inner top
-#     [5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 0], #inner right
+#     # [2 * BOX_SIZE/6, BOX_SIZE, 4 * BOX_SIZE/6, BOX_SIZE,             0], #top wall
+#     [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 2.2 * BOX_SIZE/6, BOX_SIZE,    0], #top left
+#     [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, 3.8 * BOX_SIZE/6, BOX_SIZE,    0], #top right
+#     [2.2 * BOX_SIZE/6, 4 * BOX_SIZE/7, 0, 4 * BOX_SIZE/7,             0], # left shoulder
+#     [3.8 * BOX_SIZE/6, 4 * BOX_SIZE/7, BOX_SIZE, 4 * BOX_SIZE/7,      0], # right shoulder
+#     # [0, 4 * BOX_SIZE/7, 0, 0,                                         0], #bot left
+#     # [BOX_SIZE, 4*BOX_SIZE/7, BOX_SIZE, 0,                             0], #bot right
+#     # [0, 0, BOX_SIZE, 0,                                                0], #bot
+#     [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 2 * BOX_SIZE/7, 0,             0], #inner left
+#     [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 2.5*BOX_SIZE/7, 0], #inner top
+#     [5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 0,             0], #inner right
 # ], dtype=np.float64)
 # WALLS = np.array([
-#     # Boundary walls
-#     [0, 0, 0, BOX_SIZE],
-#     [0, 0, BOX_SIZE, 0],
-#     [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE],
-#     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0],
+#     # Boundary walls                                                    c
+#     [0, 0, 0, BOX_SIZE,                                                 0],
+#     [0, 0, BOX_SIZE, 0,                                                 0],
+#     [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE,                                   0],
+#     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0,                                   0],
 #     # walls inside
-#     # [0, 33.3, 66.6, 33.3],
-#     # [33.3, 66.6, 100.0, 66.3]
+#     # [0, 33.3, 66.6, 33.3,                                             0],
+#     # [33.3, 66.6, 100.0, 66.3,                                         0],
 # ], dtype=np.float64)
 
 
 # Visualization parameters
 SHOW_VECTORS = True              # Display v vectors as arrows
 COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "D:/PostThesis/visualizations/genmaze0.mp4"           # If None, uses timestamp. Otherwise specify path.
+OUTPUT_FILENAME = "D:/PostThesis/visualizations/genmaze2.mp4"           # If None, uses timestamp. Otherwise specify path.
 # OUTPUT_FILENAME = "c:/Users/educa/Downloads/test2.mp4"
 # Data saving (set to True to save simulation data)
 SAVE_DATA = False

@@ -81,7 +81,7 @@ class TestLineOfSight:
         goal_position = np.array([20.0, 0.0])
         payload_pos = np.array([50.0, 50.0])  # Out of the way
         payload_radius = 5.0
-        walls = np.array([[10, -5, 10, 5]])  # Wall crosses path
+        walls = np.array([[10, -5, 10, 5, 0]], dtype=np.float64)  # Wall crosses path
 
         result = has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls)
 
@@ -173,7 +173,7 @@ class TestGoalDirectedPolarity:
         current_score = 9999
         payload_pos = np.array([50.0, 50.0])  # Not blocking
         payload_radius = 5.0
-        walls = np.zeros((0, 4))
+        walls = np.zeros((0, 5), dtype=np.float64)
 
         # Create simple cell list
         cell_size = r
@@ -206,7 +206,7 @@ class TestGoalDirectedPolarity:
         current_score = 9999
         payload_pos = np.array([0.0, 0.0])
         payload_radius = 5.0
-        walls = np.zeros((0, 4))
+        walls = np.zeros((0, 5), dtype=np.float64)
 
         cell_size = r
         head = np.ones((10, 10), dtype=np.int64) * -1
@@ -300,7 +300,7 @@ class TestAllForces:
         stiffness = 10.0
         n_particles = 2
         box_size = 100.0
-        walls = np.zeros((0, 4))
+        walls = np.zeros((0, 5), dtype=np.float64)
 
         particle_forces, payload_force = compute_all_forces(
             positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls
@@ -322,7 +322,7 @@ class TestAllForces:
         stiffness = 10.0
         n_particles = 2
         box_size = 100.0
-        walls = np.zeros((0, 4))
+        walls = np.zeros((0, 5), dtype=np.float64)
 
         particle_forces, payload_force = compute_all_forces(
             positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls
@@ -345,7 +345,7 @@ class TestAllForces:
         stiffness = 10.0
         n_particles = 1
         box_size = 100.0
-        walls = np.zeros((0, 4))
+        walls = np.zeros((0, 5), dtype=np.float64)
 
         particle_forces, payload_force = compute_all_forces(
             positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls

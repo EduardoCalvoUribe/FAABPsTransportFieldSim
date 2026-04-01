@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit, int64
 
-from .physics_utils import compute_minimum_distance, point_to_segment_distance
+from .physics_utils import compute_minimum_distance, point_to_curve_distance
 
 
 ##########################
@@ -50,14 +50,15 @@ def compute_wall_forces(pos, radius, walls, stiffness):
     """Compute repulsive forces from all walls on a particle/payload.
 
     For each wall:
-    1. Calculate distance from particle center to wall segment
+    1. Calculate distance from particle center to wall (segment or arc)
     2. If distance < radius: particle is colliding with wall
     3. Apply force: F = stiffness * (radius - distance) * normal_direction
 
     Args:
         pos: np.ndarray [x, y], particle/payload position
         radius: float, particle/payload radius
-        walls: np.ndarray of shape (n_walls, 4) with [x1, y1, x2, y2] per wall
+        walls: np.ndarray of shape (n_walls, 5) with [x1, y1, x2, y2, c] per wall,
+               where c is the arc curvature (0 = straight segment).
         stiffness: float, wall stiffness (same as particle stiffness)
 
     Returns:
@@ -67,37 +68,28 @@ def compute_wall_forces(pos, radius, walls, stiffness):
     n_walls = walls.shape[0]
 
     for w in range(n_walls):
-        # Get wall segment endpoints
-        x1, y1, x2, y2 = walls[w, 0], walls[w, 1], walls[w, 2], walls[w, 3]
+        x1, y1, x2, y2, c = walls[w, 0], walls[w, 1], walls[w, 2], walls[w, 3], walls[w, 4]
 
-        # Calculate distance from particle to wall segment
-        distance, closest_x, closest_y = point_to_segment_distance(pos[0], pos[1], x1, y1, x2, y2)
+        distance, closest_x, closest_y = point_to_curve_distance(pos[0], pos[1], x1, y1, x2, y2, c)
 
-        # Check for collision
         if distance < radius:
             overlap = radius - distance
 
-            # Calculate normal vector (from wall toward particle)
             if distance > 1e-10:
-                # Normal direction: from closest point on wall toward particle center
                 normal_x = (pos[0] - closest_x) / distance
                 normal_y = (pos[1] - closest_y) / distance
             else:
-                # Particle exactly on wall - use perpendicular to wall direction
+                # Particle exactly on wall — push perpendicular to wall chord
                 wall_dx = x2 - x1
                 wall_dy = y2 - y1
-                wall_len = np.sqrt(wall_dx*wall_dx + wall_dy*wall_dy)
-
+                wall_len = np.sqrt(wall_dx * wall_dx + wall_dy * wall_dy)
                 if wall_len > 1e-10:
-                    # Perpendicular vector (rotate 90 degrees)
                     normal_x = -wall_dy / wall_len
                     normal_y = wall_dx / wall_len
                 else:
-                    # Degenerate wall, push in arbitrary direction
                     normal_x = 1.0
                     normal_y = 0.0
 
-            # Apply repulsive force
             force_magnitude = stiffness * overlap
             force[0] += force_magnitude * normal_x
             force[1] += force_magnitude * normal_y
