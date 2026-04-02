@@ -69,6 +69,38 @@ def maze_to_walls(passages, grid_size, box_size, include_boundary=True):
             if h_left  and v_up:   walls.append([cx - R, ry, cx, ry + R, -C_ARC])
             if h_left  and v_down: walls.append([cx - R, ry, cx, ry - R, +C_ARC])
 
+    # Corners where interior walls meet the boundary.
+    # The boundary always supplies both V directions (left/right edges) or both H
+    # directions (top/bottom edges), so two arcs are added per interior wall end.
+    if include_boundary:
+        # Left boundary (x=0): horizontal wall goes right from (0, r_int*cell)
+        for r_int in range(1, grid_size):
+            if (r_int, 0) not in passages.get((r_int - 1, 0), set()):
+                ry = r_int * cell
+                walls.append([R, ry, 0, ry + R, +C_ARC])  # H_right + V_up
+                walls.append([R, ry, 0, ry - R, -C_ARC])  # H_right + V_down
+
+        # Right boundary (x=box_size): horizontal wall goes left from (box_size, r_int*cell)
+        for r_int in range(1, grid_size):
+            if (r_int, grid_size - 1) not in passages.get((r_int - 1, grid_size - 1), set()):
+                ry = r_int * cell
+                walls.append([box_size - R, ry, box_size, ry + R, -C_ARC])  # H_left + V_up
+                walls.append([box_size - R, ry, box_size, ry - R, +C_ARC])  # H_left + V_down
+
+        # Bottom boundary (y=0): vertical wall goes up from (c_int*cell, 0)
+        for c_int in range(1, grid_size):
+            if (0, c_int) not in passages.get((0, c_int - 1), set()):
+                cx = c_int * cell
+                walls.append([cx + R, 0, cx, R, +C_ARC])  # H_right + V_up
+                walls.append([cx - R, 0, cx, R, -C_ARC])  # H_left  + V_up
+
+        # Top boundary (y=box_size): vertical wall goes down from (c_int*cell, box_size)
+        for c_int in range(1, grid_size):
+            if (grid_size - 1, c_int) not in passages.get((grid_size - 1, c_int - 1), set()):
+                cx = c_int * cell
+                walls.append([cx + R, box_size, cx, box_size - R, -C_ARC])  # H_right + V_down
+                walls.append([cx - R, box_size, cx, box_size - R, +C_ARC])  # H_left  + V_down
+
     return np.array(walls, dtype=np.float64)
 
 
@@ -154,7 +186,7 @@ WALLS = maze_to_walls(
 # Visualization parameters
 SHOW_VECTORS = True              # Display v vectors as arrows
 COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "D:/PostThesis/visualizations/genmaze2.mp4"           # If None, uses timestamp. Otherwise specify path.
+OUTPUT_FILENAME = "D:/PostThesis/visualizations/genmaze3.mp4"           # If None, uses timestamp. Otherwise specify path.
 # OUTPUT_FILENAME = "c:/Users/educa/Downloads/test2.mp4"
 # Data saving (set to True to save simulation data)
 SAVE_DATA = False
