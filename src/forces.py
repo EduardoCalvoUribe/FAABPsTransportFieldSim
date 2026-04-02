@@ -107,8 +107,8 @@ def create_cell_list(positions, box_size, cell_size, n_particles):
     # fails to work without int64 for some reason
 
     for i in range(n_particles):
-        cell_x = int(positions[i, 0] / cell_size) # , n_cells - 1
-        cell_y = int(positions[i, 1] / cell_size) # , n_cells - 1
+        cell_x = min(int(positions[i, 0] / cell_size), n_cells - 1)
+        cell_y = min(int(positions[i, 1] / cell_size), n_cells - 1)
 
         list_next[i] = head[cell_x, cell_y]
         head[cell_x, cell_y] = i
