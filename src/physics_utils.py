@@ -122,13 +122,10 @@ def point_to_curve_distance(px, py, x1, y1, x2, y2, c):
 
     if _point_on_arc(proj_x, proj_y, cx, cy, x1, y1, x2, y2):
         distance = abs(dist_to_center - R)
-        # Return a virtual closest point that always yields the outward normal
-        # (pos - closest)/distance == (particle - center)/dist_to_center
-        outward_x = dx / dist_to_center
-        outward_y = dy / dist_to_center
-        closest_x = px - distance * outward_x
-        closest_y = py - distance * outward_y
-        return distance, closest_x, closest_y
+        # proj_x/proj_y is the actual closest point on the arc.
+        # (pos - proj)/distance is outward from center when outside the circle,
+        # and inward (toward center) when inside — correctly repelling from both sides.
+        return distance, proj_x, proj_y
 
     # Projection not on arc: closest is one of the endpoints
     d1 = math.sqrt((px - x1) ** 2 + (py - y1) ** 2)
