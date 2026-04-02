@@ -23,19 +23,21 @@ def K_to_c(K, x1, y1, x2, y2):
 
 def maze_to_walls(passages, grid_size, box_size, include_boundary=True):
     cell = box_size / grid_size
+    R = cell / 2
+    C_ARC = 0.707107  # sin(45°) = sqrt(2)/2 → quarter circle
     walls = []
     if include_boundary:
         walls += [
-            [0,        cell/2-5,        0,        box_size-(cell/2)+5, 0],
-            [cell/2-5,        0,        box_size-(cell/2)+5, 0,        0],
-            [box_size-(cell/2)+5, box_size, cell/2-5,        box_size, 0],
-            [box_size, box_size-(cell/2)+5, box_size, cell/2-5,        0],   
+            [0,        R-5,        0,        box_size-(R)+5, 0],
+            [cell/2-5,        0,        box_size-(R)+5, 0,        0],
+            [box_size-(R)+5, box_size, R-5,        box_size, 0],
+            [box_size, box_size-(R)+5, box_size, R,        0],   
         ]
         walls += [
-            [0,        cell/2,        cell/2,        0,            -0.707107], # 0.707107 = sqrt(2)/2. this c value results in a quarter circle
-            [box_size-(cell/2),        0,        box_size, cell/2, -0.707107],
-            [cell/2, box_size, 0, box_size-(cell/2),        -0.707107],   
-            [box_size-(cell/2), box_size, box_size,        box_size-(cell/2), 0.707107],
+            [0,        R,        R,        0,            -C_ARC],
+            [box_size-(R),        0,        box_size, R, -C_ARC],
+            [R, box_size, 0, box_size-(R),        -C_ARC],   
+            [box_size-(R), box_size, box_size,        box_size-(R), C_ARC],
         ]
     for r in range(grid_size - 1):
         for c in range(grid_size):
@@ -47,6 +49,26 @@ def maze_to_walls(passages, grid_size, box_size, include_boundary=True):
             if (r, c + 1) not in passages.get((r, c), set()):
                 x = (c + 1) * cell
                 walls.append([x, r * cell, x, (r + 1) * cell, 0])
+
+    # Add quarter-circle arcs at every interior grid-point corner.
+    # At each point (cx, ry) we check which of the four wall segments exist and
+    # add an arc for every (horizontal, vertical) pair that meets there.
+    # Convention: p1 = horizontal endpoint, p2 = vertical endpoint.
+    # Sign rule: c = +C_ARC when dx_H and dy_V point into the same diagonal
+    #            (right+up or left+down), -C_ARC for the opposite diagonals.
+    for r_int in range(1, grid_size):
+        for c_int in range(1, grid_size):
+            cx = c_int * cell
+            ry = r_int * cell
+            h_right = (r_int, c_int)   not in passages.get((r_int - 1, c_int),     set())
+            h_left  = (r_int, c_int-1) not in passages.get((r_int - 1, c_int - 1), set())
+            v_up    = (r_int, c_int)   not in passages.get((r_int,     c_int - 1), set())
+            v_down  = (r_int-1, c_int) not in passages.get((r_int - 1, c_int - 1), set())
+            if h_right and v_up:   walls.append([cx + R, ry, cx, ry + R, +C_ARC])
+            if h_right and v_down: walls.append([cx + R, ry, cx, ry - R, -C_ARC])
+            if h_left  and v_up:   walls.append([cx - R, ry, cx, ry + R, -C_ARC])
+            if h_left  and v_down: walls.append([cx - R, ry, cx, ry - R, +C_ARC])
+
     return np.array(walls, dtype=np.float64)
 
 
