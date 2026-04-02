@@ -112,9 +112,9 @@ def maze_to_walls(passages, grid_size, box_size, include_boundary=True):
 RANDOM_SEED = 42
 
 # Simulation parameters
-N_PARTICLES = 600
-BOX_SIZE = 300
-N_STEPS = 10000
+N_PARTICLES = 1000 #600
+BOX_SIZE = 600 #300
+N_STEPS = 300000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -137,17 +137,17 @@ PAYLOAD_START_POSITION = np.array([30.0, 30.0])
 STIFFNESS = 25.0
 
 # Goal parameters
-GOAL_POSITION = np.array([270.0, 270.0]) # np.array([83.3, 83.3])  # Top-left corner
-PARTICLE_VIEW_RANGE = 0.2 * BOX_SIZE * (1/1.414213)  # Range for goal detection
+GOAL_POSITION = np.array([570.0, 570.0]) # np.array([270.0, 270.0])  # Top-right corner
+PARTICLE_VIEW_RANGE = 0.2 * BOX_SIZE * (1/1.414213)  # Range for goal detection #BOX_SIZE = 300
 SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
 END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
 POLARITY_NUDGE_INTERVAL = 5        # Every N steps, nudge heading toward polarity
 POLARITY_NUDGE_STRENGTH = 0.01       # Angular nudge magnitude (radians)
 
 # Wall configuration — generated from a Wilson maze
-MAZE_GRID_SIZE = 5  # W×W grid; larger = more cells, narrower corridors
+MAZE_GRID_SIZE = 10 #5  # W×W grid; larger = more cells, narrower corridors
 WALLS = maze_to_walls(
-    wilson.generate(MAZE_GRID_SIZE, seed=42),
+    wilson.generate(MAZE_GRID_SIZE, seed=42), # seed=42
     MAZE_GRID_SIZE,
     BOX_SIZE,
 )
@@ -186,11 +186,11 @@ WALLS = maze_to_walls(
 # Visualization parameters
 SHOW_VECTORS = True              # Display v vectors as arrows
 COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "D:/PostThesis/visualizations/genmaze3.mp4"           # If None, uses timestamp. Otherwise specify path.
+OUTPUT_FILENAME = "D:/PostThesis/visualizations/genmaze3big.mp4"           # If None, uses timestamp. Otherwise specify path.
 # OUTPUT_FILENAME = "c:/Users/educa/Downloads/test2.mp4"
 # Data saving (set to True to save simulation data)
-SAVE_DATA = False
-DATA_OUTPUT_PATH = "D:/PostThesis/data/test.npz"                    # If None, uses timestamp. Otherwise specify path.
+SAVE_DATA = True
+DATA_OUTPUT_PATH = "D:/PostThesis/data/genmaze3big.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 
 #####################
