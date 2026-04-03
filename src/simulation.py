@@ -17,11 +17,11 @@ def compute_all_forces(positions, payload_pos, radii, payload_radius, stiffness,
     payload_force = np.zeros(2) # Initialize force array for payload
 
     # Determine maximum interaction distance (for cell size)
-    max_radius = np.max(radii) # Takes maximum radius of all particles. (Because radius of particles is possibly heterogeneous)
-    cell_size = 2 * max_radius  # For particle-particle interactions (not payload-particle)
+    # max_radius = np.max(radii) # Takes maximum radius of all particles. (Because radius of particles is possibly heterogeneous)
+    # cell_size = 2 * max_radius  # For particle-particle interactions (not payload-particle)
 
     # Create cell list (O(N))
-    head, list_next, n_cells = create_cell_list(positions, box_size, cell_size, n_particles)
+    # head, list_next, n_cells = create_cell_list(positions, box_size, cell_size, n_particles)
 
     # Compute forces between particles and payload (O(N))
     for i in range(n_particles):

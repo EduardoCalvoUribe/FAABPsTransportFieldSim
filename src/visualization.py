@@ -90,7 +90,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     scatter = ax.scatter(
         positions[0, :, 0],
         positions[0, :, 1],
-        s=np.pi * (params['particle_radius'] * 3)**2,  # Area of circle
+        s=np.pi * (params['particle_radius'] * 1)**2,  # Area of circle #BIG, particle size (* 3)
         c=particle_colors,
         alpha=0.7
     )
@@ -141,7 +141,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         line, = ax.plot(
             xs, ys,
             color='black',
-            linewidth=4,
+            linewidth=2, #BIG
             solid_capstyle='round',
             zorder=10
         )
