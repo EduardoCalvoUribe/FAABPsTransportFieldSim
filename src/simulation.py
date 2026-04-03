@@ -435,14 +435,13 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
             # Loop through all particles in this cell
             while j != -1:
                 if i != j:
-                    # First check if wall separates particles along periodic shortest path
-                    if not particles_separated_by_wall_periodic(pos_i, positions[j], walls, box_size):
-                        # Compute distance (PERIODIC)
-                        r_ij = compute_minimum_distance(pos_i, positions[j], box_size)
-
-                        dist_j = np.sqrt(np.sum(r_ij**2))
-                        # Only include neighbor if within range
-                        if dist_j <= r:
+                    # Compute distance first (cheap) — skip wall check if out of range
+                    r_ij = compute_minimum_distance(pos_i, positions[j], box_size)
+                    dist_j = np.sqrt(np.sum(r_ij**2))
+                    if dist_j <= r:
+                        # Reuse r_ij to avoid recomputing inside particles_separated_by_wall_periodic
+                        pos_j_periodic = pos_i + r_ij
+                        if not line_intersects_any_wall(pos_i[0], pos_i[1], pos_j_periodic[0], pos_j_periodic[1], walls):
                             neighbor_indices.append(j)
                             neighbor_scores.append(particle_scores[j])
                             neighbor_positions.append(positions[j].copy())
