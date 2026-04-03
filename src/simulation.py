@@ -410,9 +410,9 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
             # If blocked, fall through to gradient-following behavior
 
     # Goal out of range - find all neighbors within r and collect their info
-    neighbor_indices = []
-    neighbor_scores = []
-    neighbor_positions = []
+    neighbor_scores = np.empty(n_particles, dtype=np.int64)
+    neighbor_positions = np.empty((n_particles, 2), dtype=np.float64)
+    n_neighbors = 0
 
     # Determine cell size from the cell list
     cell_size = box_size / n_cells
@@ -442,22 +442,22 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
                         # Reuse r_ij to avoid recomputing inside particles_separated_by_wall_periodic
                         pos_j_periodic = pos_i + r_ij
                         if not line_intersects_any_wall(pos_i[0], pos_i[1], pos_j_periodic[0], pos_j_periodic[1], walls):
-                            neighbor_indices.append(j)
-                            neighbor_scores.append(particle_scores[j])
-                            neighbor_positions.append(positions[j].copy())
+                            neighbor_scores[n_neighbors] = particle_scores[j]
+                            neighbor_positions[n_neighbors] = positions[j]
+                            n_neighbors += 1
 
                 j = list_next[j]
 
     # If no neighbors found, return score 9999 and zero vector
-    if len(neighbor_indices) == 0:
+    if n_neighbors == 0:
         return np.array([0.0, 0.0]), 9999
 
     # Calculate new score: min(neighbor scores) + 1
-    min_score = min(neighbor_scores)
+    min_score = min(neighbor_scores[:n_neighbors])
     new_score = min_score + 1
 
     # Direction toward particle with lowest score
-    combined_polarity = compute_polarity_toward_minscore_pos(pos_i, neighbor_scores, neighbor_positions, box_size)
+    combined_polarity = compute_polarity_toward_minscore_pos(pos_i, neighbor_scores[:n_neighbors], neighbor_positions[:n_neighbors], box_size)
 
     # ALTERNATIVE: Uncomment to use average angle method instead
     # combined_polarity = compute_polarity_toward_minscore_ang(pos_i, neighbor_scores, neighbor_positions, box_size)
