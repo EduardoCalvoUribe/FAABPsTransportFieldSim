@@ -21,17 +21,6 @@ def normalize(v):
 ##############################
 
 @njit(fastmath=True)
-def _angle_ccw(ax, ay, bx, by):
-    """CCW angle in [0, 2π) to rotate from vector (ax,ay) to vector (bx,by)."""
-    cross = ax * by - ay * bx
-    dot = ax * bx + ay * by
-    a = math.atan2(cross, dot)
-    if a < 0.0:
-        a += 2.0 * math.pi
-    return a
-
-
-@njit(fastmath=True)
 def _point_on_arc(qx, qy, cx, cy, p1x, p1y, p2x, p2y):
     """Check if Q (on the circle) lies on the minor arc from P1 to P2 with center C.
 
@@ -42,17 +31,17 @@ def _point_on_arc(qx, qy, cx, cy, p1x, p1y, p2x, p2y):
     v2x, v2y = p2x - cx, p2y - cy
     vqx, vqy = qx - cx, qy - cy
 
-    span_ccw = _angle_ccw(v1x, v1y, v2x, v2y)
+    # cross(v1, v2) ≥ 0 → minor arc goes CCW from P1 to P2; < 0 → CW
+    cross12 = v1x * v2y - v1y * v2x
+    cross1q = v1x * vqy - v1y * vqx
+    crossq2 = vqx * v2y - vqy * v2x
 
-    if span_ccw <= math.pi + 1e-9:
-        # Minor arc goes CCW from P1 to P2
-        to_q = _angle_ccw(v1x, v1y, vqx, vqy)
-        return to_q <= span_ccw + 1e-9
+    if cross12 >= 0.0:
+        # Minor arc goes CCW: Q must be CCW of P1 and CW of P2
+        return cross1q >= -1e-9 and crossq2 >= -1e-9
     else:
-        # Minor arc goes CW from P1 to P2
-        span_cw = 2.0 * math.pi - span_ccw
-        to_q_cw = _angle_ccw(vqx, vqy, v1x, v1y)
-        return to_q_cw <= span_cw + 1e-9
+        # Minor arc goes CW: Q must be CW of P1 and CCW of P2
+        return cross1q <= 1e-9 and crossq2 <= 1e-9
 
 
 @njit(fastmath=True)
