@@ -36,11 +36,6 @@ def _point_on_arc(qx, qy, cx, cy, p1x, p1y, p2x, p2y):
     cross1q = v1x * vqy - v1y * vqx
     crossq2 = vqx * v2y - vqy * v2x
 
-    # cross(v1, v2) ≥ 0 → minor arc goes CCW from P1 to P2; < 0 → CW
-    cross12 = v1x * v2y - v1y * v2x
-    cross1q = v1x * vqy - v1y * vqx
-    crossq2 = vqx * v2y - vqy * v2x
-
     if cross12 >= 0.0:
         # Minor arc goes CCW: Q must be CCW of P1 and CW of P2
         return cross1q >= -1e-9 and crossq2 >= -1e-9
