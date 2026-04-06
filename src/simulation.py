@@ -2,8 +2,12 @@ import numpy as np
 import math
 from numba import njit
 
-from .physics_utils import normalize, line_intersects_any_wall, compute_minimum_distance, particles_separated_by_wall, particles_separated_by_wall_periodic
-from .forces import compute_repulsive_force, compute_wall_forces, create_cell_list
+from .physics_utils import (normalize, line_intersects_any_wall,
+                            line_intersects_any_wall_indexed,
+                            particles_separated_by_wall_periodic_indexed,
+                            compute_minimum_distance,
+                            particles_separated_by_wall, particles_separated_by_wall_periodic)
+from .forces import compute_repulsive_force, compute_wall_forces, compute_wall_forces_indexed, create_cell_list
 
 
 ##########################
@@ -11,35 +15,44 @@ from .forces import compute_repulsive_force, compute_wall_forces, create_cell_li
 ##########################
 
 @njit(fastmath=True)
-def compute_all_forces(positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls):
+def compute_all_forces(positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls,
+                       wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
     """Compute all forces acting on particles and the payload"""
     particle_forces = np.zeros((n_particles, 2)) # Initialize force array for particles
     payload_force = np.zeros(2) # Initialize force array for payload
 
-    # Determine maximum interaction distance (for cell size)
-    # max_radius = np.max(radii) # Takes maximum radius of all particles. (Because radius of particles is possibly heterogeneous)
-    # cell_size = 2 * max_radius  # For particle-particle interactions (not payload-particle)
-
-    # Create cell list (O(N))
-    # head, list_next, n_cells = create_cell_list(positions, box_size, cell_size, n_particles)
-
-    # Compute forces between particles and payload (O(N))
+    # Compute forces between particles and payload.
+    # Distance gate first: only particles within (r_i + r_payload) can overlap the
+    # payload, so the expensive wall-separation check is skipped for the vast
+    # majority of particles that are too far away to interact.
     for i in range(n_particles):
-        # Only compute forces if particle and payload are not separated by a wall (periodic shortest path)
-        if not particles_separated_by_wall_periodic(positions[i], payload_pos, walls, box_size):
-            force_particle_payload = compute_repulsive_force( # Computes force between particle and payload
-                positions[i], payload_pos, radii[i], payload_radius, stiffness, box_size
-            )
-            particle_forces[i] += force_particle_payload # Applies force to particle
-            payload_force -= force_particle_payload  # Applies opposite force to payload
+        r_ij = compute_minimum_distance(positions[i], payload_pos, box_size)
+        dist_payload = math.sqrt(r_ij[0] * r_ij[0] + r_ij[1] * r_ij[1])
+        if dist_payload < radii[i] + payload_radius:
+            # Particle is close enough to potentially interact — check wall separation
+            pos_j_periodic = positions[i] + r_ij
+            if not line_intersects_any_wall_indexed(
+                positions[i, 0], positions[i, 1],
+                pos_j_periodic[0], pos_j_periodic[1],
+                walls, wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size
+            ):
+                force_particle_payload = compute_repulsive_force(
+                    positions[i], payload_pos, radii[i], payload_radius, stiffness, box_size
+                )
+                particle_forces[i] += force_particle_payload
+                payload_force -= force_particle_payload
 
-    # Compute forces between particles and walls (O(N * n_walls))
+    # Compute forces between particles and walls (indexed: single-cell lookup per particle)
     for i in range(n_particles):
-        wall_force = compute_wall_forces(positions[i], radii[i], walls, stiffness)
+        wall_force = compute_wall_forces_indexed(positions[i], radii[i], walls,
+                                                 wall_grid_offsets, wall_grid_indices,
+                                                 n_wall_cells, wall_cell_size, stiffness)
         particle_forces[i] += wall_force
 
-    # Compute force between payload and walls
-    payload_wall_force = compute_wall_forces(payload_pos, payload_radius, walls, stiffness)
+    # Compute force between payload and walls (indexed: single-cell lookup)
+    payload_wall_force = compute_wall_forces_indexed(payload_pos, payload_radius, walls,
+                                                     wall_grid_offsets, wall_grid_indices,
+                                                     n_wall_cells, wall_cell_size, stiffness)
     payload_force += payload_wall_force
 
     # NON-INTERACTING
@@ -217,7 +230,8 @@ def compute_curvity_from_polarity(orientations, polarity, n_particles, max_curvi
     return curvity
 
 @njit(fastmath=True)
-def has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls):
+def has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls,
+                      wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
     """Check if particle i has line of sight to goal (no walls or payload blocking).
 
     Returns True if line from particle to goal doesn't intersect with walls or payload circle.
@@ -227,8 +241,10 @@ def has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls):
     x_goal, y_goal = goal_position
     x_p, y_p = payload_pos
 
-    # Check if any wall blocks line of sight
-    if walls is not None and line_intersects_any_wall(x_i, y_i, x_goal, y_goal, walls):
+    # Check if any wall blocks line of sight (indexed: only nearby walls checked)
+    if line_intersects_any_wall_indexed(x_i, y_i, x_goal, y_goal, walls,
+                                        wall_grid_offsets, wall_grid_indices,
+                                        n_wall_cells, wall_cell_size):
         return False  # Wall blocks line of sight
 
     # Quick bounding box check
@@ -367,7 +383,8 @@ def compute_polarity_toward_minscore_ang(pos_i, neighbor_scores, neighbor_positi
 
 
 @njit(fastmath=True)
-def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size, current_score, head, list_next, n_cells, all_polarity, payload_pos, payload_radius, walls):
+def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size, current_score, head, list_next, n_cells, all_polarity, payload_pos, payload_radius, walls,
+                           wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
     """Compute polarity vector pointing toward lowest-score neighbor.
 
     Score calculation:
@@ -402,7 +419,8 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
         # If goal is within range, check line of sight
         if dist_to_goal <= r:
             # Check if line of sight is clear (no walls or payload blocking)
-            if has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls):
+            if has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls,
+                                 wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
                 if dist_to_goal > 0:
                     return np.array([dx_goal / dist_to_goal, dy_goal / dist_to_goal]), 0
                 return np.array([0.0, 0.0]), 0 # payload is exactly on the goal
@@ -441,7 +459,8 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
                     if dist_j <= r:
                         # Reuse r_ij to avoid recomputing inside particles_separated_by_wall_periodic
                         pos_j_periodic = pos_i + r_ij
-                        if not line_intersects_any_wall(pos_i[0], pos_i[1], pos_j_periodic[0], pos_j_periodic[1], walls):
+                        if not line_intersects_any_wall_indexed(pos_i[0], pos_i[1], pos_j_periodic[0], pos_j_periodic[1],
+                                                               walls, wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
                             neighbor_scores[n_neighbors] = particle_scores[j]
                             neighbor_positions[n_neighbors] = positions[j]
                             n_neighbors += 1
@@ -478,11 +497,13 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
                          step, goal_position, particle_view_range, score_and_polarity_update_interval, walls,
                          max_curvity, min_curvity, mid_curvity,
-                         polarity_nudge_interval, polarity_nudge_strength):
+                         polarity_nudge_interval, polarity_nudge_strength,
+                         wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
     """Simulate a single time step"""
     # Compute forces on particles and payload
     particle_forces, payload_force = compute_all_forces(
-        positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls
+        positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls,
+        wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size
     )
 
     # Update polarity vectors and scores based on goal (at update interval)
@@ -495,7 +516,8 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
             polarity[i], particle_scores[i] = point_polarity_to_goal(
                 positions[i], goal_position, positions, particle_scores, i, n_particles,
                 particle_view_range, box_size, particle_scores[i], head_goal, list_next_goal, n_cells_goal,
-                polarity, payload_pos, payload_radius, walls
+                polarity, payload_pos, payload_radius, walls,
+                wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size
             )
 
     curvity = compute_curvity_from_polarity(orientations, polarity, n_particles, max_curvity, min_curvity, mid_curvity)

@@ -2,6 +2,7 @@ import numpy as np
 import time
 
 from .simulation import simulate_single_step
+from .forces import build_wall_spatial_index
 
 
 #####################################################
@@ -25,7 +26,17 @@ def run_payload_simulation(params):
 
     # Extract walls
     walls = params['walls']
-    
+
+    # Build wall spatial index.
+    # cell_size: ~box/20 gives a 20×20 grid; fine enough to prune most walls per lookup.
+    # margin: set to payload_radius so a single-cell query covers the full force range
+    # for both particles (radius ~1) and the payload (radius ~20).
+    wall_cell_size = max(box_size / 20.0, 2.0)
+    wall_margin = float(params['payload_radius'])
+    wall_grid_offsets, wall_grid_indices, n_wall_cells = build_wall_spatial_index(
+        walls, box_size, wall_cell_size, wall_margin
+    )
+
     # Extract curvity params
     max_curvity = params['max_curvity']
     min_curvity = params['min_curvity']
@@ -96,7 +107,8 @@ def run_payload_simulation(params):
             params['box_size'], params['payload_radius'], params['dt'], params['rot_diffusion'],
             n_particles, step, goal_position, particle_view_range, score_and_polarity_update_interval, walls,
             max_curvity, min_curvity, mid_curvity,
-            polarity_nudge_interval, polarity_nudge_strength
+            polarity_nudge_interval, polarity_nudge_strength,
+            wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size
         )
 
         # Check if payload reached goal

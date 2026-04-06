@@ -114,7 +114,7 @@ RANDOM_SEED = 42
 # Simulation parameters
 N_PARTICLES = 1000 #600
 BOX_SIZE = 600 #300
-N_STEPS = 3000
+N_STEPS = 10000
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -138,7 +138,7 @@ STIFFNESS = 25.0
 
 # Goal parameters
 GOAL_POSITION = np.array([570.0, 570.0]) # np.array([270.0, 270.0])  # Top-right corner
-PARTICLE_VIEW_RANGE = 0.2 * BOX_SIZE * (1/1.414213)  # Range for goal detection #BOX_SIZE = 300
+PARTICLE_VIEW_RANGE = 0.2 * 600 * (1/1.414213)  # Range for goal detection #BOX_SIZE = 300
 SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
 END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
 POLARITY_NUDGE_INTERVAL = 5        # Every N steps, nudge heading toward polarity
@@ -186,10 +186,10 @@ WALLS = maze_to_walls(
 # Visualization parameters
 SHOW_VECTORS = True              # Display v vectors as arrows
 COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "D:/PostThesis/visualizations/snelltest0_fake.mp4"           # If None, uses timestamp. Otherwise specify path.
+OUTPUT_FILENAME = "D:/PostThesis/visualizations/localoptim0.mp4"           # If None, uses timestamp. Otherwise specify path.
 # OUTPUT_FILENAME = "c:/Users/educa/Downloads/test2.mp4"
 # Data saving (set to True to save simulation data)
-SAVE_DATA = True
+SAVE_DATA = False
 DATA_OUTPUT_PATH = "D:/PostThesis/data/snelltest0_fake.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 
@@ -197,148 +197,26 @@ DATA_OUTPUT_PATH = "D:/PostThesis/data/snelltest0_fake.npz"                    #
 # Main execution    #
 #####################
 
-if __name__ == "__main__": # load and render
-    data = np.load("data/snelltest30tiny.npz")
-    saved_positions = data['positions']
-    saved_orientations = data['orientations']
-    saved_velocities = data['velocities']
-    saved_payload_positions = data['payload_positions']
-    saved_curvity = data['curvity_values']
-    saved_polarity = data['polarity']
-    saved_particle_scores = data['particle_scores']
-    params = {
-        'n_particles': saved_positions.shape[1],
-        'box_size': float(data['box_size']),
-        'payload_radius': float(data['payload_radius']),
-        'goal_position': data['goal_position'],
-        'particle_radius': data['particle_radius'],
-        'rot_diffusion': data['rot_diffusion'],
-        'mobility': data['mobility'],
-        'payload_mobility': float(data['payload_mobility']),
-        'walls': data['walls'],
-    }
-    create_payload_animation(
-        saved_positions, saved_orientations, saved_velocities,
-        saved_payload_positions, params, saved_curvity,
-        output_file=OUTPUT_FILENAME,
-        show_vectors=SHOW_VECTORS,
-        polarity=saved_polarity,
-        particle_scores=saved_particle_scores if COLOR_BY_SCORE else None
-    )
-        
-# if __name__ == "__main__":
-#     # Set random seed
-#     np.random.seed(RANDOM_SEED)
-
-#     # Create directories if they don't exist
-#     if SAVE_DATA:
-#         os.makedirs('./data', exist_ok=True)
-#     os.makedirs('./visualizations', exist_ok=True)
-
-#     #####################################################
-#     # JIT COMPILATION                                   #
-#     #####################################################
-
-#     print("Compiling JIT functions...")
-
-#     # Build parameter dictionary for compilation run
-#     compile_n_particles = 10
-#     compile_params = {
-#         'n_particles': compile_n_particles,
-#         'box_size': BOX_SIZE,
-#         'dt': DT,
-#         'n_steps': 10,
-#         'save_interval': SAVE_INTERVAL,
-#         'payload_radius': PAYLOAD_RADIUS,
-#         'payload_mobility': PAYLOAD_MOBILITY,
-#         'payload_position': PAYLOAD_START_POSITION,
-#         'stiffness': STIFFNESS,
-#         'goal_position': GOAL_POSITION,
-#         'particle_view_range': PARTICLE_VIEW_RANGE,
-#         'score_and_polarity_update_interval': SCORE_AND_POLARITY_UPDATE_INTERVAL,
-#         'end_when_goal_reached': END_WHEN_GOAL_REACHED,
-#         'polarity_nudge_interval': POLARITY_NUDGE_INTERVAL,
-#         'polarity_nudge_strength': POLARITY_NUDGE_STRENGTH,
-#         'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),
-#         'v0': np.ones(compile_n_particles) * PARTICLE_V0,
-#         'curvity': np.zeros(compile_n_particles),
-#         'particle_radius': np.ones(compile_n_particles) * PARTICLE_RADIUS,
-#         'mobility': np.ones(compile_n_particles) * PARTICLE_MOBILITY,
-#         'rot_diffusion': np.ones(compile_n_particles) * ROTATIONAL_DIFFUSION,
-#         'max_curvity': MAX_CURVITY,
-#         'min_curvity': MIN_CURVITY,
-#         'mid_curvity': MID_CURVITY
-#     }
-
-#     run_payload_simulation(compile_params)
-#     print("JIT compilation complete.\n")
-
-#     #####################################################
-#     # BUILD SIMULATION PARAMETERS                       #
-#     #####################################################
-
+# if __name__ == "__main__": # load and render
+#     data = np.load("data/snelltesthuge4_5kr60.npz")
+#     saved_positions = data['positions']
+#     saved_orientations = data['orientations']
+#     saved_velocities = data['velocities']
+#     saved_payload_positions = data['payload_positions']
+#     saved_curvity = data['curvity_values']
+#     saved_polarity = data['polarity']
+#     saved_particle_scores = data['particle_scores']
 #     params = {
-#         # Global parameters
-#         'n_particles': N_PARTICLES,
-#         'box_size': BOX_SIZE,
-#         'dt': DT,
-#         'n_steps': N_STEPS,
-#         'save_interval': SAVE_INTERVAL,
-#         'payload_radius': PAYLOAD_RADIUS,
-#         'payload_mobility': PAYLOAD_MOBILITY,
-#         'payload_position': PAYLOAD_START_POSITION,
-#         'stiffness': STIFFNESS,
-
-#         # Goal parameters
-#         'goal_position': GOAL_POSITION,
-#         'particle_view_range': PARTICLE_VIEW_RANGE,
-#         'score_and_polarity_update_interval': SCORE_AND_POLARITY_UPDATE_INTERVAL,
-#         'end_when_goal_reached': END_WHEN_GOAL_REACHED,
-#         'polarity_nudge_interval': POLARITY_NUDGE_INTERVAL,
-#         'polarity_nudge_strength': POLARITY_NUDGE_STRENGTH,
-
-#         # Wall parameters
-#         'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),
-
-#         # Particle-specific parameters (arrays)
-#         'v0': np.ones(N_PARTICLES) * PARTICLE_V0,
-#         'curvity': np.zeros(N_PARTICLES),  # Computed dynamically from score & polarity
-#         'particle_radius': np.ones(N_PARTICLES) * PARTICLE_RADIUS,
-#         'mobility': np.ones(N_PARTICLES) * PARTICLE_MOBILITY,
-#         'rot_diffusion': np.ones(N_PARTICLES) * ROTATIONAL_DIFFUSION,
-
-#         'max_curvity': MAX_CURVITY,
-#         'min_curvity': MIN_CURVITY,
-#         'mid_curvity': MID_CURVITY
+#         'n_particles': saved_positions.shape[1],
+#         'box_size': float(data['box_size']),
+#         'payload_radius': float(data['payload_radius']),
+#         'goal_position': data['goal_position'],
+#         'particle_radius': data['particle_radius'],
+#         'rot_diffusion': data['rot_diffusion'],
+#         'mobility': data['mobility'],
+#         'payload_mobility': float(data['payload_mobility']),
+#         'walls': data['walls'],
 #     }
-
-#     #####################################################
-#     # RUN SIMULATION                                    #
-#     #####################################################
-
-#     result = run_payload_simulation(params)
-
-#     # Unpack results
-#     (saved_positions, saved_orientations, saved_velocities,
-#      saved_payload_positions, saved_payload_velocities, saved_curvity,
-#      saved_polarity, saved_particle_scores, particle_scores, polarity,
-#      simulation_time, final_step) = result
-
-#     print(f"\nSimulation completed in {simulation_time:.2f} seconds")
-#     print(f"Final step: {final_step}")
-
-#     # Save data if enabled
-#     if SAVE_DATA:
-#         from src.runner import save_simulation_data
-#         save_simulation_data(
-#             DATA_OUTPUT_PATH,
-#             saved_positions, saved_orientations, saved_velocities,
-#             saved_payload_positions, saved_payload_velocities,
-#             params, saved_curvity, saved_polarity, saved_particle_scores
-#         )
-#         print(f"Data saved to: {DATA_OUTPUT_PATH}")
-
-#     # Create visualization
 #     create_payload_animation(
 #         saved_positions, saved_orientations, saved_velocities,
 #         saved_payload_positions, params, saved_curvity,
@@ -347,5 +225,127 @@ if __name__ == "__main__": # load and render
 #         polarity=saved_polarity,
 #         particle_scores=saved_particle_scores if COLOR_BY_SCORE else None
 #     )
+        
+if __name__ == "__main__":
+    # Set random seed
+    np.random.seed(RANDOM_SEED)
 
-#     print("Simulation and visualization completed successfully!")
+    # Create directories if they don't exist
+    if SAVE_DATA:
+        os.makedirs('./data', exist_ok=True)
+    os.makedirs('./visualizations', exist_ok=True)
+
+    #####################################################
+    # JIT COMPILATION                                   #
+    #####################################################
+
+    print("Compiling JIT functions...")
+
+    # Build parameter dictionary for compilation run
+    compile_n_particles = 10
+    compile_params = {
+        'n_particles': compile_n_particles,
+        'box_size': BOX_SIZE,
+        'dt': DT,
+        'n_steps': 10,
+        'save_interval': SAVE_INTERVAL,
+        'payload_radius': PAYLOAD_RADIUS,
+        'payload_mobility': PAYLOAD_MOBILITY,
+        'payload_position': PAYLOAD_START_POSITION,
+        'stiffness': STIFFNESS,
+        'goal_position': GOAL_POSITION,
+        'particle_view_range': PARTICLE_VIEW_RANGE,
+        'score_and_polarity_update_interval': SCORE_AND_POLARITY_UPDATE_INTERVAL,
+        'end_when_goal_reached': END_WHEN_GOAL_REACHED,
+        'polarity_nudge_interval': POLARITY_NUDGE_INTERVAL,
+        'polarity_nudge_strength': POLARITY_NUDGE_STRENGTH,
+        'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),
+        'v0': np.ones(compile_n_particles) * PARTICLE_V0,
+        'curvity': np.zeros(compile_n_particles),
+        'particle_radius': np.ones(compile_n_particles) * PARTICLE_RADIUS,
+        'mobility': np.ones(compile_n_particles) * PARTICLE_MOBILITY,
+        'rot_diffusion': np.ones(compile_n_particles) * ROTATIONAL_DIFFUSION,
+        'max_curvity': MAX_CURVITY,
+        'min_curvity': MIN_CURVITY,
+        'mid_curvity': MID_CURVITY
+    }
+
+    run_payload_simulation(compile_params)
+    print("JIT compilation complete.\n")
+
+    #####################################################
+    # BUILD SIMULATION PARAMETERS                       #
+    #####################################################
+
+    params = {
+        # Global parameters
+        'n_particles': N_PARTICLES,
+        'box_size': BOX_SIZE,
+        'dt': DT,
+        'n_steps': N_STEPS,
+        'save_interval': SAVE_INTERVAL,
+        'payload_radius': PAYLOAD_RADIUS,
+        'payload_mobility': PAYLOAD_MOBILITY,
+        'payload_position': PAYLOAD_START_POSITION,
+        'stiffness': STIFFNESS,
+
+        # Goal parameters
+        'goal_position': GOAL_POSITION,
+        'particle_view_range': PARTICLE_VIEW_RANGE,
+        'score_and_polarity_update_interval': SCORE_AND_POLARITY_UPDATE_INTERVAL,
+        'end_when_goal_reached': END_WHEN_GOAL_REACHED,
+        'polarity_nudge_interval': POLARITY_NUDGE_INTERVAL,
+        'polarity_nudge_strength': POLARITY_NUDGE_STRENGTH,
+
+        # Wall parameters
+        'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),
+
+        # Particle-specific parameters (arrays)
+        'v0': np.ones(N_PARTICLES) * PARTICLE_V0,
+        'curvity': np.zeros(N_PARTICLES),  # Computed dynamically from score & polarity
+        'particle_radius': np.ones(N_PARTICLES) * PARTICLE_RADIUS,
+        'mobility': np.ones(N_PARTICLES) * PARTICLE_MOBILITY,
+        'rot_diffusion': np.ones(N_PARTICLES) * ROTATIONAL_DIFFUSION,
+
+        'max_curvity': MAX_CURVITY,
+        'min_curvity': MIN_CURVITY,
+        'mid_curvity': MID_CURVITY
+    }
+
+    #####################################################
+    # RUN SIMULATION                                    #
+    #####################################################
+
+    result = run_payload_simulation(params)
+
+    # Unpack results
+    (saved_positions, saved_orientations, saved_velocities,
+     saved_payload_positions, saved_payload_velocities, saved_curvity,
+     saved_polarity, saved_particle_scores, particle_scores, polarity,
+     simulation_time, final_step) = result
+
+    print(f"\nSimulation completed in {simulation_time:.2f} seconds")
+    print(f"Final step: {final_step}")
+
+    # Save data if enabled
+    if SAVE_DATA:
+        from src.runner import save_simulation_data
+        save_simulation_data(
+            DATA_OUTPUT_PATH,
+            saved_positions, saved_orientations, saved_velocities,
+            saved_payload_positions, saved_payload_velocities,
+            params, saved_curvity, saved_polarity, saved_particle_scores
+        )
+        print(f"Data saved to: {DATA_OUTPUT_PATH}")
+
+    # Create visualization
+    create_payload_animation(
+        saved_positions, saved_orientations, saved_velocities,
+        saved_payload_positions, params, saved_curvity,
+        output_file=OUTPUT_FILENAME,
+        show_vectors=SHOW_VECTORS,
+        polarity=saved_polarity,
+        particle_scores=saved_particle_scores if COLOR_BY_SCORE else None
+    )
+
+    print("Simulation and visualization completed successfully!")

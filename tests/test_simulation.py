@@ -10,6 +10,13 @@ from src.simulation import (
     point_polarity_to_goal
 )
 
+# Minimal empty wall index used by tests that pass no walls.
+# margin=0, 1×1 grid covering the whole test box.
+_EMPTY_OFFSETS = np.zeros(2, dtype=np.int64)   # 1 cell, 0 walls
+_EMPTY_INDICES = np.zeros(0, dtype=np.int64)
+_N_WALL_CELLS = 1
+_WALL_CELL_SIZE = 200.0  # larger than any test box_size
+
 
 class TestCurvityComputation:
     """Tests for curvity computation from polarity."""
@@ -57,9 +64,10 @@ class TestLineOfSight:
         goal_position = np.array([10.0, 10.0])
         payload_pos = np.array([50.0, 50.0])  # Far away
         payload_radius = 5.0
-        walls = None  # No walls
+        walls = np.zeros((0, 5), dtype=np.float64)
 
-        result = has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls)
+        result = has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls,
+                                   _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE)
 
         assert result == True
 
@@ -69,21 +77,25 @@ class TestLineOfSight:
         goal_position = np.array([20.0, 20.0])
         payload_pos = np.array([10.0, 10.0])  # Directly in the way
         payload_radius = 5.0
-        walls = None
+        walls = np.zeros((0, 5), dtype=np.float64)
 
-        result = has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls)
+        result = has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls,
+                                   _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE)
 
         assert result == False
 
     def test_has_line_of_sight_blocked_by_wall(self):
         """Test line of sight blocked by wall."""
+        from src.forces import build_wall_spatial_index
         pos_i = np.array([0.0, 0.0])
         goal_position = np.array([20.0, 0.0])
         payload_pos = np.array([50.0, 50.0])  # Out of the way
         payload_radius = 5.0
         walls = np.array([[10, -5, 10, 5, 0]], dtype=np.float64)  # Wall crosses path
+        offsets, indices, n_cells = build_wall_spatial_index(walls, 200.0, 50.0, 5.0)
 
-        result = has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls)
+        result = has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls,
+                                   offsets, indices, n_cells, 50.0)
 
         assert result == False
 
@@ -93,9 +105,10 @@ class TestLineOfSight:
         goal_position = np.array([20.0, 0.0])
         payload_pos = np.array([10.0, 10.0])  # Above the line
         payload_radius = 5.0
-        walls = None
+        walls = np.zeros((0, 5), dtype=np.float64)
 
-        result = has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls)
+        result = has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls,
+                                   _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE)
 
         assert result == True
 
@@ -185,7 +198,7 @@ class TestGoalDirectedPolarity:
         polarity, score = point_polarity_to_goal(
             pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size,
             current_score, head, list_next, n_cells, all_polarity, payload_pos, payload_radius,
-            walls
+            walls, _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE
         )
 
         # Should point directly at goal and have score 0
@@ -218,7 +231,7 @@ class TestGoalDirectedPolarity:
         polarity, score = point_polarity_to_goal(
             pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size,
             current_score, head, list_next, n_cells, all_polarity, payload_pos, payload_radius,
-            walls
+            walls, _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE
         )
 
         # No neighbors, should return score 9999
@@ -303,7 +316,8 @@ class TestAllForces:
         walls = np.zeros((0, 5), dtype=np.float64)
 
         particle_forces, payload_force = compute_all_forces(
-            positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls
+            positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls,
+            _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE
         )
 
         # No overlap means no forces
@@ -325,7 +339,8 @@ class TestAllForces:
         walls = np.zeros((0, 5), dtype=np.float64)
 
         particle_forces, payload_force = compute_all_forces(
-            positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls
+            positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls,
+            _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE
         )
 
         # Particles overlap, should have repulsive forces
@@ -348,7 +363,8 @@ class TestAllForces:
         walls = np.zeros((0, 5), dtype=np.float64)
 
         particle_forces, payload_force = compute_all_forces(
-            positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls
+            positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls,
+            _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE
         )
 
         # Particle should be pushed left, payload right

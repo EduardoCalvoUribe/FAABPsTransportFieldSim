@@ -262,6 +262,71 @@ def point_to_segment_distance(px, py, x1, y1, x2, y2):
     return dist, closest_x, closest_y
 
 @njit(fastmath=True)
+def line_intersects_any_wall_indexed(p1_x, p1_y, p2_x, p2_y, walls,
+                                     wall_grid_offsets, wall_grid_indices,
+                                     n_wall_cells, wall_cell_size):
+    """Check wall intersection using the spatial index.
+
+    Iterates only over cells whose bounding boxes overlap the segment's axis-
+    aligned bounding box.  The same wall may appear in more than one cell and
+    be tested twice; this is safe because the test is idempotent and we exit
+    immediately on the first intersection found.
+
+    Segment coordinates may lie outside [0, box_size]; out-of-range cell
+    indices are clamped to [0, n_wall_cells-1], which is correct because walls
+    exist only inside the box.
+    """
+    if walls.shape[0] == 0:
+        return False
+
+    min_x = p1_x if p1_x < p2_x else p2_x
+    max_x = p1_x if p1_x > p2_x else p2_x
+    min_y = p1_y if p1_y < p2_y else p2_y
+    max_y = p1_y if p1_y > p2_y else p2_y
+
+    gx_min = int(min_x / wall_cell_size)
+    gx_max = int(max_x / wall_cell_size)
+    gy_min = int(min_y / wall_cell_size)
+    gy_max = int(max_y / wall_cell_size)
+
+    if gx_min < 0:
+        gx_min = 0
+    if gx_max >= n_wall_cells:
+        gx_max = n_wall_cells - 1
+    if gy_min < 0:
+        gy_min = 0
+    if gy_max >= n_wall_cells:
+        gy_max = n_wall_cells - 1
+
+    for gx in range(gx_min, gx_max + 1):
+        for gy in range(gy_min, gy_max + 1):
+            cell_id = gy * n_wall_cells + gx
+            start = wall_grid_offsets[cell_id]
+            end = wall_grid_offsets[cell_id + 1]
+            for k in range(start, end):
+                w = wall_grid_indices[k]
+                if line_intersects_arc(p1_x, p1_y, p2_x, p2_y,
+                                       walls[w, 0], walls[w, 1],
+                                       walls[w, 2], walls[w, 3],
+                                       walls[w, 4]):
+                    return True
+    return False
+
+
+@njit(fastmath=True)
+def particles_separated_by_wall_periodic_indexed(pos_i, pos_j, walls, box_size,
+                                                  wall_grid_offsets, wall_grid_indices,
+                                                  n_wall_cells, wall_cell_size):
+    """Check wall separation along periodic shortest path using the spatial index."""
+    r_ij = compute_minimum_distance(pos_i, pos_j, box_size)
+    pos_j_periodic = pos_i + r_ij
+    return line_intersects_any_wall_indexed(
+        pos_i[0], pos_i[1], pos_j_periodic[0], pos_j_periodic[1],
+        walls, wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size
+    )
+
+
+@njit(fastmath=True)
 def line_intersects_any_wall(p1_x, p1_y, p2_x, p2_y, walls):
     """Check if line segment (p1, p2) intersects any wall.
 

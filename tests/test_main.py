@@ -1,6 +1,13 @@
 import pytest
 import numpy as np
 from src.simulation import simulate_single_step
+from src.forces import build_wall_spatial_index
+
+# Minimal empty wall index for tests that use no walls
+_EMPTY_OFFSETS = np.zeros(2, dtype=np.int64)
+_EMPTY_INDICES = np.zeros(0, dtype=np.int64)
+_N_WALL_CELLS = 1
+_WALL_CELL_SIZE = 200.0  # larger than any test box_size
 
 
 class TestIntegration:
@@ -49,7 +56,8 @@ class TestIntegration:
             radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
             step, goal_position, particle_view_range, score_and_polarity_update_interval,
-            walls
+            walls, 1.0, -1.0, 0.5, 100, 0.0,
+            _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE
         )
 
         # Check that arrays have correct shapes
@@ -103,12 +111,14 @@ class TestIntegration:
             [box_size, box_size, 0, box_size, 0],
             [box_size, box_size, box_size, 0, 0]
         ], dtype=np.float64)
+        w_offsets, w_indices, w_ncells = build_wall_spatial_index(walls, box_size, 10.0, 5.0)
         new_positions, new_orientations, new_velocities, new_payload_pos, new_payload_vel, curvity = simulate_single_step(
             positions, orientations, velocities, payload_pos, payload_vel,
             radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
             step, goal_position, particle_view_range, score_and_polarity_update_interval,
-            walls
+            walls, 1.0, -1.0, 0.5, 100, 0.0,
+            w_offsets, w_indices, w_ncells, 10.0
         )
 
         # Verify output shapes
@@ -163,7 +173,8 @@ class TestIntegration:
             radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
             1, goal_position, particle_view_range, score_and_polarity_update_interval,
-            walls
+            walls, 1.0, -1.0, 0.5, 100, 0.0,
+            _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE
         )
 
         scores_before_update = particle_scores.copy()
@@ -174,7 +185,8 @@ class TestIntegration:
             radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
             5, goal_position, particle_view_range, score_and_polarity_update_interval,
-            walls
+            walls, 1.0, -1.0, 0.5, 100, 0.0,
+            _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE
         )
 
         # Scores should have been updated (particles close to goal should have lower scores)
@@ -213,7 +225,8 @@ class TestIntegration:
             radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
             stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
             step, goal_position, particle_view_range, score_and_polarity_update_interval,
-            walls
+            walls, 1.0, -1.0, 0.5, 100, 0.0,
+            _EMPTY_OFFSETS, _EMPTY_INDICES, _N_WALL_CELLS, _WALL_CELL_SIZE
         )
 
         # Particle should wrap around to other side
