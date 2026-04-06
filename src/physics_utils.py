@@ -30,6 +30,11 @@ def _point_on_arc(qx, qy, cx, cy, p1x, p1y, p2x, p2y):
     v1x, v1y = p1x - cx, p1y - cy
     v2x, v2y = p2x - cx, p2y - cy
     vqx, vqy = qx - cx, qy - cy
+    
+    # cross(v1, v2) ≥ 0 → minor arc goes CCW from P1 to P2; < 0 → CW
+    cross12 = v1x * v2y - v1y * v2x
+    cross1q = v1x * vqy - v1y * vqx
+    crossq2 = vqx * v2y - vqy * v2x
 
     # cross(v1, v2) ≥ 0 → minor arc goes CCW from P1 to P2; < 0 → CW
     cross12 = v1x * v2y - v1y * v2x

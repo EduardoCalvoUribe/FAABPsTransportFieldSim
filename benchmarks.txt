@@ -1,0 +1,41 @@
+cpus=2, time=237.753, charged=16CPUs?
+cpus=4, time=239.197, charged=16CPUs
+cpus=8, time=235.955, 16CPUs
+cpus=16, time=236.51, 16CPUs
+cpus=32, time=237.662, 32
+cpus=64, time=241.735, 64
+cpus=128, time=240.142, 128
+cpus=128, time=185.401
+cpus=64, time=186.283
+cpus=64, time=20.3076
+cpus=64, time=24.7918
+cpus=64, time=14.2444
+cpus=64, time=22.0886
+cpus=64, time=27.9776
+cpus=64, time=39.0003
+cpus=64, time=17.3469
+cpus=64, time=13.8293
+cpus=64, time=103.8
+cpus=64, time=14.2676
+cpus=64, time=14.2128
+cpus=64, time=16.6153
+cpus=64, time=20.5265
+cpus=64, time=155.124
+cpus=64, time=21.7131
+cpus=64, time=13.3892
+cpus=64, time=13.3253
+cpus=64, time=23.4585
+cpus=64, time=58.9326
+cpus=64, time=29.9987
+cpus=64, time=116.143
+cpus=64, time=189.979
+cpus=64, time=289.592
+cpus=64, time=62.0329
+cpus=64, time=429.118
+
+cpus=64, time=1654.17 snelltestmid.mp4
+cpus=64, time=430.664 snelltestmid3k.mp4 X
+cpus=64, time=571.992 snelltestmid4_5r60.mp4
+cpus=64, time=998.473 snelltestmidr60.mp4
+cpus=64, time=279.888 snelltestmid3kr60.mp4 X
+cpus=128, time=10853.4

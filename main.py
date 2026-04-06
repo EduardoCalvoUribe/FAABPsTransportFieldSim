@@ -112,9 +112,11 @@ def maze_to_walls(passages, grid_size, box_size, include_boundary=True):
 RANDOM_SEED = 42
 
 # Simulation parameters
-N_PARTICLES = 1000 #600
-BOX_SIZE = 600 #300
-N_STEPS = 10000
+N_PARTICLES = 4000 #1000
+BOX_SIZE = 1200.0 #600
+MAZE_GRID_SIZE = 20 #10  # W×W grid; larger = more cells, narrower corridors
+N_STEPS = 100000
+
 SAVE_INTERVAL = 10
 DT = 0.01
 
@@ -131,26 +133,28 @@ MID_CURVITY = -0.25 #0
 # Payload parameters
 PAYLOAD_RADIUS = 20
 PAYLOAD_MOBILITY = 1 / PAYLOAD_RADIUS
-PAYLOAD_START_POSITION = np.array([30.0, 30.0])
 
 # Force parameters
 STIFFNESS = 25.0
 
-# Goal parameters
-GOAL_POSITION = np.array([570.0, 570.0]) # np.array([270.0, 270.0])  # Top-right corner
-PARTICLE_VIEW_RANGE = 0.2 * 600 * (1/1.414213)  # Range for goal detection #BOX_SIZE = 300
-SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
-END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
-POLARITY_NUDGE_INTERVAL = 5        # Every N steps, nudge heading toward polarity
-POLARITY_NUDGE_STRENGTH = 0.01       # Angular nudge magnitude (radians)
-
 # Wall configuration — generated from a Wilson maze
-MAZE_GRID_SIZE = 10 #5  # W×W grid; larger = more cells, narrower corridors
 WALLS = maze_to_walls(
     wilson.generate(MAZE_GRID_SIZE, seed=42), # seed=42
     MAZE_GRID_SIZE,
     BOX_SIZE,
 )
+CELL_SIZE = BOX_SIZE / MAZE_GRID_SIZE
+
+# Goal parameters
+PAYLOAD_START_POSITION = np.array([CELL_SIZE / 2, CELL_SIZE / 2])
+GOAL_POSITION = np.array([BOX_SIZE - (CELL_SIZE / 2), BOX_SIZE - (CELL_SIZE / 2)]) # np.array([270.0, 270.0])  # Top-right corner
+PARTICLE_VIEW_RANGE = CELL_SIZE * 1.5 # Range for goal & neighbor detection
+SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
+END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
+POLARITY_NUDGE_INTERVAL = 5        # Every N steps, nudge heading toward polarity
+POLARITY_NUDGE_STRENGTH = 0.01       # Angular nudge magnitude (radians)
+
+
 # WALLS = None  # uncomment to disable walls entirely
 # WALLS = np.array([
 #     # Boundary walls                                                    c
@@ -184,13 +188,16 @@ WALLS = maze_to_walls(
 
 
 # Visualization parameters
-SHOW_VECTORS = True              # Display v vectors as arrows
+
+CREATE_VIDEO = False
+SHOW_VECTORS = True              # Display polarity vectors as arrows
 COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "D:/PostThesis/visualizations/localoptim0.mp4"           # If None, uses timestamp. Otherwise specify path.
-# OUTPUT_FILENAME = "c:/Users/educa/Downloads/test2.mp4"
-# Data saving (set to True to save simulation data)
-SAVE_DATA = False
-DATA_OUTPUT_PATH = "D:/PostThesis/data/snelltest0_fake.npz"                    # If None, uses timestamp. Otherwise specify path.
+OUTPUT_FILENAME = "visualizations/snelltest0.mp4"           # If None, uses timestamp. Otherwise specify path.
+
+# Data saving
+
+SAVE_DATA = True
+DATA_OUTPUT_PATH = "data/snelltesthuge4_5kr60.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 
 #####################
@@ -233,7 +240,8 @@ if __name__ == "__main__":
     # Create directories if they don't exist
     if SAVE_DATA:
         os.makedirs('./data', exist_ok=True)
-    os.makedirs('./visualizations', exist_ok=True)
+    if CREATE_VIDEO:
+        os.makedirs('./visualizations', exist_ok=True)
 
     #####################################################
     # JIT COMPILATION                                   #
@@ -338,14 +346,15 @@ if __name__ == "__main__":
         )
         print(f"Data saved to: {DATA_OUTPUT_PATH}")
 
-    # Create visualization
-    create_payload_animation(
-        saved_positions, saved_orientations, saved_velocities,
-        saved_payload_positions, params, saved_curvity,
-        output_file=OUTPUT_FILENAME,
-        show_vectors=SHOW_VECTORS,
-        polarity=saved_polarity,
-        particle_scores=saved_particle_scores if COLOR_BY_SCORE else None
-    )
+    if CREATE_VIDEO:
+        # Create visualization
+        create_payload_animation(
+            saved_positions, saved_orientations, saved_velocities,
+            saved_payload_positions, params, saved_curvity,
+            output_file=OUTPUT_FILENAME,
+            show_vectors=SHOW_VECTORS,
+            polarity=saved_polarity,
+            particle_scores=saved_particle_scores if COLOR_BY_SCORE else None
+        )
 
     print("Simulation and visualization completed successfully!")

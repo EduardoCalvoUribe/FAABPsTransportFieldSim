@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from numba import njit
+from numba import njit, prange
 
 from .physics_utils import (normalize, line_intersects_any_wall,
                             line_intersects_any_wall_indexed,
@@ -14,17 +14,21 @@ from .forces import compute_repulsive_force, compute_wall_forces, compute_wall_f
 # Main physics functions #
 ##########################
 
-@njit(fastmath=True)
+@njit(fastmath=True, parallel=True)
 def compute_all_forces(positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls,
                        wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
     """Compute all forces acting on particles and the payload"""
     particle_forces = np.zeros((n_particles, 2)) # Initialize force array for particles
     payload_force = np.zeros(2) # Initialize force array for payload
 
-    # Compute forces between particles and payload.
-    # Distance gate first: only particles within (r_i + r_payload) can overlap the
-    # payload, so the expensive wall-separation check is skipped for the vast
-    # majority of particles that are too far away to interact.
+    # Determine maximum interaction distance (for cell size)
+    # max_radius = np.max(radii) # Takes maximum radius of all particles. (Because radius of particles is possibly heterogeneous)
+    # cell_size = 2 * max_radius  # For particle-particle interactions (not payload-particle)
+
+    # Create cell list (O(N))
+    # head, list_next, n_cells = create_cell_list(positions, box_size, cell_size, n_particles)
+
+    # Compute forces between particles and payload (O(N))
     for i in range(n_particles):
         r_ij = compute_minimum_distance(positions[i], payload_pos, box_size)
         dist_payload = math.sqrt(r_ij[0] * r_ij[0] + r_ij[1] * r_ij[1])
@@ -88,7 +92,7 @@ def compute_all_forces(positions, payload_pos, radii, payload_radius, stiffness,
 
     return particle_forces, payload_force
 
-@njit(fastmath=True)
+@njit(fastmath=True, parallel=True)
 def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion, n_particles):
     """
     The torque is calculated as:
@@ -107,7 +111,7 @@ def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion,
 
     new_orientations = np.zeros_like(orientations)
 
-    for i in range(n_particles):
+    for i in prange(n_particles):
         # Calculate torque: τ = curvity * (n × F)
         # n × F = n_x*F_y - n_y*F_x
         cross_product = orientations[i, 0] * forces[i, 1] - orientations[i, 1] * forces[i, 0]
@@ -143,7 +147,7 @@ def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion,
 
 
 
-@njit(fastmath=True)
+@njit(fastmath=True, parallel=True)
 def nudge_orientations_toward_polarity(orientations, polarity, nudge_strength, n_particles):
     """Angularly nudge each particle's orientation toward its polarity vector.
 
@@ -154,7 +158,7 @@ def nudge_orientations_toward_polarity(orientations, polarity, nudge_strength, n
     """
     new_orientations = np.zeros_like(orientations)
 
-    for i in range(n_particles):
+    for i in prange(n_particles):
         e_x = orientations[i, 0]
         e_y = orientations[i, 1]
 
@@ -191,7 +195,7 @@ def nudge_orientations_toward_polarity(orientations, polarity, nudge_strength, n
     return new_orientations
 
 
-@njit(fastmath=True)
+@njit(fastmath=True, parallel=True)
 def compute_curvity_from_polarity(orientations, polarity, n_particles, max_curvity = 1, min_curvity = -1, mid_curvity = 0.5):
     """Compute curvity for all particles based on their polarity vectors.
 
@@ -212,7 +216,7 @@ def compute_curvity_from_polarity(orientations, polarity, n_particles, max_curvi
     
     curvity = np.zeros(n_particles)
 
-    for i in range(n_particles):
+    for i in prange(n_particles):
         # Compute dot product: e · p
         dot_product = orientations[i, 0] * polarity[i, 0] + orientations[i, 1] * polarity[i, 1]
 
@@ -479,7 +483,7 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
     combined_polarity = compute_polarity_toward_minscore_pos(pos_i, neighbor_scores[:n_neighbors], neighbor_positions[:n_neighbors], box_size)
 
     # ALTERNATIVE: Uncomment to use average angle method instead
-    # combined_polarity = compute_polarity_toward_minscore_ang(pos_i, neighbor_scores, neighbor_positions, box_size)
+    # combined_polarity = compute_polarity_toward_minscore_ang(pos_i, neighbor_scores[:n_neighbors], neighbor_positions[:n_neighbors], box_size)
 
     # Normalize final vector
     norm = np.sqrt(np.sum(combined_polarity**2))
@@ -491,7 +495,7 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
     return combined_polarity, new_score
 
 
-@njit(fastmath=True)
+@njit(fastmath=True, parallel=True)
 def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel,
                          radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
@@ -534,7 +538,7 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
         )
 
     # Update particle positions and apply goal-based modulation if enabled
-    for i in range(n_particles):
+    for i in prange(n_particles):
 
         # Self-propulsion velocity with particle-specific v0
         self_propulsion = v0s[i] * orientations[i]

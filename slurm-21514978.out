@@ -1,0 +1,4022 @@
+Running from: /scratch-local/ecalvo.21514978/FAABPsTransportFieldSim_21514978/project
+TMPDIR: /scratch-local/ecalvo.21514978
+CPUs: 128
+Compiling JIT functions...
+Running payload transport simulation with 10 particles for 10 steps...
+Simulation completed in 12.74 seconds
+Total payload displacement: 0.000
+Final distance to goal: 2460.732
+JIT compilation complete.
+
+Running payload transport simulation with 4500 particles for 100000 steps...
+Step 100:
+  Payload position: [30. 30.]
+  Payload displacement from start: 0.000
+  Distance to goal: 2460.732
+Step 200:
+  Payload position: [30. 30.]
+  Payload displacement from start: 0.000
+  Distance to goal: 2460.732
+Step 300:
+  Payload position: [30. 30.]
+  Payload displacement from start: 0.000
+  Distance to goal: 2460.732
+Step 400:
+  Payload position: [30. 30.]
+  Payload displacement from start: 0.000
+  Distance to goal: 2460.732
+Step 500:
+  Payload position: [30. 30.]
+  Payload displacement from start: 0.000
+  Distance to goal: 2460.732
+Step 600:
+  Payload position: [30. 30.]
+  Payload displacement from start: 0.000
+  Distance to goal: 2460.732
+Step 700:
+  Payload position: [30. 30.]
+  Payload displacement from start: 0.000
+  Distance to goal: 2460.732
+Step 800:
+  Payload position: [30. 30.]
+  Payload displacement from start: 0.000
+  Distance to goal: 2460.732
+Step 900:
+  Payload position: [29.93583129 29.95065618]
+  Payload displacement from start: 0.081
+  Distance to goal: 2460.812
+Step 1000:
+  Payload position: [29.9132459  29.92749929]
+  Payload displacement from start: 0.113
+  Distance to goal: 2460.844
+Step 1100:
+  Payload position: [29.9132459  29.92749929]
+  Payload displacement from start: 0.113
+  Distance to goal: 2460.844
+Step 1200:
+  Payload position: [29.9132459  29.92749929]
+  Payload displacement from start: 0.113
+  Distance to goal: 2460.844
+Step 1300:
+  Payload position: [29.9132459  29.92749929]
+  Payload displacement from start: 0.113
+  Distance to goal: 2460.844
+Step 1400:
+  Payload position: [29.80775565 29.83425176]
+  Payload displacement from start: 0.254
+  Distance to goal: 2460.985
+Step 1500:
+  Payload position: [29.71359502 29.73481482]
+  Payload displacement from start: 0.390
+  Distance to goal: 2461.122
+Step 1600:
+  Payload position: [29.68734427 29.68744826]
+  Payload displacement from start: 0.442
+  Distance to goal: 2461.174
+Step 1700:
+  Payload position: [29.67446792 29.65023815]
+  Payload displacement from start: 0.478
+  Distance to goal: 2461.209
+Step 1800:
+  Payload position: [29.67446792 29.65023815]
+  Payload displacement from start: 0.478
+  Distance to goal: 2461.209
+Step 1900:
+  Payload position: [29.67446792 29.65023815]
+  Payload displacement from start: 0.478
+  Distance to goal: 2461.209
+Step 2000:
+  Payload position: [29.67446792 29.65023815]
+  Payload displacement from start: 0.478
+  Distance to goal: 2461.209
+Step 2100:
+  Payload position: [29.67446792 29.65023815]
+  Payload displacement from start: 0.478
+  Distance to goal: 2461.209
+Step 2200:
+  Payload position: [29.67446792 29.65023815]
+  Payload displacement from start: 0.478
+  Distance to goal: 2461.209
+Step 2300:
+  Payload position: [29.69041895 29.63037186]
+  Payload displacement from start: 0.482
+  Distance to goal: 2461.212
+Step 2400:
+  Payload position: [29.83402183 29.44739532]
+  Payload displacement from start: 0.577
+  Distance to goal: 2461.240
+Step 2500:
+  Payload position: [29.8368785  29.25162103]
+  Payload displacement from start: 0.766
+  Distance to goal: 2461.376
+Step 2600:
+  Payload position: [29.85796745 29.1135356 ]
+  Payload displacement from start: 0.898
+  Distance to goal: 2461.459
+Step 2700:
+  Payload position: [29.85088073 28.93264034]
+  Payload displacement from start: 1.078
+  Distance to goal: 2461.592
+Step 2800:
+  Payload position: [29.83879716 28.77666396]
+  Payload displacement from start: 1.234
+  Distance to goal: 2461.711
+Step 2900:
+  Payload position: [29.78907403 28.62464642]
+  Payload displacement from start: 1.391
+  Distance to goal: 2461.853
+Step 3000:
+  Payload position: [29.80523764 28.47548449]
+  Payload displacement from start: 1.537
+  Distance to goal: 2461.947
+Step 3100:
+  Payload position: [29.87392516 28.33427843]
+  Payload displacement from start: 1.670
+  Distance to goal: 2461.999
+Step 3200:
+  Payload position: [29.99368069 28.2011007 ]
+  Payload displacement from start: 1.799
+  Distance to goal: 2462.008
+Step 3300:
+  Payload position: [30.10291206 28.1820113 ]
+  Payload displacement from start: 1.821
+  Distance to goal: 2461.945
+Step 3400:
+  Payload position: [30.27494708 28.37891803]
+  Payload displacement from start: 1.644
+  Distance to goal: 2461.684
+Step 3500:
+  Payload position: [30.52277835 28.59357778]
+  Payload displacement from start: 1.500
+  Distance to goal: 2461.357
+Step 3600:
+  Payload position: [30.79981173 28.79221858]
+  Payload displacement from start: 1.449
+  Distance to goal: 2461.020
+Step 3700:
+  Payload position: [31.10670261 28.97938562]
+  Payload displacement from start: 1.505
+  Distance to goal: 2460.671
+Step 3800:
+  Payload position: [31.46319921 29.04426287]
+  Payload displacement from start: 1.748
+  Distance to goal: 2460.373
+Step 3900:
+  Payload position: [31.77433524 29.00720113]
+  Payload displacement from start: 2.033
+  Distance to goal: 2460.180
+Step 4000:
+  Payload position: [32.05442633 28.92761409]
+  Payload displacement from start: 2.317
+  Distance to goal: 2460.038
+Step 4100:
+  Payload position: [32.26372202 28.82272972]
+  Payload displacement from start: 2.552
+  Distance to goal: 2459.965
+Step 4200:
+  Payload position: [32.4725082  28.71562136]
+  Payload displacement from start: 2.786
+  Distance to goal: 2459.893
+Step 4300:
+  Payload position: [32.67408424 28.60564046]
+  Payload displacement from start: 3.016
+  Distance to goal: 2459.828
+Step 4400:
+  Payload position: [32.87415084 28.3408047 ]
+  Payload displacement from start: 3.319
+  Distance to goal: 2459.875
+Step 4500:
+  Payload position: [33.07284137 27.9894796 ]
+  Payload displacement from start: 3.672
+  Distance to goal: 2459.983
+Step 4600:
+  Payload position: [33.26311255 27.78155492]
+  Payload displacement from start: 3.946
+  Distance to goal: 2459.996
+Step 4700:
+  Payload position: [33.45351607 27.67191671]
+  Payload displacement from start: 4.165
+  Distance to goal: 2459.939
+Step 4800:
+  Payload position: [33.61486467 27.60999977]
+  Payload displacement from start: 4.334
+  Distance to goal: 2459.869
+Step 4900:
+  Payload position: [33.81602849 27.56359804]
+  Payload displacement from start: 4.527
+  Distance to goal: 2459.760
+Step 5000:
+  Payload position: [34.03289105 27.52366572]
+  Payload displacement from start: 4.732
+  Distance to goal: 2459.635
+Step 5100:
+  Payload position: [34.25668715 27.50162391]
+  Payload displacement from start: 4.936
+  Distance to goal: 2459.493
+Step 5200:
+  Payload position: [34.50272677 27.50820732]
+  Payload displacement from start: 5.146
+  Distance to goal: 2459.315
+Step 5300:
+  Payload position: [34.77048641 27.54058145]
+  Payload displacement from start: 5.367
+  Distance to goal: 2459.103
+Step 5400:
+  Payload position: [35.0611085  27.57697055]
+  Payload displacement from start: 5.611
+  Distance to goal: 2458.872
+Step 5500:
+  Payload position: [35.29810557 27.56623851]
+  Payload displacement from start: 5.830
+  Distance to goal: 2458.712
+Step 5600:
+  Payload position: [35.42812244 27.44935709]
+  Payload displacement from start: 5.998
+  Distance to goal: 2458.703
+Step 5700:
+  Payload position: [35.5326917  27.33195786]
+  Payload displacement from start: 6.142
+  Distance to goal: 2458.713
+Step 5800:
+  Payload position: [35.63410181 27.41021103]
+  Payload displacement from start: 6.201
+  Distance to goal: 2458.586
+Step 5900:
+  Payload position: [35.73713734 27.62525706]
+  Payload displacement from start: 6.209
+  Distance to goal: 2458.361
+Step 6000:
+  Payload position: [36.00132214 27.90219636]
+  Payload displacement from start: 6.357
+  Distance to goal: 2457.978
+Step 6100:
+  Payload position: [36.27515994 28.07762266]
+  Payload displacement from start: 6.563
+  Distance to goal: 2457.661
+Step 6200:
+  Payload position: [36.52224051 28.09054854]
+  Payload displacement from start: 6.796
+  Distance to goal: 2457.477
+Step 6300:
+  Payload position: [36.75036699 28.04211686]
+  Payload displacement from start: 7.029
+  Distance to goal: 2457.351
+Step 6400:
+  Payload position: [36.97887736 27.9873667 ]
+  Payload displacement from start: 7.263
+  Distance to goal: 2457.228
+Step 6500:
+  Payload position: [37.19737114 27.95774023]
+  Payload displacement from start: 7.482
+  Distance to goal: 2457.095
+Step 6600:
+  Payload position: [37.42897136 27.92495569]
+  Payload displacement from start: 7.713
+  Distance to goal: 2456.955
+Step 6700:
+  Payload position: [37.6366486  27.87933493]
+  Payload displacement from start: 7.926
+  Distance to goal: 2456.841
+Step 6800:
+  Payload position: [37.85614372 27.81770063]
+  Payload displacement from start: 8.154
+  Distance to goal: 2456.730
+Step 6900:
+  Payload position: [38.08074553 27.76570399]
+  Payload displacement from start: 8.384
+  Distance to goal: 2456.608
+Step 7000:
+  Payload position: [38.33545702 27.85126699]
+  Payload displacement from start: 8.608
+  Distance to goal: 2456.368
+Step 7100:
+  Payload position: [38.68741874 27.94777468]
+  Payload displacement from start: 8.927
+  Distance to goal: 2456.052
+Step 7200:
+  Payload position: [39.03455758 28.053783  ]
+  Payload displacement from start: 9.242
+  Distance to goal: 2455.732
+Step 7300:
+  Payload position: [39.44091512 28.15742225]
+  Payload displacement from start: 9.619
+  Distance to goal: 2455.372
+Step 7400:
+  Payload position: [39.86400677 28.25320218]
+  Payload displacement from start: 10.017
+  Distance to goal: 2455.006
+Step 7500:
+  Payload position: [40.29392263 28.34946682]
+  Payload displacement from start: 10.425
+  Distance to goal: 2454.634
+Step 7600:
+  Payload position: [40.72265201 28.44560166]
+  Payload displacement from start: 10.835
+  Distance to goal: 2454.264
+Step 7700:
+  Payload position: [41.0694131 28.6721824]
+  Payload displacement from start: 11.149
+  Distance to goal: 2453.859
+Step 7800:
+  Payload position: [41.37474913 28.98239167]
+  Payload displacement from start: 11.420
+  Distance to goal: 2453.424
+Step 7900:
+  Payload position: [41.67141101 29.29014322]
+  Payload displacement from start: 11.693
+  Distance to goal: 2452.996
+Step 8000:
+  Payload position: [41.97883497 29.58807956]
+  Payload displacement from start: 11.986
+  Distance to goal: 2452.568
+Step 8100:
+  Payload position: [42.24315637 29.72318827]
+  Payload displacement from start: 12.246
+  Distance to goal: 2452.286
+Step 8200:
+  Payload position: [42.59528805 29.77122929]
+  Payload displacement from start: 12.597
+  Distance to goal: 2452.004
+Step 8300:
+  Payload position: [43.08517195 29.68140057]
+  Payload displacement from start: 13.089
+  Distance to goal: 2451.723
+Step 8400:
+  Payload position: [43.66914939 29.34560964]
+  Payload displacement from start: 13.685
+  Distance to goal: 2451.550
+Step 8500:
+  Payload position: [44.33311241 29.12095687]
+  Payload displacement from start: 14.360
+  Distance to goal: 2451.242
+Step 8600:
+  Payload position: [45.01910475 28.80943743]
+  Payload displacement from start: 15.066
+  Distance to goal: 2450.980
+Step 8700:
+  Payload position: [45.80347608 28.49940514]
+  Payload displacement from start: 15.875
+  Distance to goal: 2450.648
+Step 8800:
+  Payload position: [46.6641359  28.25500469]
+  Payload displacement from start: 16.755
+  Distance to goal: 2450.217
+Step 8900:
+  Payload position: [47.45715107 27.93957266]
+  Payload displacement from start: 17.578
+  Distance to goal: 2449.883
+Step 9000:
+  Payload position: [48.14590905 27.51629458]
+  Payload displacement from start: 18.315
+  Distance to goal: 2449.700
+Step 9100:
+  Payload position: [48.7607129  27.09698152]
+  Payload displacement from start: 18.984
+  Distance to goal: 2449.566
+Step 9200:
+  Payload position: [49.37078919 26.71172467]
+  Payload displacement from start: 19.648
+  Distance to goal: 2449.412
+Step 9300:
+  Payload position: [50.00834426 26.33266881]
+  Payload displacement from start: 20.342
+  Distance to goal: 2449.234
+Step 9400:
+  Payload position: [50.79932841 25.86289886]
+  Payload displacement from start: 21.207
+  Distance to goal: 2449.013
+Step 9500:
+  Payload position: [51.6607587  25.49747711]
+  Payload displacement from start: 22.124
+  Distance to goal: 2448.669
+Step 9600:
+  Payload position: [52.46475485 25.22966967]
+  Payload displacement from start: 22.966
+  Distance to goal: 2448.295
+Step 9700:
+  Payload position: [53.21936703 24.95482471]
+  Payload displacement from start: 23.761
+  Distance to goal: 2447.962
+Step 9800:
+  Payload position: [54.00270413 24.69637965]
+  Payload displacement from start: 24.582
+  Distance to goal: 2447.597
+Step 9900:
+  Payload position: [54.89635102 24.57117504]
+  Payload displacement from start: 25.481
+  Distance to goal: 2447.060
+Step 10000:
+  Payload position: [55.88256703 24.52000241]
+  Payload displacement from start: 26.456
+  Distance to goal: 2446.405
+Step 10100:
+  Payload position: [56.86794378 24.50190455]
+  Payload displacement from start: 27.425
+  Distance to goal: 2445.728
+Step 10200:
+  Payload position: [57.7565733  24.54776173]
+  Payload displacement from start: 28.287
+  Distance to goal: 2445.073
+Step 10300:
+  Payload position: [58.42419631 24.49124324]
+  Payload displacement from start: 28.953
+  Distance to goal: 2444.646
+Step 10400:
+  Payload position: [58.93055273 24.46180194]
+  Payload displacement from start: 29.456
+  Distance to goal: 2444.312
+Step 10500:
+  Payload position: [59.43815274 24.35383086]
+  Payload displacement from start: 29.975
+  Distance to goal: 2444.034
+Step 10600:
+  Payload position: [60.00752591 24.13992603]
+  Payload displacement from start: 30.574
+  Distance to goal: 2443.788
+Step 10700:
+  Payload position: [60.43445287 23.83720061]
+  Payload displacement from start: 31.052
+  Distance to goal: 2443.706
+Step 10800:
+  Payload position: [60.85138484 23.49324292]
+  Payload displacement from start: 31.530
+  Distance to goal: 2443.660
+Step 10900:
+  Payload position: [61.33655053 23.20468354]
+  Payload displacement from start: 32.065
+  Distance to goal: 2443.527
+Step 11000:
+  Payload position: [61.91278483 23.0066772 ]
+  Payload displacement from start: 32.670
+  Distance to goal: 2443.266
+Step 11100:
+  Payload position: [62.44526737 22.97565232]
+  Payload displacement from start: 33.197
+  Distance to goal: 2442.916
+Step 11200:
+  Payload position: [62.98239677 22.91009558]
+  Payload displacement from start: 33.736
+  Distance to goal: 2442.587
+Step 11300:
+  Payload position: [63.58108214 22.89266904]
+  Payload displacement from start: 34.325
+  Distance to goal: 2442.181
+Step 11400:
+  Payload position: [64.39337088 22.89514949]
+  Payload displacement from start: 35.120
+  Distance to goal: 2441.612
+Step 11500:
+  Payload position: [65.25160583 22.93346909]
+  Payload displacement from start: 35.953
+  Distance to goal: 2440.985
+Step 11600:
+  Payload position: [66.09592822 23.06861033]
+  Payload displacement from start: 36.755
+  Distance to goal: 2440.299
+Step 11700:
+  Payload position: [66.8565943  23.23444893]
+  Payload displacement from start: 37.472
+  Distance to goal: 2439.649
+Step 11800:
+  Payload position: [67.69332181 23.3850599 ]
+  Payload displacement from start: 38.269
+  Distance to goal: 2438.957
+Step 11900:
+  Payload position: [68.5771169  23.55856276]
+  Payload displacement from start: 39.111
+  Distance to goal: 2438.216
+Step 12000:
+  Payload position: [69.49717652 23.72656565]
+  Payload displacement from start: 39.992
+  Distance to goal: 2437.454
+Step 12100:
+  Payload position: [70.44159755 23.88831105]
+  Payload displacement from start: 40.901
+  Distance to goal: 2436.679
+Step 12200:
+  Payload position: [71.40080774 24.04825933]
+  Payload displacement from start: 41.826
+  Distance to goal: 2435.895
+Step 12300:
+  Payload position: [72.29937923 24.196195  ]
+  Payload displacement from start: 42.696
+  Distance to goal: 2435.163
+Step 12400:
+  Payload position: [73.16992419 24.34396558]
+  Payload displacement from start: 43.539
+  Distance to goal: 2434.450
+Step 12500:
+  Payload position: [74.09900617 24.48651469]
+  Payload displacement from start: 44.442
+  Distance to goal: 2433.700
+Step 12600:
+  Payload position: [75.02608345 24.67171658]
+  Payload displacement from start: 45.340
+  Distance to goal: 2432.922
+Step 12700:
+  Payload position: [75.88757988 24.72369079]
+  Payload displacement from start: 46.190
+  Distance to goal: 2432.284
+Step 12800:
+  Payload position: [76.67678896 24.68989205]
+  Payload displacement from start: 46.978
+  Distance to goal: 2431.759
+Step 12900:
+  Payload position: [77.60125854 24.57726157]
+  Payload displacement from start: 47.909
+  Distance to goal: 2431.196
+Step 13000:
+  Payload position: [78.62521921 24.39593026]
+  Payload displacement from start: 48.947
+  Distance to goal: 2430.614
+Step 13100:
+  Payload position: [79.63653506 24.19066322]
+  Payload displacement from start: 49.975
+  Distance to goal: 2430.057
+Step 13200:
+  Payload position: [80.61841018 24.02248303]
+  Payload displacement from start: 50.970
+  Distance to goal: 2429.495
+Step 13300:
+  Payload position: [81.53564923 23.91436428]
+  Payload displacement from start: 51.894
+  Distance to goal: 2428.935
+Step 13400:
+  Payload position: [82.46252481 23.84731229]
+  Payload displacement from start: 52.822
+  Distance to goal: 2428.339
+Step 13500:
+  Payload position: [83.39702974 23.76792768]
+  Payload displacement from start: 53.759
+  Distance to goal: 2427.747
+Step 13600:
+  Payload position: [84.25808053 23.83471737]
+  Payload displacement from start: 54.607
+  Distance to goal: 2427.101
+Step 13700:
+  Payload position: [84.96136643 23.90316737]
+  Payload displacement from start: 55.298
+  Distance to goal: 2426.563
+Step 13800:
+  Payload position: [85.28342005 23.98073949]
+  Payload displacement from start: 55.610
+  Distance to goal: 2426.284
+Step 13900:
+  Payload position: [85.6514067  24.09425531]
+  Payload displacement from start: 55.964
+  Distance to goal: 2425.947
+Step 14000:
+  Payload position: [85.55878393 24.13868586]
+  Payload displacement from start: 55.867
+  Distance to goal: 2425.979
+Step 14100:
+  Payload position: [85.34461811 24.33504762]
+  Payload displacement from start: 55.634
+  Distance to goal: 2425.986
+Step 14200:
+  Payload position: [85.27810014 24.34699228]
+  Payload displacement from start: 55.566
+  Distance to goal: 2426.024
+Step 14300:
+  Payload position: [85.26676518 24.1312891 ]
+  Payload displacement from start: 55.577
+  Distance to goal: 2426.187
+Step 14400:
+  Payload position: [85.26522614 23.89814045]
+  Payload displacement from start: 55.601
+  Distance to goal: 2426.356
+Step 14500:
+  Payload position: [85.24986351 23.64081269]
+  Payload displacement from start: 55.615
+  Distance to goal: 2426.552
+Step 14600:
+  Payload position: [85.23762533 23.3777825 ]
+  Payload displacement from start: 55.633
+  Distance to goal: 2426.750
+Step 14700:
+  Payload position: [85.35544706 23.04793344]
+  Payload displacement from start: 55.790
+  Distance to goal: 2426.905
+Step 14800:
+  Payload position: [85.7141151  22.63853762]
+  Payload displacement from start: 56.198
+  Distance to goal: 2426.951
+Step 14900:
+  Payload position: [85.96076371 22.33034187]
+  Payload displacement from start: 56.484
+  Distance to goal: 2427.002
+Step 15000:
+  Payload position: [86.28622323 22.19030178]
+  Payload displacement from start: 56.825
+  Distance to goal: 2426.877
+Step 15100:
+  Payload position: [86.60348875 22.05426958]
+  Payload displacement from start: 57.158
+  Distance to goal: 2426.755
+Step 15200:
+  Payload position: [86.90828007 21.91142244]
+  Payload displacement from start: 57.480
+  Distance to goal: 2426.646
+Step 15300:
+  Payload position: [87.21483615 21.76548042]
+  Payload displacement from start: 57.804
+  Distance to goal: 2426.539
+Step 15400:
+  Payload position: [87.51069465 21.71790674]
+  Payload displacement from start: 58.104
+  Distance to goal: 2426.368
+Step 15500:
+  Payload position: [87.84700827 21.77176203]
+  Payload displacement from start: 58.429
+  Distance to goal: 2426.096
+Step 15600:
+  Payload position: [88.23532468 21.81971216]
+  Payload displacement from start: 58.807
+  Distance to goal: 2425.792
+Step 15700:
+  Payload position: [88.6296414  21.92775259]
+  Payload displacement from start: 59.183
+  Distance to goal: 2425.441
+Step 15800:
+  Payload position: [89.0310589 22.0165592]
+  Payload displacement from start: 59.568
+  Distance to goal: 2425.098
+Step 15900:
+  Payload position: [89.41112838 22.09134676]
+  Payload displacement from start: 59.935
+  Distance to goal: 2424.781
+Step 16000:
+  Payload position: [89.74471208 22.24072338]
+  Payload displacement from start: 60.246
+  Distance to goal: 2424.442
+Step 16100:
+  Payload position: [89.99479822 22.44881544]
+  Payload displacement from start: 60.468
+  Distance to goal: 2424.119
+Step 16200:
+  Payload position: [90.23770092 22.64348292]
+  Payload displacement from start: 60.685
+  Distance to goal: 2423.810
+Step 16300:
+  Payload position: [90.47096002 22.68921801]
+  Payload displacement from start: 60.911
+  Distance to goal: 2423.616
+Step 16400:
+  Payload position: [90.74774079 22.77685132]
+  Payload displacement from start: 61.176
+  Distance to goal: 2423.361
+Step 16500:
+  Payload position: [91.01227423 22.98530776]
+  Payload displacement from start: 61.414
+  Distance to goal: 2423.027
+Step 16600:
+  Payload position: [91.18813634 23.16506685]
+  Payload displacement from start: 61.569
+  Distance to goal: 2422.776
+Step 16700:
+  Payload position: [91.32132176 23.29740519]
+  Payload displacement from start: 61.687
+  Distance to goal: 2422.588
+Step 16800:
+  Payload position: [91.49036746 23.45589019]
+  Payload displacement from start: 61.838
+  Distance to goal: 2422.356
+Step 16900:
+  Payload position: [91.6656513  23.61516249]
+  Payload displacement from start: 61.995
+  Distance to goal: 2422.120
+Step 17000:
+  Payload position: [91.8682691  23.76109439]
+  Payload displacement from start: 62.182
+  Distance to goal: 2421.875
+Step 17100:
+  Payload position: [92.02835261 23.92154775]
+  Payload displacement from start: 62.325
+  Distance to goal: 2421.648
+Step 17200:
+  Payload position: [92.19688769 24.10784449]
+  Payload displacement from start: 62.475
+  Distance to goal: 2421.397
+Step 17300:
+  Payload position: [92.39076137 24.44912722]
+  Payload displacement from start: 62.637
+  Distance to goal: 2421.016
+Step 17400:
+  Payload position: [92.58571961 24.81738275]
+  Payload displacement from start: 62.800
+  Distance to goal: 2420.616
+Step 17500:
+  Payload position: [92.78538067 25.20004563]
+  Payload displacement from start: 62.969
+  Distance to goal: 2420.202
+Step 17600:
+  Payload position: [92.99224551 25.57503018]
+  Payload displacement from start: 63.147
+  Distance to goal: 2419.788
+Step 17700:
+  Payload position: [93.24627243 25.82457476]
+  Payload displacement from start: 63.384
+  Distance to goal: 2419.432
+Step 17800:
+  Payload position: [93.44791612 26.01406102]
+  Payload displacement from start: 63.573
+  Distance to goal: 2419.156
+Step 17900:
+  Payload position: [93.64987591 26.21600073]
+  Payload displacement from start: 63.762
+  Distance to goal: 2418.870
+Step 18000:
+  Payload position: [94.00823755 26.49960699]
+  Payload displacement from start: 64.104
+  Distance to goal: 2418.417
+Step 18100:
+  Payload position: [94.44982689 26.78749122]
+  Payload displacement from start: 64.530
+  Distance to goal: 2417.904
+Step 18200:
+  Payload position: [94.95510957 26.86051054]
+  Payload displacement from start: 65.031
+  Distance to goal: 2417.501
+Step 18300:
+  Payload position: [95.3584686  27.01067281]
+  Payload displacement from start: 65.427
+  Distance to goal: 2417.113
+Step 18400:
+  Payload position: [95.76951897 27.12394317]
+  Payload displacement from start: 65.832
+  Distance to goal: 2416.747
+Step 18500:
+  Payload position: [96.19613917 27.19734403]
+  Payload displacement from start: 66.255
+  Distance to goal: 2416.398
+Step 18600:
+  Payload position: [96.6865739  27.10039894]
+  Payload displacement from start: 66.750
+  Distance to goal: 2416.128
+Step 18700:
+  Payload position: [97.23094239 26.90403836]
+  Payload displacement from start: 67.302
+  Distance to goal: 2415.893
+Step 18800:
+  Payload position: [97.82713503 26.55578538]
+  Payload displacement from start: 67.915
+  Distance to goal: 2415.732
+Step 18900:
+  Payload position: [98.41706324 26.07746661]
+  Payload displacement from start: 68.529
+  Distance to goal: 2415.669
+Step 19000:
+  Payload position: [99.10228549 25.59673087]
+  Payload displacement from start: 69.242
+  Distance to goal: 2415.542
+Step 19100:
+  Payload position: [99.89135635 25.1607407 ]
+  Payload displacement from start: 70.059
+  Distance to goal: 2415.311
+Step 19200:
+  Payload position: [100.72316612  24.75712096]
+  Payload displacement from start: 70.917
+  Distance to goal: 2415.028
+Step 19300:
+  Payload position: [101.63348998  24.40242275]
+  Payload displacement from start: 71.852
+  Distance to goal: 2414.655
+Step 19400:
+  Payload position: [102.56396462  24.02825418]
+  Payload displacement from start: 72.809
+  Distance to goal: 2414.283
+Step 19500:
+  Payload position: [103.53049092  23.62063809]
+  Payload displacement from start: 73.807
+  Distance to goal: 2413.910
+Step 19600:
+  Payload position: [104.45210136  23.21216737]
+  Payload displacement from start: 74.761
+  Distance to goal: 2413.569
+Step 19700:
+  Payload position: [105.39655355  22.75421108]
+  Payload displacement from start: 75.744
+  Distance to goal: 2413.249
+Step 19800:
+  Payload position: [106.25906678  22.26696975]
+  Payload displacement from start: 76.650
+  Distance to goal: 2413.007
+Step 19900:
+  Payload position: [107.17711378  21.78002917]
+  Payload displacement from start: 77.614
+  Distance to goal: 2412.727
+Step 20000:
+  Payload position: [108.22302036  21.38816579]
+  Payload displacement from start: 78.696
+  Distance to goal: 2412.291
+Step 20100:
+  Payload position: [109.25219668  21.05729541]
+  Payload displacement from start: 79.755
+  Distance to goal: 2411.822
+Step 20200:
+  Payload position: [110.2410465   20.77368011]
+  Payload displacement from start: 80.770
+  Distance to goal: 2411.347
+Step 20300:
+  Payload position: [111.220442    20.56414445]
+  Payload displacement from start: 81.767
+  Distance to goal: 2410.825
+Step 20400:
+  Payload position: [112.12393418  20.51509629]
+  Payload displacement from start: 82.670
+  Distance to goal: 2410.239
+Step 20500:
+  Payload position: [112.96511128  20.8437365 ]
+  Payload displacement from start: 83.469
+  Distance to goal: 2409.422
+Step 20600:
+  Payload position: [113.73999952  21.28499948]
+  Payload displacement from start: 84.192
+  Distance to goal: 2408.568
+Step 20700:
+  Payload position: [114.25077256  21.35188524]
+  Payload displacement from start: 84.693
+  Distance to goal: 2408.169
+Step 20800:
+  Payload position: [114.7290641   21.23109233]
+  Payload displacement from start: 85.182
+  Distance to goal: 2407.927
+Step 20900:
+  Payload position: [115.26148948  21.19380428]
+  Payload displacement from start: 85.715
+  Distance to goal: 2407.589
+Step 21000:
+  Payload position: [115.80877936  21.22227292]
+  Payload displacement from start: 86.257
+  Distance to goal: 2407.192
+Step 21100:
+  Payload position: [116.44716245  21.40742397]
+  Payload displacement from start: 86.873
+  Distance to goal: 2406.619
+Step 21200:
+  Payload position: [117.19235532  21.61570074]
+  Payload displacement from start: 87.595
+  Distance to goal: 2405.955
+Step 21300:
+  Payload position: [117.93058768  21.82015467]
+  Payload displacement from start: 88.310
+  Distance to goal: 2405.300
+Step 21400:
+  Payload position: [118.44693977  22.042619  ]
+  Payload displacement from start: 88.804
+  Distance to goal: 2404.783
+Step 21500:
+  Payload position: [118.8215519  22.1802233]
+  Payload displacement from start: 89.165
+  Distance to goal: 2404.426
+Step 21600:
+  Payload position: [119.08370596  22.29849261]
+  Payload displacement from start: 89.416
+  Distance to goal: 2404.160
+Step 21700:
+  Payload position: [119.33106155  22.43164597]
+  Payload displacement from start: 89.651
+  Distance to goal: 2403.893
+Step 21800:
+  Payload position: [119.71898363  22.65264732]
+  Payload displacement from start: 90.019
+  Distance to goal: 2403.466
+Step 21900:
+  Payload position: [120.25445664  22.71562046]
+  Payload displacement from start: 90.548
+  Distance to goal: 2403.053
+Step 22000:
+  Payload position: [120.59900467  22.75638991]
+  Payload displacement from start: 90.888
+  Distance to goal: 2402.787
+Step 22100:
+  Payload position: [120.9287706   22.80137632]
+  Payload displacement from start: 91.213
+  Distance to goal: 2402.528
+Step 22200:
+  Payload position: [121.44638514  22.80556109]
+  Payload displacement from start: 91.729
+  Distance to goal: 2402.169
+Step 22300:
+  Payload position: [122.02890461  23.10068692]
+  Payload displacement from start: 92.287
+  Distance to goal: 2401.555
+Step 22400:
+  Payload position: [122.62345829  23.41819567]
+  Payload displacement from start: 92.857
+  Distance to goal: 2400.916
+Step 22500:
+  Payload position: [123.07653636  23.73306088]
+  Payload displacement from start: 93.287
+  Distance to goal: 2400.376
+Step 22600:
+  Payload position: [123.34520623  24.00643103]
+  Payload displacement from start: 93.537
+  Distance to goal: 2399.993
+Step 22700:
+  Payload position: [123.44395193  24.10832436]
+  Payload displacement from start: 93.630
+  Distance to goal: 2399.851
+Step 22800:
+  Payload position: [123.47865602  24.18760438]
+  Payload displacement from start: 93.659
+  Distance to goal: 2399.769
+Step 22900:
+  Payload position: [123.48651797  24.30020604]
+  Payload displacement from start: 93.660
+  Distance to goal: 2399.682
+Step 23000:
+  Payload position: [123.46916753  24.45209494]
+  Payload displacement from start: 93.634
+  Distance to goal: 2399.584
+Step 23100:
+  Payload position: [123.46335632  24.61869798]
+  Payload displacement from start: 93.618
+  Distance to goal: 2399.466
+Step 23200:
+  Payload position: [123.46070611  24.77749342]
+  Payload displacement from start: 93.607
+  Distance to goal: 2399.353
+Step 23300:
+  Payload position: [123.42906405  25.07896128]
+  Payload displacement from start: 93.559
+  Distance to goal: 2399.155
+Step 23400:
+  Payload position: [123.41659152  25.42379819]
+  Payload displacement from start: 93.529
+  Distance to goal: 2398.913
+Step 23500:
+  Payload position: [123.39422011  25.77810837]
+  Payload displacement from start: 93.490
+  Distance to goal: 2398.671
+Step 23600:
+  Payload position: [123.41291977  26.14014381]
+  Payload displacement from start: 93.493
+  Distance to goal: 2398.395
+Step 23700:
+  Payload position: [123.38061047  26.53083207]
+  Payload displacement from start: 93.445
+  Distance to goal: 2398.133
+Step 23800:
+  Payload position: [123.35134881  26.93512758]
+  Payload displacement from start: 93.402
+  Distance to goal: 2397.859
+Step 23900:
+  Payload position: [123.29734675  27.34574926]
+  Payload displacement from start: 93.335
+  Distance to goal: 2397.597
+Step 24000:
+  Payload position: [123.26277569  27.8113877 ]
+  Payload displacement from start: 93.288
+  Distance to goal: 2397.283
+Step 24100:
+  Payload position: [123.32853097  28.35839133]
+  Payload displacement from start: 93.343
+  Distance to goal: 2396.840
+Step 24200:
+  Payload position: [123.61173977  28.82382155]
+  Payload displacement from start: 93.619
+  Distance to goal: 2396.307
+Step 24300:
+  Payload position: [123.87965168  29.32782085]
+  Payload displacement from start: 93.882
+  Distance to goal: 2395.757
+Step 24400:
+  Payload position: [124.09444328  29.96013328]
+  Payload displacement from start: 94.094
+  Distance to goal: 2395.150
+Step 24500:
+  Payload position: [124.2865895   30.52598879]
+  Payload displacement from start: 94.288
+  Distance to goal: 2394.607
+Step 24600:
+  Payload position: [124.48634393  31.08196697]
+  Payload displacement from start: 94.493
+  Distance to goal: 2394.066
+Step 24700:
+  Payload position: [124.86492104  31.55687627]
+  Payload displacement from start: 94.878
+  Distance to goal: 2393.461
+Step 24800:
+  Payload position: [125.26860973  32.02041099]
+  Payload displacement from start: 95.290
+  Distance to goal: 2392.847
+Step 24900:
+  Payload position: [125.68409964  32.45522257]
+  Payload displacement from start: 95.716
+  Distance to goal: 2392.245
+Step 25000:
+  Payload position: [126.15836344  32.91592398]
+  Payload displacement from start: 96.203
+  Distance to goal: 2391.584
+Step 25100:
+  Payload position: [126.9531347   33.48928728]
+  Payload displacement from start: 97.016
+  Distance to goal: 2390.622
+Step 25200:
+  Payload position: [127.89117579  34.05808543]
+  Payload displacement from start: 97.975
+  Distance to goal: 2389.564
+Step 25300:
+  Payload position: [128.7119226   34.53577553]
+  Payload displacement from start: 98.816
+  Distance to goal: 2388.653
+Step 25400:
+  Payload position: [129.5837572  35.0488701]
+  Payload displacement from start: 99.712
+  Distance to goal: 2387.681
+Step 25500:
+  Payload position: [130.56767291  35.57446597]
+  Payload displacement from start: 100.722
+  Distance to goal: 2386.623
+Step 25600:
+  Payload position: [131.63467925  36.13910082]
+  Payload displacement from start: 101.820
+  Distance to goal: 2385.480
+Step 25700:
+  Payload position: [132.73161376  36.77628334]
+  Payload displacement from start: 102.955
+  Distance to goal: 2384.263
+Step 25800:
+  Payload position: [133.94331064  37.43944669]
+  Payload displacement from start: 104.209
+  Distance to goal: 2382.949
+Step 25900:
+  Payload position: [135.21360581  38.10675943]
+  Payload displacement from start: 105.525
+  Distance to goal: 2381.592
+Step 26000:
+  Payload position: [136.47455959  38.79202209]
+  Payload displacement from start: 106.837
+  Distance to goal: 2380.228
+Step 26100:
+  Payload position: [137.67011693  39.36725427]
+  Payload displacement from start: 108.077
+  Distance to goal: 2378.989
+Step 26200:
+  Payload position: [138.81787542  39.91132278]
+  Payload displacement from start: 109.268
+  Distance to goal: 2377.806
+Step 26300:
+  Payload position: [139.90684181  40.33084604]
+  Payload displacement from start: 110.391
+  Distance to goal: 2376.754
+Step 26400:
+  Payload position: [141.01352688  40.44865906]
+  Payload displacement from start: 111.504
+  Distance to goal: 2375.909
+Step 26500:
+  Payload position: [142.1607945   40.48381755]
+  Payload displacement from start: 112.650
+  Distance to goal: 2375.097
+Step 26600:
+  Payload position: [143.29065007  40.49530404]
+  Payload displacement from start: 113.776
+  Distance to goal: 2374.315
+Step 26700:
+  Payload position: [144.21412817  40.43770154]
+  Payload displacement from start: 114.690
+  Distance to goal: 2373.724
+Step 26800:
+  Payload position: [144.95216579  40.38119687]
+  Payload displacement from start: 115.420
+  Distance to goal: 2373.260
+Step 26900:
+  Payload position: [145.64153132  40.34613986]
+  Payload displacement from start: 116.103
+  Distance to goal: 2372.813
+Step 27000:
+  Payload position: [146.37050659  40.33212963]
+  Payload displacement from start: 116.828
+  Distance to goal: 2372.325
+Step 27100:
+  Payload position: [146.91885305  40.25277855]
+  Payload displacement from start: 117.368
+  Distance to goal: 2372.007
+Step 27200:
+  Payload position: [147.25254376  40.20156527]
+  Payload displacement from start: 117.696
+  Distance to goal: 2371.816
+Step 27300:
+  Payload position: [147.49217688  40.1832124 ]
+  Payload displacement from start: 117.933
+  Distance to goal: 2371.666
+Step 27400:
+  Payload position: [147.73753977  40.16740767]
+  Payload displacement from start: 118.176
+  Distance to goal: 2371.509
+Step 27500:
+  Payload position: [147.98882201  40.181068  ]
+  Payload displacement from start: 118.427
+  Distance to goal: 2371.327
+Step 27600:
+  Payload position: [148.16912415  40.20026881]
+  Payload displacement from start: 118.609
+  Distance to goal: 2371.190
+Step 27700:
+  Payload position: [148.33051344  40.18801542]
+  Payload displacement from start: 118.768
+  Distance to goal: 2371.089
+Step 27800:
+  Payload position: [148.52527274  40.21657621]
+  Payload displacement from start: 118.965
+  Distance to goal: 2370.935
+Step 27900:
+  Payload position: [148.75395438  40.1756542 ]
+  Payload displacement from start: 119.189
+  Distance to goal: 2370.808
+Step 28000:
+  Payload position: [148.91829902  40.16145379]
+  Payload displacement from start: 119.352
+  Distance to goal: 2370.706
+Step 28100:
+  Payload position: [148.95619048  40.046664  ]
+  Payload displacement from start: 119.380
+  Distance to goal: 2370.764
+Step 28200:
+  Payload position: [148.95582481  40.00815993]
+  Payload displacement from start: 119.376
+  Distance to goal: 2370.792
+Step 28300:
+  Payload position: [148.95582481  40.00231951]
+  Payload displacement from start: 119.376
+  Distance to goal: 2370.797
+Step 28400:
+  Payload position: [148.88526352  40.01523395]
+  Payload displacement from start: 119.306
+  Distance to goal: 2370.835
+Step 28500:
+  Payload position: [148.8708428   40.00526919]
+  Payload displacement from start: 119.291
+  Distance to goal: 2370.852
+Step 28600:
+  Payload position: [148.86899432  40.00634033]
+  Payload displacement from start: 119.289
+  Distance to goal: 2370.853
+Step 28700:
+  Payload position: [148.78770925  40.07530768]
+  Payload displacement from start: 119.214
+  Distance to goal: 2370.858
+Step 28800:
+  Payload position: [148.72238964  40.0808665 ]
+  Payload displacement from start: 119.150
+  Distance to goal: 2370.899
+Step 28900:
+  Payload position: [148.65176479  40.0810197 ]
+  Payload displacement from start: 119.079
+  Distance to goal: 2370.947
+Step 29000:
+  Payload position: [148.56992297  40.08471292]
+  Payload displacement from start: 118.998
+  Distance to goal: 2371.000
+Step 29100:
+  Payload position: [148.47774123  40.08566751]
+  Payload displacement from start: 118.906
+  Distance to goal: 2371.063
+Step 29200:
+  Payload position: [148.3805929   40.08999846]
+  Payload displacement from start: 118.810
+  Distance to goal: 2371.126
+Step 29300:
+  Payload position: [148.18306707  40.03847117]
+  Payload displacement from start: 118.609
+  Distance to goal: 2371.299
+Step 29400:
+  Payload position: [147.99458412  40.04637797]
+  Payload displacement from start: 118.421
+  Distance to goal: 2371.422
+Step 29500:
+  Payload position: [147.96885589  40.05510358]
+  Payload displacement from start: 118.397
+  Distance to goal: 2371.433
+Step 29600:
+  Payload position: [147.79456641  39.82469317]
+  Payload displacement from start: 118.204
+  Distance to goal: 2371.720
+Step 29700:
+  Payload position: [147.76608815  39.51290579]
+  Payload displacement from start: 118.150
+  Distance to goal: 2371.967
+Step 29800:
+  Payload position: [147.76819724  39.1226736 ]
+  Payload displacement from start: 118.121
+  Distance to goal: 2372.250
+Step 29900:
+  Payload position: [147.75985449  38.83205247]
+  Payload displacement from start: 118.091
+  Distance to goal: 2372.468
+Step 30000:
+  Payload position: [147.60441962  38.74712492]
+  Payload displacement from start: 117.929
+  Distance to goal: 2372.636
+Step 30100:
+  Payload position: [147.44910692  38.6769257 ]
+  Payload displacement from start: 117.769
+  Distance to goal: 2372.794
+Step 30200:
+  Payload position: [147.24758999  38.63398167]
+  Payload displacement from start: 117.565
+  Distance to goal: 2372.963
+Step 30300:
+  Payload position: [147.06397683  38.5700022 ]
+  Payload displacement from start: 117.377
+  Distance to goal: 2373.135
+Step 30400:
+  Payload position: [146.94585421  38.44208775]
+  Payload displacement from start: 117.250
+  Distance to goal: 2373.309
+Step 30500:
+  Payload position: [146.87362401  38.22530571]
+  Payload displacement from start: 117.163
+  Distance to goal: 2373.517
+Step 30600:
+  Payload position: [146.80805468  38.00302679]
+  Payload displacement from start: 117.082
+  Distance to goal: 2373.724
+Step 30700:
+  Payload position: [146.7542281   37.77934655]
+  Payload displacement from start: 117.013
+  Distance to goal: 2373.924
+Step 30800:
+  Payload position: [146.67190797  37.60150655]
+  Payload displacement from start: 116.919
+  Distance to goal: 2374.110
+Step 30900:
+  Payload position: [146.95163471  37.59288156]
+  Payload displacement from start: 117.198
+  Distance to goal: 2373.925
+Step 31000:
+  Payload position: [147.25094823  37.59176891]
+  Payload displacement from start: 117.496
+  Distance to goal: 2373.721
+Step 31100:
+  Payload position: [147.36036336  37.54111685]
+  Payload displacement from start: 117.602
+  Distance to goal: 2373.683
+Step 31200:
+  Payload position: [147.47759158  37.5159943 ]
+  Payload displacement from start: 117.718
+  Distance to goal: 2373.622
+Step 31300:
+  Payload position: [147.57164627  37.50434782]
+  Payload displacement from start: 117.811
+  Distance to goal: 2373.566
+Step 31400:
+  Payload position: [147.68720831  37.67949769]
+  Payload displacement from start: 117.937
+  Distance to goal: 2373.359
+Step 31500:
+  Payload position: [147.7960679   37.85645249]
+  Payload displacement from start: 118.058
+  Distance to goal: 2373.155
+Step 31600:
+  Payload position: [147.92619881  38.04485174]
+  Payload displacement from start: 118.200
+  Distance to goal: 2372.929
+Step 31700:
+  Payload position: [147.98387636  38.14565857]
+  Payload displacement from start: 118.265
+  Distance to goal: 2372.816
+Step 31800:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 31900:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 32000:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 32100:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 32200:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 32300:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 32400:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 32500:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 32600:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 32700:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 32800:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 32900:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 33000:
+  Payload position: [147.98552975  38.14996152]
+  Payload displacement from start: 118.267
+  Distance to goal: 2372.812
+Step 33100:
+  Payload position: [147.92995914  38.1841393 ]
+  Payload displacement from start: 118.214
+  Distance to goal: 2372.825
+Step 33200:
+  Payload position: [147.88500997  38.21597495]
+  Payload displacement from start: 118.171
+  Distance to goal: 2372.832
+Step 33300:
+  Payload position: [147.88500997  38.21597495]
+  Payload displacement from start: 118.171
+  Distance to goal: 2372.832
+Step 33400:
+  Payload position: [147.88500997  38.21597495]
+  Payload displacement from start: 118.171
+  Distance to goal: 2372.832
+Step 33500:
+  Payload position: [147.89632527  38.21375004]
+  Payload displacement from start: 118.182
+  Distance to goal: 2372.826
+Step 33600:
+  Payload position: [148.08944784  38.37481999]
+  Payload displacement from start: 118.386
+  Distance to goal: 2372.577
+Step 33700:
+  Payload position: [148.30555147  38.48806833]
+  Payload displacement from start: 118.610
+  Distance to goal: 2372.346
+Step 33800:
+  Payload position: [148.49392878  38.47962632]
+  Payload displacement from start: 118.797
+  Distance to goal: 2372.224
+Step 33900:
+  Payload position: [148.49029278  38.43501978]
+  Payload displacement from start: 118.790
+  Distance to goal: 2372.259
+Step 34000:
+  Payload position: [148.62392208  38.37797874]
+  Payload displacement from start: 118.919
+  Distance to goal: 2372.209
+Step 34100:
+  Payload position: [148.78561228  38.30647004]
+  Payload displacement from start: 119.076
+  Distance to goal: 2372.151
+Step 34200:
+  Payload position: [148.87821332  38.38563261]
+  Payload displacement from start: 119.174
+  Distance to goal: 2372.030
+Step 34300:
+  Payload position: [148.90957962  38.48596293]
+  Payload displacement from start: 119.212
+  Distance to goal: 2371.935
+Step 34400:
+  Payload position: [148.95736965  38.57176231]
+  Payload displacement from start: 119.266
+  Distance to goal: 2371.840
+Step 34500:
+  Payload position: [149.00192503  38.66561532]
+  Payload displacement from start: 119.317
+  Distance to goal: 2371.741
+Step 34600:
+  Payload position: [149.06121387  38.76349069]
+  Payload displacement from start: 119.383
+  Distance to goal: 2371.629
+Step 34700:
+  Payload position: [149.12594953  38.87142612]
+  Payload displacement from start: 119.456
+  Distance to goal: 2371.506
+Step 34800:
+  Payload position: [149.20762926  38.96579214]
+  Payload displacement from start: 119.544
+  Distance to goal: 2371.381
+Step 34900:
+  Payload position: [149.40046747  38.95133993]
+  Payload displacement from start: 119.736
+  Distance to goal: 2371.260
+Step 35000:
+  Payload position: [149.73215979  38.98711628]
+  Payload displacement from start: 120.069
+  Distance to goal: 2371.007
+Step 35100:
+  Payload position: [150.10839602  39.08076575]
+  Payload displacement from start: 120.451
+  Distance to goal: 2370.681
+Step 35200:
+  Payload position: [150.3148403   38.93510265]
+  Payload displacement from start: 120.646
+  Distance to goal: 2370.647
+Step 35300:
+  Payload position: [150.4315142   38.64163637]
+  Payload displacement from start: 120.741
+  Distance to goal: 2370.781
+Step 35400:
+  Payload position: [150.39811288  38.42004013]
+  Payload displacement from start: 120.692
+  Distance to goal: 2370.966
+Step 35500:
+  Payload position: [150.32335953  38.31413396]
+  Payload displacement from start: 120.610
+  Distance to goal: 2371.094
+Step 35600:
+  Payload position: [150.20437416  38.27991606]
+  Payload displacement from start: 120.489
+  Distance to goal: 2371.201
+Step 35700:
+  Payload position: [150.00938079  38.23289826]
+  Payload displacement from start: 120.291
+  Distance to goal: 2371.368
+Step 35800:
+  Payload position: [149.6712975   38.09317814]
+  Payload displacement from start: 119.945
+  Distance to goal: 2371.701
+Step 35900:
+  Payload position: [149.30388029  37.93710905]
+  Payload displacement from start: 119.568
+  Distance to goal: 2372.066
+Step 36000:
+  Payload position: [148.99802039  37.85901399]
+  Payload displacement from start: 119.257
+  Distance to goal: 2372.332
+Step 36100:
+  Payload position: [148.63929456  37.81248194]
+  Payload displacement from start: 118.896
+  Distance to goal: 2372.611
+Step 36200:
+  Payload position: [148.26550566  37.65755942]
+  Payload displacement from start: 118.513
+  Distance to goal: 2372.980
+Step 36300:
+  Payload position: [147.93715906  37.60904585]
+  Payload displacement from start: 118.182
+  Distance to goal: 2373.240
+Step 36400:
+  Payload position: [147.59497892  37.71269758]
+  Payload displacement from start: 117.848
+  Distance to goal: 2373.398
+Step 36500:
+  Payload position: [147.11805861  37.91931561]
+  Payload displacement from start: 117.385
+  Distance to goal: 2373.573
+Step 36600:
+  Payload position: [146.67165002  38.07597172]
+  Payload displacement from start: 116.951
+  Distance to goal: 2373.764
+Step 36700:
+  Payload position: [146.24359691  38.20049952]
+  Payload displacement from start: 116.532
+  Distance to goal: 2373.966
+Step 36800:
+  Payload position: [145.76307196  38.37856446]
+  Payload displacement from start: 116.066
+  Distance to goal: 2374.165
+Step 36900:
+  Payload position: [145.43408667  38.54964069]
+  Payload displacement from start: 115.750
+  Distance to goal: 2374.265
+Step 37000:
+  Payload position: [145.18323909  38.73726442]
+  Payload displacement from start: 115.514
+  Distance to goal: 2374.300
+Step 37100:
+  Payload position: [144.93815231  38.91129267]
+  Payload displacement from start: 115.283
+  Distance to goal: 2374.341
+Step 37200:
+  Payload position: [144.76035792  39.14382719]
+  Payload displacement from start: 115.124
+  Distance to goal: 2374.293
+Step 37300:
+  Payload position: [144.61684529  39.38631917]
+  Payload displacement from start: 115.001
+  Distance to goal: 2374.214
+Step 37400:
+  Payload position: [144.42828869  39.69007579]
+  Payload displacement from start: 114.838
+  Distance to goal: 2374.122
+Step 37500:
+  Payload position: [144.41591324  39.52524134]
+  Payload displacement from start: 114.812
+  Distance to goal: 2374.251
+Step 37600:
+  Payload position: [144.36031604  39.16704642]
+  Payload displacement from start: 114.727
+  Distance to goal: 2374.550
+Step 37700:
+  Payload position: [144.39577274  38.85332072]
+  Payload displacement from start: 114.738
+  Distance to goal: 2374.754
+Step 37800:
+  Payload position: [144.48118561  38.59156145]
+  Payload displacement from start: 114.803
+  Distance to goal: 2374.887
+Step 37900:
+  Payload position: [144.60749961  38.39356916]
+  Payload displacement from start: 114.914
+  Distance to goal: 2374.945
+Step 38000:
+  Payload position: [144.84116622  38.28062574]
+  Payload displacement from start: 115.139
+  Distance to goal: 2374.867
+Step 38100:
+  Payload position: [145.22624405  38.09717435]
+  Payload displacement from start: 115.510
+  Distance to goal: 2374.737
+Step 38200:
+  Payload position: [145.69385447  37.88841612]
+  Payload displacement from start: 115.962
+  Distance to goal: 2374.570
+Step 38300:
+  Payload position: [146.20232012  37.67010672]
+  Payload displacement from start: 116.455
+  Distance to goal: 2374.381
+Step 38400:
+  Payload position: [146.72948726  37.60425983]
+  Payload displacement from start: 116.977
+  Distance to goal: 2374.069
+Step 38500:
+  Payload position: [147.25675594  37.47018612]
+  Payload displacement from start: 117.494
+  Distance to goal: 2373.806
+Step 38600:
+  Payload position: [147.841532    37.29093285]
+  Payload displacement from start: 118.067
+  Distance to goal: 2373.537
+Step 38700:
+  Payload position: [148.59357482  37.09714173]
+  Payload displacement from start: 118.806
+  Distance to goal: 2373.165
+Step 38800:
+  Payload position: [149.4649239   36.85962468]
+  Payload displacement from start: 119.662
+  Distance to goal: 2372.743
+Step 38900:
+  Payload position: [150.34988323  36.62514697]
+  Payload displacement from start: 120.532
+  Distance to goal: 2372.310
+Step 39000:
+  Payload position: [151.2812813   36.31931669]
+  Payload displacement from start: 121.446
+  Distance to goal: 2371.898
+Step 39100:
+  Payload position: [152.1875139   35.93315498]
+  Payload displacement from start: 122.331
+  Distance to goal: 2371.562
+Step 39200:
+  Payload position: [153.14133099  35.51152485]
+  Payload displacement from start: 123.265
+  Distance to goal: 2371.220
+Step 39300:
+  Payload position: [154.18166768  35.00524418]
+  Payload displacement from start: 124.282
+  Distance to goal: 2370.881
+Step 39400:
+  Payload position: [155.23713235  34.46268683]
+  Payload displacement from start: 125.317
+  Distance to goal: 2370.559
+Step 39500:
+  Payload position: [156.25862845  33.88155904]
+  Payload displacement from start: 126.318
+  Distance to goal: 2370.289
+Step 39600:
+  Payload position: [157.34792307  33.31238612]
+  Payload displacement from start: 127.391
+  Distance to goal: 2369.964
+Step 39700:
+  Payload position: [158.4595057   32.82388705]
+  Payload displacement from start: 128.491
+  Distance to goal: 2369.566
+Step 39800:
+  Payload position: [159.57882081  32.44471719]
+  Payload displacement from start: 129.602
+  Distance to goal: 2369.083
+Step 39900:
+  Payload position: [160.66688713  32.04180207]
+  Payload displacement from start: 130.683
+  Distance to goal: 2368.639
+Step 40000:
+  Payload position: [161.66027901  31.61013872]
+  Payload displacement from start: 131.670
+  Distance to goal: 2368.281
+Step 40100:
+  Payload position: [162.62322606  31.19328198]
+  Payload displacement from start: 132.629
+  Distance to goal: 2367.933
+Step 40200:
+  Payload position: [163.44779801  30.66836649]
+  Payload displacement from start: 133.449
+  Distance to goal: 2367.759
+Step 40300:
+  Payload position: [164.21253498  30.11027876]
+  Payload displacement from start: 134.213
+  Distance to goal: 2367.651
+Step 40400:
+  Payload position: [164.8715574   29.51695181]
+  Payload displacement from start: 134.872
+  Distance to goal: 2367.640
+Step 40500:
+  Payload position: [165.74781479  28.90784828]
+  Payload displacement from start: 135.752
+  Distance to goal: 2367.494
+Step 40600:
+  Payload position: [166.45852901  28.3303526 ]
+  Payload displacement from start: 136.469
+  Distance to goal: 2367.437
+Step 40700:
+  Payload position: [167.06494606  27.66461185]
+  Payload displacement from start: 137.085
+  Distance to goal: 2367.516
+Step 40800:
+  Payload position: [167.57315562  26.94646607]
+  Payload displacement from start: 137.607
+  Distance to goal: 2367.701
+Step 40900:
+  Payload position: [168.08610291  26.2086376 ]
+  Payload displacement from start: 138.138
+  Distance to goal: 2367.897
+Step 41000:
+  Payload position: [168.49267166  25.43502354]
+  Payload displacement from start: 138.568
+  Distance to goal: 2368.192
+Step 41100:
+  Payload position: [168.91936573  24.70394987]
+  Payload displacement from start: 139.020
+  Distance to goal: 2368.442
+Step 41200:
+  Payload position: [169.41854564  24.15750654]
+  Payload displacement from start: 139.541
+  Distance to goal: 2368.507
+Step 41300:
+  Payload position: [169.7486254   23.81884064]
+  Payload displacement from start: 139.885
+  Distance to goal: 2368.534
+Step 41400:
+  Payload position: [169.96747997  23.50803559]
+  Payload displacement from start: 140.118
+  Distance to goal: 2368.615
+Step 41500:
+  Payload position: [170.02498908  23.17823282]
+  Payload displacement from start: 140.191
+  Distance to goal: 2368.820
+Step 41600:
+  Payload position: [169.96141036  22.92418283]
+  Payload displacement from start: 140.140
+  Distance to goal: 2369.050
+Step 41700:
+  Payload position: [169.87164791  22.7547358 ]
+  Payload displacement from start: 140.059
+  Distance to goal: 2369.235
+Step 41800:
+  Payload position: [169.71384549  22.65437683]
+  Payload displacement from start: 139.907
+  Distance to goal: 2369.416
+Step 41900:
+  Payload position: [169.54942856  22.7021189 ]
+  Payload displacement from start: 139.740
+  Distance to goal: 2369.492
+Step 42000:
+  Payload position: [169.50758263  22.8183977 ]
+  Payload displacement from start: 139.692
+  Distance to goal: 2369.434
+Step 42100:
+  Payload position: [169.58789307  23.14531769]
+  Payload displacement from start: 139.756
+  Distance to goal: 2369.139
+Step 42200:
+  Payload position: [169.68121111  23.56169804]
+  Payload displacement from start: 139.830
+  Distance to goal: 2368.769
+Step 42300:
+  Payload position: [169.76477488  23.97722897]
+  Payload displacement from start: 139.894
+  Distance to goal: 2368.406
+Step 42400:
+  Payload position: [169.83330832  24.3926104 ]
+  Payload displacement from start: 139.946
+  Distance to goal: 2368.054
+Step 42500:
+  Payload position: [169.91594389  24.81983105]
+  Payload displacement from start: 140.012
+  Distance to goal: 2367.683
+Step 42600:
+  Payload position: [170.02564838  25.25823866]
+  Payload displacement from start: 140.106
+  Distance to goal: 2367.286
+Step 42700:
+  Payload position: [170.14237529  25.69716877]
+  Payload displacement from start: 140.208
+  Distance to goal: 2366.883
+Step 42800:
+  Payload position: [170.25755855  26.13210551]
+  Payload displacement from start: 140.311
+  Distance to goal: 2366.485
+Step 42900:
+  Payload position: [170.36155304  26.56744054]
+  Payload displacement from start: 140.404
+  Distance to goal: 2366.094
+Step 43000:
+  Payload position: [170.46136889  27.00028225]
+  Payload displacement from start: 140.493
+  Distance to goal: 2365.707
+Step 43100:
+  Payload position: [170.59209784  27.42582982]
+  Payload displacement from start: 140.616
+  Distance to goal: 2365.306
+Step 43200:
+  Payload position: [170.76175776  27.74384836]
+  Payload displacement from start: 140.780
+  Distance to goal: 2364.957
+Step 43300:
+  Payload position: [171.01025082  28.17629051]
+  Payload displacement from start: 141.022
+  Distance to goal: 2364.470
+Step 43400:
+  Payload position: [171.42252959  28.73415402]
+  Payload displacement from start: 141.428
+  Distance to goal: 2363.780
+Step 43500:
+  Payload position: [171.85092973  29.29941655]
+  Payload displacement from start: 141.853
+  Distance to goal: 2363.074
+Step 43600:
+  Payload position: [172.27472991  29.819084  ]
+  Payload displacement from start: 142.275
+  Distance to goal: 2362.405
+Step 43700:
+  Payload position: [172.73319105  30.35790738]
+  Payload displacement from start: 142.734
+  Distance to goal: 2361.698
+Step 43800:
+  Payload position: [173.1944736  30.9274722]
+  Payload displacement from start: 143.197
+  Distance to goal: 2360.966
+Step 43900:
+  Payload position: [173.67937773  31.49102015]
+  Payload displacement from start: 143.687
+  Distance to goal: 2360.223
+Step 44000:
+  Payload position: [174.1669499   32.02423122]
+  Payload displacement from start: 144.181
+  Distance to goal: 2359.501
+Step 44100:
+  Payload position: [174.6608547   32.56868303]
+  Payload displacement from start: 144.684
+  Distance to goal: 2358.765
+Step 44200:
+  Payload position: [175.13434112  33.10784406]
+  Payload displacement from start: 145.168
+  Distance to goal: 2358.048
+Step 44300:
+  Payload position: [175.61255148  33.7155359 ]
+  Payload displacement from start: 145.660
+  Distance to goal: 2357.277
+Step 44400:
+  Payload position: [176.19337788  34.4521461 ]
+  Payload displacement from start: 146.261
+  Distance to goal: 2356.342
+Step 44500:
+  Payload position: [176.76576991  35.23192718]
+  Payload displacement from start: 146.859
+  Distance to goal: 2355.380
+Step 44600:
+  Payload position: [177.25218792  35.91258397]
+  Payload displacement from start: 147.371
+  Distance to goal: 2354.550
+Step 44700:
+  Payload position: [177.66874323  36.44959895]
+  Payload displacement from start: 147.810
+  Distance to goal: 2353.873
+Step 44800:
+  Payload position: [178.18957023  37.03112986]
+  Payload displacement from start: 148.356
+  Distance to goal: 2353.092
+Step 44900:
+  Payload position: [178.6761924  37.6036716]
+  Payload displacement from start: 148.871
+  Distance to goal: 2352.341
+Step 45000:
+  Payload position: [179.19567879  38.1907487 ]
+  Payload displacement from start: 149.420
+  Distance to goal: 2351.557
+Step 45100:
+  Payload position: [179.70319839  38.59063453]
+  Payload displacement from start: 149.949
+  Distance to goal: 2350.919
+Step 45200:
+  Payload position: [180.23981665  38.76748082]
+  Payload displacement from start: 150.495
+  Distance to goal: 2350.426
+Step 45300:
+  Payload position: [180.73089622  38.90837642]
+  Payload displacement from start: 150.994
+  Distance to goal: 2349.990
+Step 45400:
+  Payload position: [181.43678186  39.00716453]
+  Payload displacement from start: 151.704
+  Distance to goal: 2349.440
+Step 45500:
+  Payload position: [182.21546513  39.18997528]
+  Payload displacement from start: 152.493
+  Distance to goal: 2348.779
+Step 45600:
+  Payload position: [183.01775     39.52961919]
+  Payload displacement from start: 153.314
+  Distance to goal: 2347.986
+Step 45700:
+  Payload position: [183.71836616  39.99667743]
+  Payload displacement from start: 154.043
+  Distance to goal: 2347.169
+Step 45800:
+  Payload position: [184.27281982  40.53982825]
+  Payload displacement from start: 154.632
+  Distance to goal: 2346.394
+Step 45900:
+  Payload position: [184.67053355  40.76921356]
+  Payload displacement from start: 155.045
+  Distance to goal: 2345.956
+Step 46000:
+  Payload position: [185.05748076  40.92172815]
+  Payload displacement from start: 155.442
+  Distance to goal: 2345.582
+Step 46100:
+  Payload position: [185.50992305  41.0333434 ]
+  Payload displacement from start: 155.901
+  Distance to goal: 2345.194
+Step 46200:
+  Payload position: [185.95130595  41.17168954]
+  Payload displacement from start: 156.351
+  Distance to goal: 2344.794
+Step 46300:
+  Payload position: [186.43722099  41.31878318]
+  Payload displacement from start: 156.846
+  Distance to goal: 2344.357
+Step 46400:
+  Payload position: [187.04863067  41.51803205]
+  Payload displacement from start: 157.470
+  Distance to goal: 2343.797
+Step 46500:
+  Payload position: [187.82695108  41.84511926]
+  Payload displacement from start: 158.271
+  Distance to goal: 2343.030
+Step 46600:
+  Payload position: [188.68735104  42.23571031]
+  Payload displacement from start: 159.158
+  Distance to goal: 2342.161
+Step 46700:
+  Payload position: [189.57528001  42.66506391]
+  Payload displacement from start: 160.077
+  Distance to goal: 2341.245
+Step 46800:
+  Payload position: [190.42578788  43.1163868 ]
+  Payload displacement from start: 160.961
+  Distance to goal: 2340.338
+Step 46900:
+  Payload position: [191.25383973  43.6245204 ]
+  Payload displacement from start: 161.828
+  Distance to goal: 2339.404
+Step 47000:
+  Payload position: [192.1046919   44.20928721]
+  Payload displacement from start: 162.726
+  Distance to goal: 2338.398
+Step 47100:
+  Payload position: [192.96103073  44.8690079 ]
+  Payload displacement from start: 163.638
+  Distance to goal: 2337.334
+Step 47200:
+  Payload position: [193.71311454  45.52986067]
+  Payload displacement from start: 164.448
+  Distance to goal: 2336.339
+Step 47300:
+  Payload position: [194.50748211  46.19342355]
+  Payload displacement from start: 165.303
+  Distance to goal: 2335.313
+Step 47400:
+  Payload position: [195.35871176  46.89471852]
+  Payload displacement from start: 166.220
+  Distance to goal: 2334.221
+Step 47500:
+  Payload position: [196.19234765  47.66506081]
+  Payload displacement from start: 167.129
+  Distance to goal: 2333.090
+Step 47600:
+  Payload position: [197.03702609  48.4482246 ]
+  Payload displacement from start: 168.053
+  Distance to goal: 2331.942
+Step 47700:
+  Payload position: [197.88177876  49.16271603]
+  Payload displacement from start: 168.972
+  Distance to goal: 2330.845
+Step 47800:
+  Payload position: [198.71468455  49.76059883]
+  Payload displacement from start: 169.868
+  Distance to goal: 2329.841
+Step 47900:
+  Payload position: [199.56318808  50.38559358]
+  Payload displacement from start: 170.784
+  Distance to goal: 2328.808
+Step 48000:
+  Payload position: [200.43081957  51.00311532]
+  Payload displacement from start: 171.720
+  Distance to goal: 2327.767
+Step 48100:
+  Payload position: [201.2753475   51.59434667]
+  Payload displacement from start: 172.631
+  Distance to goal: 2326.761
+Step 48200:
+  Payload position: [202.07331967  52.0457766 ]
+  Payload displacement from start: 173.480
+  Distance to goal: 2325.889
+Step 48300:
+  Payload position: [202.80921994  52.47624659]
+  Payload displacement from start: 174.265
+  Distance to goal: 2325.075
+Step 48400:
+  Payload position: [203.32720262  52.89449042]
+  Payload displacement from start: 174.833
+  Distance to goal: 2324.417
+Step 48500:
+  Payload position: [203.68223355  53.19930066]
+  Payload displacement from start: 175.225
+  Distance to goal: 2323.953
+Step 48600:
+  Payload position: [203.99199102  53.46683037]
+  Payload displacement from start: 175.567
+  Distance to goal: 2323.546
+Step 48700:
+  Payload position: [204.21989651  53.65753652]
+  Payload displacement from start: 175.819
+  Distance to goal: 2323.252
+Step 48800:
+  Payload position: [204.49394758  53.82368575]
+  Payload displacement from start: 176.113
+  Distance to goal: 2322.944
+Step 48900:
+  Payload position: [204.6149203   53.92286221]
+  Payload displacement from start: 176.246
+  Distance to goal: 2322.790
+Step 49000:
+  Payload position: [204.88241418  54.11111644]
+  Payload displacement from start: 176.537
+  Distance to goal: 2322.470
+Step 49100:
+  Payload position: [205.08384771  54.23597569]
+  Payload displacement from start: 176.753
+  Distance to goal: 2322.242
+Step 49200:
+  Payload position: [205.07048394  54.21959304]
+  Payload displacement from start: 176.738
+  Distance to goal: 2322.263
+Step 49300:
+  Payload position: [205.22381565  53.95761529]
+  Payload displacement from start: 176.854
+  Distance to goal: 2322.354
+Step 49400:
+  Payload position: [205.49361415  53.62899046]
+  Payload displacement from start: 177.077
+  Distance to goal: 2322.415
+Step 49500:
+  Payload position: [205.90274112  53.30853685]
+  Payload displacement from start: 177.440
+  Distance to goal: 2322.376
+Step 49600:
+  Payload position: [206.40983515  52.91532159]
+  Payload displacement from start: 177.892
+  Distance to goal: 2322.325
+Step 49700:
+  Payload position: [207.00532701  52.51970907]
+  Payload displacement from start: 178.432
+  Distance to goal: 2322.217
+Step 49800:
+  Payload position: [207.65296759  52.29418661]
+  Payload displacement from start: 179.046
+  Distance to goal: 2321.948
+Step 49900:
+  Payload position: [208.24834048  52.15755604]
+  Payload displacement from start: 179.620
+  Distance to goal: 2321.648
+Step 50000:
+  Payload position: [208.51934811  51.98103987]
+  Payload displacement from start: 179.868
+  Distance to goal: 2321.597
+Step 50100:
+  Payload position: [208.57997724  51.79231981]
+  Payload displacement from start: 179.905
+  Distance to goal: 2321.696
+Step 50200:
+  Payload position: [208.85050164  51.52481898]
+  Payload displacement from start: 180.141
+  Distance to goal: 2321.712
+Step 50300:
+  Payload position: [209.09344928  51.23308637]
+  Payload displacement from start: 180.348
+  Distance to goal: 2321.764
+Step 50400:
+  Payload position: [209.28799407  50.933387  ]
+  Payload displacement from start: 180.506
+  Distance to goal: 2321.855
+Step 50500:
+  Payload position: [209.42566172  50.64782297]
+  Payload displacement from start: 180.610
+  Distance to goal: 2321.974
+Step 50600:
+  Payload position: [209.5635921   50.33633922]
+  Payload displacement from start: 180.712
+  Distance to goal: 2322.112
+Step 50700:
+  Payload position: [209.67886053  50.01975118]
+  Payload displacement from start: 180.791
+  Distance to goal: 2322.269
+Step 50800:
+  Payload position: [209.83592963  49.67577414]
+  Payload displacement from start: 180.909
+  Distance to goal: 2322.418
+Step 50900:
+  Payload position: [210.02452828  49.3510311 ]
+  Payload displacement from start: 181.062
+  Distance to goal: 2322.532
+Step 51000:
+  Payload position: [210.295068    49.11233307]
+  Payload displacement from start: 181.305
+  Distance to goal: 2322.527
+Step 51100:
+  Payload position: [210.57866903  48.86660206]
+  Payload displacement from start: 181.562
+  Distance to goal: 2322.519
+Step 51200:
+  Payload position: [210.80813594  48.80144106]
+  Payload displacement from start: 181.783
+  Distance to goal: 2322.413
+Step 51300:
+  Payload position: [210.94261687  48.93614391]
+  Payload displacement from start: 181.931
+  Distance to goal: 2322.223
+Step 51400:
+  Payload position: [211.06463457  49.11864475]
+  Payload displacement from start: 182.071
+  Distance to goal: 2322.006
+Step 51500:
+  Payload position: [211.15003524  49.4735631 ]
+  Payload displacement from start: 182.194
+  Distance to goal: 2321.686
+Step 51600:
+  Payload position: [211.23506837  49.85495614]
+  Payload displacement from start: 182.319
+  Distance to goal: 2321.346
+Step 51700:
+  Payload position: [211.33430947  50.27009647]
+  Payload displacement from start: 182.464
+  Distance to goal: 2320.972
+Step 51800:
+  Payload position: [211.43207421  50.70994302]
+  Payload displacement from start: 182.610
+  Distance to goal: 2320.580
+Step 51900:
+  Payload position: [211.55573666  51.15130398]
+  Payload displacement from start: 182.784
+  Distance to goal: 2320.170
+Step 52000:
+  Payload position: [211.82249381  51.70770613]
+  Payload displacement from start: 183.114
+  Distance to goal: 2319.579
+Step 52100:
+  Payload position: [212.13614743  52.30169628]
+  Payload displacement from start: 183.496
+  Distance to goal: 2318.928
+Step 52200:
+  Payload position: [212.46234306  52.92494199]
+  Payload displacement from start: 183.897
+  Distance to goal: 2318.247
+Step 52300:
+  Payload position: [212.67411237  53.61792142]
+  Payload displacement from start: 184.195
+  Distance to goal: 2317.592
+Step 52400:
+  Payload position: [212.8825845   54.33450233]
+  Payload displacement from start: 184.494
+  Distance to goal: 2316.921
+Step 52500:
+  Payload position: [213.25092826  55.06285187]
+  Payload displacement from start: 184.957
+  Distance to goal: 2316.134
+Step 52600:
+  Payload position: [213.68889863  55.83968706]
+  Payload displacement from start: 185.497
+  Distance to goal: 2315.265
+Step 52700:
+  Payload position: [214.1780452   56.66774916]
+  Payload displacement from start: 186.099
+  Distance to goal: 2314.323
+Step 52800:
+  Payload position: [214.67841794  57.52045686]
+  Payload displacement from start: 186.718
+  Distance to goal: 2313.355
+Step 52900:
+  Payload position: [215.21138142  58.08902133]
+  Payload displacement from start: 187.329
+  Distance to goal: 2312.576
+Step 53000:
+  Payload position: [215.69111412  58.63480668]
+  Payload displacement from start: 187.886
+  Distance to goal: 2311.849
+Step 53100:
+  Payload position: [216.12116646  59.12746917]
+  Payload displacement from start: 188.387
+  Distance to goal: 2311.195
+Step 53200:
+  Payload position: [216.54795918  59.41958362]
+  Payload displacement from start: 188.854
+  Distance to goal: 2310.692
+Step 53300:
+  Payload position: [217.022133   59.7532142]
+  Payload displacement from start: 189.374
+  Distance to goal: 2310.126
+Step 53400:
+  Payload position: [217.57610942  60.03986245]
+  Payload displacement from start: 189.966
+  Distance to goal: 2309.542
+Step 53500:
+  Payload position: [218.1674258   60.32958358]
+  Payload displacement from start: 190.596
+  Distance to goal: 2308.930
+Step 53600:
+  Payload position: [218.77032481  60.60354132]
+  Payload displacement from start: 191.235
+  Distance to goal: 2308.322
+Step 53700:
+  Payload position: [219.37235169  60.86994029]
+  Payload displacement from start: 191.872
+  Distance to goal: 2307.720
+Step 53800:
+  Payload position: [219.96343811  61.17671019]
+  Payload displacement from start: 192.505
+  Distance to goal: 2307.096
+Step 53900:
+  Payload position: [220.36908128  61.48350563]
+  Payload displacement from start: 192.955
+  Distance to goal: 2306.596
+Step 54000:
+  Payload position: [220.49494598  61.96970338]
+  Payload displacement from start: 193.159
+  Distance to goal: 2306.151
+Step 54100:
+  Payload position: [220.52196258  62.37074047]
+  Payload displacement from start: 193.252
+  Distance to goal: 2305.836
+Step 54200:
+  Payload position: [220.49110744  62.73532168]
+  Payload displacement from start: 193.283
+  Distance to goal: 2305.587
+Step 54300:
+  Payload position: [220.41236518  63.07545585]
+  Payload displacement from start: 193.264
+  Distance to goal: 2305.388
+Step 54400:
+  Payload position: [220.31274818  63.35376152]
+  Payload displacement from start: 193.213
+  Distance to goal: 2305.249
+Step 54500:
+  Payload position: [220.24402606  63.58349883]
+  Payload displacement from start: 193.186
+  Distance to goal: 2305.125
+Step 54600:
+  Payload position: [220.34196071  63.77048433]
+  Payload displacement from start: 193.315
+  Distance to goal: 2304.921
+Step 54700:
+  Payload position: [220.44658683  63.96965326]
+  Payload displacement from start: 193.452
+  Distance to goal: 2304.703
+Step 54800:
+  Payload position: [220.50151641  64.19368642]
+  Payload displacement from start: 193.546
+  Distance to goal: 2304.500
+Step 54900:
+  Payload position: [220.57435428  64.44425171]
+  Payload displacement from start: 193.662
+  Distance to goal: 2304.266
+Step 55000:
+  Payload position: [220.53961132  64.69080893]
+  Payload displacement from start: 193.672
+  Distance to goal: 2304.107
+Step 55100:
+  Payload position: [220.32811151  65.00854896]
+  Payload displacement from start: 193.521
+  Distance to goal: 2304.014
+Step 55200:
+  Payload position: [220.06691018  65.34856919]
+  Payload displacement from start: 193.326
+  Distance to goal: 2303.938
+Step 55300:
+  Payload position: [219.81525895  65.67738103]
+  Payload displacement from start: 193.139
+  Distance to goal: 2303.864
+Step 55400:
+  Payload position: [219.82769416  66.18897577]
+  Payload displacement from start: 193.246
+  Distance to goal: 2303.477
+Step 55500:
+  Payload position: [219.90397848  66.6851669 ]
+  Payload displacement from start: 193.415
+  Distance to goal: 2303.059
+Step 55600:
+  Payload position: [219.93348736  67.09113813]
+  Payload displacement from start: 193.521
+  Distance to goal: 2302.739
+Step 55700:
+  Payload position: [219.98635327  67.471098  ]
+  Payload displacement from start: 193.646
+  Distance to goal: 2302.422
+Step 55800:
+  Payload position: [220.00183935  67.84857888]
+  Payload displacement from start: 193.735
+  Distance to goal: 2302.132
+Step 55900:
+  Payload position: [219.87913543  68.08094389]
+  Payload displacement from start: 193.660
+  Distance to goal: 2302.043
+Step 56000:
+  Payload position: [219.73758284  68.33675858]
+  Payload displacement from start: 193.572
+  Distance to goal: 2301.949
+Step 56100:
+  Payload position: [219.56715454  68.48332038]
+  Payload displacement from start: 193.434
+  Distance to goal: 2301.956
+Step 56200:
+  Payload position: [219.38945767  68.6295197 ]
+  Payload displacement from start: 193.289
+  Distance to goal: 2301.968
+Step 56300:
+  Payload position: [219.27470753  68.71536874]
+  Payload displacement from start: 193.194
+  Distance to goal: 2301.981
+Step 56400:
+  Payload position: [219.07818452  68.82845449]
+  Payload displacement from start: 193.024
+  Distance to goal: 2302.030
+Step 56500:
+  Payload position: [219.03248301  68.85744943]
+  Payload displacement from start: 192.985
+  Distance to goal: 2302.040
+Step 56600:
+  Payload position: [218.99882916  69.01435697]
+  Payload displacement from start: 192.984
+  Distance to goal: 2301.946
+Step 56700:
+  Payload position: [218.96200776  69.25154263]
+  Payload displacement from start: 192.996
+  Distance to goal: 2301.796
+Step 56800:
+  Payload position: [218.9393792   69.48536743]
+  Payload displacement from start: 193.021
+  Distance to goal: 2301.638
+Step 56900:
+  Payload position: [218.91340703  69.71671036]
+  Payload displacement from start: 193.043
+  Distance to goal: 2301.485
+Step 57000:
+  Payload position: [218.88620851  69.95184969]
+  Payload displacement from start: 193.065
+  Distance to goal: 2301.330
+Step 57100:
+  Payload position: [218.86193298  70.18539269]
+  Payload displacement from start: 193.090
+  Distance to goal: 2301.173
+Step 57200:
+  Payload position: [218.83877687  70.4197344 ]
+  Payload displacement from start: 193.116
+  Distance to goal: 2301.016
+Step 57300:
+  Payload position: [218.81241452  70.65440874]
+  Payload displacement from start: 193.140
+  Distance to goal: 2300.860
+Step 57400:
+  Payload position: [218.78526472  70.88972107]
+  Payload displacement from start: 193.163
+  Distance to goal: 2300.705
+Step 57500:
+  Payload position: [218.7598521   71.12461258]
+  Payload displacement from start: 193.188
+  Distance to goal: 2300.549
+Step 57600:
+  Payload position: [218.73601131  71.35762841]
+  Payload displacement from start: 193.214
+  Distance to goal: 2300.393
+Step 57700:
+  Payload position: [218.72001595  71.57740217]
+  Payload displacement from start: 193.246
+  Distance to goal: 2300.241
+Step 57800:
+  Payload position: [218.72005853  71.80074467]
+  Payload displacement from start: 193.294
+  Distance to goal: 2300.076
+Step 57900:
+  Payload position: [218.72473131  72.03406793]
+  Payload displacement from start: 193.349
+  Distance to goal: 2299.901
+Step 58000:
+  Payload position: [218.72049746  72.26188896]
+  Payload displacement from start: 193.395
+  Distance to goal: 2299.735
+Step 58100:
+  Payload position: [218.70375249  72.49359038]
+  Payload displacement from start: 193.429
+  Distance to goal: 2299.576
+Step 58200:
+  Payload position: [218.67884169  72.71941008]
+  Payload displacement from start: 193.455
+  Distance to goal: 2299.426
+Step 58300:
+  Payload position: [218.64614465  72.95313943]
+  Payload displacement from start: 193.474
+  Distance to goal: 2299.275
+Step 58400:
+  Payload position: [218.54361408  73.18526482]
+  Payload displacement from start: 193.426
+  Distance to goal: 2299.173
+Step 58500:
+  Payload position: [218.49317172  73.41261874]
+  Payload displacement from start: 193.428
+  Distance to goal: 2299.039
+Step 58600:
+  Payload position: [218.44118885  73.6329637 ]
+  Payload displacement from start: 193.427
+  Distance to goal: 2298.912
+Step 58700:
+  Payload position: [218.42904609  73.74318279]
+  Payload displacement from start: 193.440
+  Distance to goal: 2298.839
+Step 58800:
+  Payload position: [218.52372755  73.79556384]
+  Payload displacement from start: 193.544
+  Distance to goal: 2298.736
+Step 58900:
+  Payload position: [218.65931237  73.83158515]
+  Payload displacement from start: 193.684
+  Distance to goal: 2298.618
+Step 59000:
+  Payload position: [218.79793807  73.88674586]
+  Payload displacement from start: 193.832
+  Distance to goal: 2298.484
+Step 59100:
+  Payload position: [218.98189731  74.11818864]
+  Payload displacement from start: 194.063
+  Distance to goal: 2298.189
+Step 59200:
+  Payload position: [219.17065361  74.35088676]
+  Payload displacement from start: 194.300
+  Distance to goal: 2297.890
+Step 59300:
+  Payload position: [219.18373817  74.38131335]
+  Payload displacement from start: 194.320
+  Distance to goal: 2297.859
+Step 59400:
+  Payload position: [219.21763814  74.39686501]
+  Payload displacement from start: 194.356
+  Distance to goal: 2297.824
+Step 59500:
+  Payload position: [219.21556113  74.43455855]
+  Payload displacement from start: 194.363
+  Distance to goal: 2297.798
+Step 59600:
+  Payload position: [219.31474477  74.4638231 ]
+  Payload displacement from start: 194.466
+  Distance to goal: 2297.709
+Step 59700:
+  Payload position: [219.48632652  74.48166237]
+  Payload displacement from start: 194.637
+  Distance to goal: 2297.580
+Step 59800:
+  Payload position: [219.66503168  74.50446607]
+  Payload displacement from start: 194.817
+  Distance to goal: 2297.443
+Step 59900:
+  Payload position: [219.84017461  74.53309395]
+  Payload displacement from start: 194.994
+  Distance to goal: 2297.304
+Step 60000:
+  Payload position: [220.0278071   74.55229009]
+  Payload displacement from start: 195.181
+  Distance to goal: 2297.163
+Step 60100:
+  Payload position: [220.22861277  74.57027072]
+  Payload displacement from start: 195.380
+  Distance to goal: 2297.014
+Step 60200:
+  Payload position: [220.44203004  74.59057543]
+  Payload displacement from start: 195.593
+  Distance to goal: 2296.855
+Step 60300:
+  Payload position: [220.65093452  74.6126961 ]
+  Payload displacement from start: 195.801
+  Distance to goal: 2296.698
+Step 60400:
+  Payload position: [220.8793116   74.63387548]
+  Payload displacement from start: 196.028
+  Distance to goal: 2296.528
+Step 60500:
+  Payload position: [221.13127654  74.6589481 ]
+  Payload displacement from start: 196.279
+  Distance to goal: 2296.340
+Step 60600:
+  Payload position: [221.35601495  74.72401582]
+  Payload displacement from start: 196.513
+  Distance to goal: 2296.140
+Step 60700:
+  Payload position: [221.41462814  74.87040573]
+  Payload displacement from start: 196.603
+  Distance to goal: 2295.992
+Step 60800:
+  Payload position: [221.42127781  75.11786256]
+  Payload displacement from start: 196.667
+  Distance to goal: 2295.805
+Step 60900:
+  Payload position: [221.47968496  75.22615829]
+  Payload displacement from start: 196.748
+  Distance to goal: 2295.686
+Step 61000:
+  Payload position: [221.62718084  75.14431521]
+  Payload displacement from start: 196.873
+  Distance to goal: 2295.647
+Step 61100:
+  Payload position: [221.68811223  75.09837981]
+  Payload displacement from start: 196.922
+  Distance to goal: 2295.640
+Step 61200:
+  Payload position: [221.75248626  75.04337976]
+  Payload displacement from start: 196.972
+  Distance to goal: 2295.637
+Step 61300:
+  Payload position: [221.83759507  74.97345517]
+  Payload displacement from start: 197.039
+  Distance to goal: 2295.631
+Step 61400:
+  Payload position: [221.81114729  74.91213289]
+  Payload displacement from start: 196.999
+  Distance to goal: 2295.694
+Step 61500:
+  Payload position: [221.88740828  74.7573222 ]
+  Payload displacement from start: 197.038
+  Distance to goal: 2295.757
+Step 61600:
+  Payload position: [221.82935428  74.74391208]
+  Payload displacement from start: 196.978
+  Distance to goal: 2295.806
+Step 61700:
+  Payload position: [221.62424311  75.01426354]
+  Payload displacement from start: 196.840
+  Distance to goal: 2295.745
+Step 61800:
+  Payload position: [221.25263665  75.20612492]
+  Payload displacement from start: 196.523
+  Distance to goal: 2295.854
+Step 61900:
+  Payload position: [220.93313956  75.38059274]
+  Payload displacement from start: 196.252
+  Distance to goal: 2295.941
+Step 62000:
+  Payload position: [220.71472267  75.56908115]
+  Payload displacement from start: 196.083
+  Distance to goal: 2295.949
+Step 62100:
+  Payload position: [220.53991993  75.70739804]
+  Payload displacement from start: 195.945
+  Distance to goal: 2295.965
+Step 62200:
+  Payload position: [220.36774946  75.85077569]
+  Payload displacement from start: 195.812
+  Distance to goal: 2295.975
+Step 62300:
+  Payload position: [220.25461327  75.93999224]
+  Payload displacement from start: 195.723
+  Distance to goal: 2295.986
+Step 62400:
+  Payload position: [220.06475019  76.29353219]
+  Payload displacement from start: 195.621
+  Distance to goal: 2295.853
+Step 62500:
+  Payload position: [219.80306113  76.78480609]
+  Payload displacement from start: 195.484
+  Distance to goal: 2295.667
+Step 62600:
+  Payload position: [219.54647446  77.26000075]
+  Payload displacement from start: 195.349
+  Distance to goal: 2295.490
+Step 62700:
+  Payload position: [219.28947791  77.80637155]
+  Payload displacement from start: 195.233
+  Distance to goal: 2295.261
+Step 62800:
+  Payload position: [219.08303288  78.4059401 ]
+  Payload displacement from start: 195.181
+  Distance to goal: 2294.958
+Step 62900:
+  Payload position: [219.15813853  78.77235567]
+  Payload displacement from start: 195.345
+  Distance to goal: 2294.638
+Step 63000:
+  Payload position: [219.31149751  79.17439771]
+  Payload displacement from start: 195.594
+  Distance to goal: 2294.238
+Step 63100:
+  Payload position: [219.3447452   79.69565326]
+  Payload displacement from start: 195.758
+  Distance to goal: 2293.831
+Step 63200:
+  Payload position: [219.28817717  80.11108136]
+  Payload displacement from start: 195.809
+  Distance to goal: 2293.563
+Step 63300:
+  Payload position: [219.27008039  80.57974105]
+  Payload displacement from start: 195.912
+  Distance to goal: 2293.230
+Step 63400:
+  Payload position: [219.50666155  81.15737173]
+  Payload displacement from start: 196.290
+  Distance to goal: 2292.645
+Step 63500:
+  Payload position: [219.92280306  81.79260053]
+  Payload displacement from start: 196.858
+  Distance to goal: 2291.895
+Step 63600:
+  Payload position: [220.34385211  82.45505957]
+  Payload displacement from start: 197.439
+  Distance to goal: 2291.122
+Step 63700:
+  Payload position: [220.75402663  83.05438661]
+  Payload displacement from start: 197.995
+  Distance to goal: 2290.404
+Step 63800:
+  Payload position: [221.15643539  83.64644916]
+  Payload displacement from start: 198.541
+  Distance to goal: 2289.695
+Step 63900:
+  Payload position: [221.61217899  84.29650974]
+  Payload displacement from start: 199.157
+  Distance to goal: 2288.908
+Step 64000:
+  Payload position: [222.09834748  84.8920809 ]
+  Payload displacement from start: 199.787
+  Distance to goal: 2288.141
+Step 64100:
+  Payload position: [222.74712412  85.38743133]
+  Payload displacement from start: 200.547
+  Distance to goal: 2287.337
+Step 64200:
+  Payload position: [223.40115241  85.89392764]
+  Payload displacement from start: 201.316
+  Distance to goal: 2286.522
+Step 64300:
+  Payload position: [223.92242015  86.20036974]
+  Payload displacement from start: 201.902
+  Distance to goal: 2285.943
+Step 64400:
+  Payload position: [224.36767136  86.30607343]
+  Payload displacement from start: 202.359
+  Distance to goal: 2285.564
+Step 64500:
+  Payload position: [225.11245604  86.57085836]
+  Payload displacement from start: 203.148
+  Distance to goal: 2284.866
+Step 64600:
+  Payload position: [225.77286299  87.0014924 ]
+  Payload displacement from start: 203.902
+  Distance to goal: 2284.102
+Step 64700:
+  Payload position: [226.46351186  87.38076503]
+  Payload displacement from start: 204.672
+  Distance to goal: 2283.356
+Step 64800:
+  Payload position: [227.26866287  87.68518044]
+  Payload displacement from start: 205.530
+  Distance to goal: 2282.587
+Step 64900:
+  Payload position: [228.1511773   87.96756328]
+  Payload displacement from start: 206.456
+  Distance to goal: 2281.782
+Step 65000:
+  Payload position: [229.13196692  88.15551625]
+  Payload displacement from start: 207.450
+  Distance to goal: 2280.981
+Step 65100:
+  Payload position: [230.11664538  88.35460705]
+  Payload displacement from start: 208.451
+  Distance to goal: 2280.169
+Step 65200:
+  Payload position: [231.16765606  88.5663852 ]
+  Payload displacement from start: 209.520
+  Distance to goal: 2279.303
+Step 65300:
+  Payload position: [232.24419174  88.76641449]
+  Payload displacement from start: 210.609
+  Distance to goal: 2278.429
+Step 65400:
+  Payload position: [233.36418517  88.98875158]
+  Payload displacement from start: 211.747
+  Distance to goal: 2277.509
+Step 65500:
+  Payload position: [234.55730224  89.36604803]
+  Payload displacement from start: 212.998
+  Distance to goal: 2276.426
+Step 65600:
+  Payload position: [235.74701867  89.80680291]
+  Payload displacement from start: 214.263
+  Distance to goal: 2275.298
+Step 65700:
+  Payload position: [236.80204646  90.34991479]
+  Payload displacement from start: 215.428
+  Distance to goal: 2274.186
+Step 65800:
+  Payload position: [237.89669891  90.93916888]
+  Payload displacement from start: 216.644
+  Distance to goal: 2273.012
+Step 65900:
+  Payload position: [238.98962732  91.56076065]
+  Payload displacement from start: 217.868
+  Distance to goal: 2271.817
+Step 66000:
+  Payload position: [240.12356064  92.16457124]
+  Payload displacement from start: 219.126
+  Distance to goal: 2270.606
+Step 66100:
+  Payload position: [241.24264537  92.78622612]
+  Payload displacement from start: 220.376
+  Distance to goal: 2269.393
+Step 66200:
+  Payload position: [242.47162479  93.44060796]
+  Payload displacement from start: 221.741
+  Distance to goal: 2268.082
+Step 66300:
+  Payload position: [243.73132123  94.14887165]
+  Payload displacement from start: 223.151
+  Distance to goal: 2266.710
+Step 66400:
+  Payload position: [244.99805935  94.87078087]
+  Payload displacement from start: 224.572
+  Distance to goal: 2265.323
+Step 66500:
+  Payload position: [246.21926367  95.73526772]
+  Payload displacement from start: 225.991
+  Distance to goal: 2263.862
+Step 66600:
+  Payload position: [247.50042156  96.76937415]
+  Payload displacement from start: 227.518
+  Distance to goal: 2262.235
+Step 66700:
+  Payload position: [248.72797086  97.77576776]
+  Payload displacement from start: 228.988
+  Distance to goal: 2260.664
+Step 66800:
+  Payload position: [249.89644122  98.64697855]
+  Payload displacement from start: 230.362
+  Distance to goal: 2259.233
+Step 66900:
+  Payload position: [250.98301866  99.39833308]
+  Payload displacement from start: 231.624
+  Distance to goal: 2257.947
+Step 67000:
+  Payload position: [251.90057609  99.90433325]
+  Payload displacement from start: 232.651
+  Distance to goal: 2256.955
+Step 67100:
+  Payload position: [252.90485908 100.28427756]
+  Payload displacement from start: 233.723
+  Distance to goal: 2255.998
+Step 67200:
+  Payload position: [253.87481574 100.4562721 ]
+  Payload displacement from start: 234.700
+  Distance to goal: 2255.219
+Step 67300:
+  Payload position: [254.72577236 100.39679088]
+  Payload displacement from start: 235.494
+  Distance to goal: 2254.691
+Step 67400:
+  Payload position: [255.27548201 100.29598733]
+  Payload displacement from start: 235.988
+  Distance to goal: 2254.396
+Step 67500:
+  Payload position: [255.63867484 100.31766497]
+  Payload displacement from start: 236.342
+  Distance to goal: 2254.136
+Step 67600:
+  Payload position: [256.32723739 100.36622589]
+  Payload displacement from start: 237.014
+  Distance to goal: 2253.638
+Step 67700:
+  Payload position: [257.13541919 100.35425118]
+  Payload displacement from start: 237.782
+  Distance to goal: 2253.104
+Step 67800:
+  Payload position: [257.97928161 100.3255288 ]
+  Payload displacement from start: 238.580
+  Distance to goal: 2252.558
+Step 67900:
+  Payload position: [258.87889382 100.23140901]
+  Payload displacement from start: 239.412
+  Distance to goal: 2252.024
+Step 68000:
+  Payload position: [259.70163734 100.25281256]
+  Payload displacement from start: 240.205
+  Distance to goal: 2251.457
+Step 68100:
+  Payload position: [260.39349708 100.26579365]
+  Payload displacement from start: 240.870
+  Distance to goal: 2250.983
+Step 68200:
+  Payload position: [261.12481876 100.28390738]
+  Payload displacement from start: 241.575
+  Distance to goal: 2250.479
+Step 68300:
+  Payload position: [261.66120504 100.22507395]
+  Payload displacement from start: 242.071
+  Distance to goal: 2250.163
+Step 68400:
+  Payload position: [262.27122531 100.22280906]
+  Payload displacement from start: 242.654
+  Distance to goal: 2249.756
+Step 68500:
+  Payload position: [262.89004137 100.26527401]
+  Payload displacement from start: 243.259
+  Distance to goal: 2249.310
+Step 68600:
+  Payload position: [263.29351089 100.21491262]
+  Payload displacement from start: 243.631
+  Distance to goal: 2249.077
+Step 68700:
+  Payload position: [263.56553181 100.19773087]
+  Payload displacement from start: 243.886
+  Distance to goal: 2248.907
+Step 68800:
+  Payload position: [263.89329218 100.10517165]
+  Payload displacement from start: 244.174
+  Distance to goal: 2248.757
+Step 68900:
+  Payload position: [264.08554978 100.07631999]
+  Payload displacement from start: 244.350
+  Distance to goal: 2248.649
+Step 69000:
+  Payload position: [264.22879275  99.97201799]
+  Payload displacement from start: 244.457
+  Distance to goal: 2248.631
+Step 69100:
+  Payload position: [264.32039135  99.89781093]
+  Payload displacement from start: 244.524
+  Distance to goal: 2248.625
+Step 69200:
+  Payload position: [264.35330534 100.08425307]
+  Payload displacement from start: 244.608
+  Distance to goal: 2248.464
+Step 69300:
+  Payload position: [264.56257425 100.15656703]
+  Payload displacement from start: 244.830
+  Distance to goal: 2248.270
+Step 69400:
+  Payload position: [264.69716354  99.98833621]
+  Payload displacement from start: 244.910
+  Distance to goal: 2248.305
+Step 69500:
+  Payload position: [264.85073806  99.56853988]
+  Payload displacement from start: 244.938
+  Distance to goal: 2248.514
+Step 69600:
+  Payload position: [265.098345    99.29293987]
+  Payload displacement from start: 245.097
+  Distance to goal: 2248.553
+Step 69700:
+  Payload position: [265.39756053  98.97565207]
+  Payload displacement from start: 245.295
+  Distance to goal: 2248.589
+Step 69800:
+  Payload position: [265.67470954  98.58494588]
+  Payload displacement from start: 245.452
+  Distance to goal: 2248.694
+Step 69900:
+  Payload position: [266.10804497  98.3067615 ]
+  Payload displacement from start: 245.790
+  Distance to goal: 2248.611
+Step 70000:
+  Payload position: [266.45396472  98.06844185]
+  Payload displacement from start: 246.056
+  Distance to goal: 2248.556
+Step 70100:
+  Payload position: [266.71960144  97.82515427]
+  Payload displacement from start: 246.245
+  Distance to goal: 2248.560
+Step 70200:
+  Payload position: [267.00671896  97.59443274]
+  Payload displacement from start: 246.457
+  Distance to goal: 2248.539
+Step 70300:
+  Payload position: [267.39735535  97.62813945]
+  Payload displacement from start: 246.842
+  Distance to goal: 2248.253
+Step 70400:
+  Payload position: [267.83731581  97.77557578]
+  Payload displacement from start: 247.306
+  Distance to goal: 2247.849
+Step 70500:
+  Payload position: [268.31907723  97.89872684]
+  Payload displacement from start: 247.803
+  Distance to goal: 2247.436
+Step 70600:
+  Payload position: [268.91934078  97.80503114]
+  Payload displacement from start: 248.355
+  Distance to goal: 2247.105
+Step 70700:
+  Payload position: [269.58471051  97.58318507]
+  Payload displacement from start: 248.934
+  Distance to goal: 2246.825
+Step 70800:
+  Payload position: [270.27463848  97.37118924]
+  Payload displacement from start: 249.541
+  Distance to goal: 2246.522
+Step 70900:
+  Payload position: [271.01099313  97.17527917]
+  Payload displacement from start: 250.198
+  Distance to goal: 2246.177
+Step 71000:
+  Payload position: [271.76809148  96.99104292]
+  Payload displacement from start: 250.878
+  Distance to goal: 2245.809
+Step 71100:
+  Payload position: [272.38616494  96.88668451]
+  Payload displacement from start: 251.446
+  Distance to goal: 2245.474
+Step 71200:
+  Payload position: [272.94355253  96.88250714]
+  Payload displacement from start: 251.982
+  Distance to goal: 2245.106
+Step 71300:
+  Payload position: [273.5981437  96.920094 ]
+  Payload displacement from start: 252.623
+  Distance to goal: 2244.641
+Step 71400:
+  Payload position: [274.32588923  96.95731672]
+  Payload displacement from start: 253.335
+  Distance to goal: 2244.129
+Step 71500:
+  Payload position: [274.94514478  96.99104009]
+  Payload displacement from start: 253.941
+  Distance to goal: 2243.691
+Step 71600:
+  Payload position: [275.45250275  97.0248255 ]
+  Payload displacement from start: 254.439
+  Distance to goal: 2243.327
+Step 71700:
+  Payload position: [276.04225435  97.04708345]
+  Payload displacement from start: 255.014
+  Distance to goal: 2242.918
+Step 71800:
+  Payload position: [276.33813699  97.24928258]
+  Payload displacement from start: 255.353
+  Distance to goal: 2242.570
+Step 71900:
+  Payload position: [276.63559777  97.48128392]
+  Payload displacement from start: 255.701
+  Distance to goal: 2242.199
+Step 72000:
+  Payload position: [277.04907462  97.64278966]
+  Payload displacement from start: 256.142
+  Distance to goal: 2241.803
+Step 72100:
+  Payload position: [277.30478673  97.81439346]
+  Payload displacement from start: 256.434
+  Distance to goal: 2241.505
+Step 72200:
+  Payload position: [277.24490007  97.89339374]
+  Payload displacement from start: 256.397
+  Distance to goal: 2241.486
+Step 72300:
+  Payload position: [277.12481149  97.88372055]
+  Payload displacement from start: 256.279
+  Distance to goal: 2241.573
+Step 72400:
+  Payload position: [277.00788422  97.82443696]
+  Payload displacement from start: 256.150
+  Distance to goal: 2241.695
+Step 72500:
+  Payload position: [276.9441226   97.76822496]
+  Payload displacement from start: 256.074
+  Distance to goal: 2241.779
+Step 72600:
+  Payload position: [277.01333284  97.82302467]
+  Payload displacement from start: 256.155
+  Distance to goal: 2241.692
+Step 72700:
+  Payload position: [277.02673229  97.79571341]
+  Payload displacement from start: 256.161
+  Distance to goal: 2241.704
+Step 72800:
+  Payload position: [277.01010364  97.64561095]
+  Payload displacement from start: 256.105
+  Distance to goal: 2241.827
+Step 72900:
+  Payload position: [276.93275621  97.44298211]
+  Payload displacement from start: 255.977
+  Distance to goal: 2242.030
+Step 73000:
+  Payload position: [276.97621947  97.35702392]
+  Payload displacement from start: 255.997
+  Distance to goal: 2242.065
+Step 73100:
+  Payload position: [277.01654466  97.25045286]
+  Payload displacement from start: 256.007
+  Distance to goal: 2242.117
+Step 73200:
+  Payload position: [277.03760052  97.1526553 ]
+  Payload displacement from start: 256.002
+  Distance to goal: 2242.176
+Step 73300:
+  Payload position: [277.14958281  96.99791631]
+  Payload displacement from start: 256.070
+  Distance to goal: 2242.217
+Step 73400:
+  Payload position: [277.40217155  96.78076831]
+  Payload displacement from start: 256.257
+  Distance to goal: 2242.211
+Step 73500:
+  Payload position: [277.65987424  96.56259956]
+  Payload displacement from start: 256.449
+  Distance to goal: 2242.202
+Step 73600:
+  Payload position: [277.91629068  96.33477426]
+  Payload displacement from start: 256.637
+  Distance to goal: 2242.202
+Step 73700:
+  Payload position: [278.16962117  96.12520811]
+  Payload displacement from start: 256.828
+  Distance to goal: 2242.190
+Step 73800:
+  Payload position: [278.40709585  95.90630017]
+  Payload displacement from start: 257.001
+  Distance to goal: 2242.195
+Step 73900:
+  Payload position: [278.64448622  95.69184669]
+  Payload displacement from start: 257.176
+  Distance to goal: 2242.197
+Step 74000:
+  Payload position: [278.95550772  95.61792254]
+  Payload displacement from start: 257.458
+  Distance to goal: 2242.046
+Step 74100:
+  Payload position: [279.27542819  95.62173069]
+  Payload displacement from start: 257.768
+  Distance to goal: 2241.830
+Step 74200:
+  Payload position: [279.62693873  95.62542861]
+  Payload displacement from start: 258.109
+  Distance to goal: 2241.594
+Step 74300:
+  Payload position: [280.06069003  95.66078776]
+  Payload displacement from start: 258.538
+  Distance to goal: 2241.279
+Step 74400:
+  Payload position: [280.5633844   95.70552807]
+  Payload displacement from start: 259.035
+  Distance to goal: 2240.911
+Step 74500:
+  Payload position: [281.11950705  95.75123794]
+  Payload displacement from start: 259.585
+  Distance to goal: 2240.508
+Step 74600:
+  Payload position: [281.54453502  95.77840932]
+  Payload displacement from start: 260.003
+  Distance to goal: 2240.205
+Step 74700:
+  Payload position: [281.90587093  95.79457635]
+  Payload displacement from start: 260.356
+  Distance to goal: 2239.953
+Step 74800:
+  Payload position: [282.26902976  95.81555868]
+  Payload displacement from start: 260.713
+  Distance to goal: 2239.696
+Step 74900:
+  Payload position: [282.62707217  95.85848906]
+  Payload displacement from start: 261.070
+  Distance to goal: 2239.426
+Step 75000:
+  Payload position: [282.83763538  95.99484611]
+  Payload displacement from start: 261.309
+  Distance to goal: 2239.184
+Step 75100:
+  Payload position: [282.99055441  96.15188156]
+  Payload displacement from start: 261.496
+  Distance to goal: 2238.965
+Step 75200:
+  Payload position: [283.1339579   96.32744369]
+  Payload displacement from start: 261.679
+  Distance to goal: 2238.739
+Step 75300:
+  Payload position: [283.27163262  96.50629454]
+  Payload displacement from start: 261.858
+  Distance to goal: 2238.513
+Step 75400:
+  Payload position: [283.40522726  96.69319944]
+  Payload displacement from start: 262.035
+  Distance to goal: 2238.285
+Step 75500:
+  Payload position: [283.53647804  96.88850079]
+  Payload displacement from start: 262.211
+  Distance to goal: 2238.052
+Step 75600:
+  Payload position: [283.66285365  97.08582224]
+  Payload displacement from start: 262.384
+  Distance to goal: 2237.820
+Step 75700:
+  Payload position: [283.78953924  97.26744607]
+  Payload displacement from start: 262.553
+  Distance to goal: 2237.600
+Step 75800:
+  Payload position: [283.92413625  97.27608935]
+  Payload displacement from start: 262.685
+  Distance to goal: 2237.505
+Step 75900:
+  Payload position: [284.07983434  97.26671556]
+  Payload displacement from start: 262.833
+  Distance to goal: 2237.408
+Step 76000:
+  Payload position: [284.22574424  97.23881405]
+  Payload displacement from start: 262.967
+  Distance to goal: 2237.332
+Step 76100:
+  Payload position: [284.36266062  97.21642206]
+  Payload displacement from start: 263.094
+  Distance to goal: 2237.258
+Step 76200:
+  Payload position: [284.4964386   97.17144897]
+  Payload displacement from start: 263.212
+  Distance to goal: 2237.203
+Step 76300:
+  Payload position: [284.63530148  97.13644156]
+  Payload displacement from start: 263.337
+  Distance to goal: 2237.137
+Step 76400:
+  Payload position: [284.75080033  97.08627067]
+  Payload displacement from start: 263.436
+  Distance to goal: 2237.098
+Step 76500:
+  Payload position: [284.86059921  97.06152861]
+  Payload displacement from start: 263.536
+  Distance to goal: 2237.043
+Step 76600:
+  Payload position: [284.97867594  97.03327663]
+  Payload displacement from start: 263.643
+  Distance to goal: 2236.986
+Step 76700:
+  Payload position: [285.0350709   97.18188197]
+  Payload displacement from start: 263.735
+  Distance to goal: 2236.837
+Step 76800:
+  Payload position: [285.12072863  97.2265205 ]
+  Payload displacement from start: 263.829
+  Distance to goal: 2236.747
+Step 76900:
+  Payload position: [285.24577355  97.17384218]
+  Payload displacement from start: 263.937
+  Distance to goal: 2236.703
+Step 77000:
+  Payload position: [285.28432322  96.98795746]
+  Payload displacement from start: 263.927
+  Distance to goal: 2236.817
+Step 77100:
+  Payload position: [285.3058074   96.75995284]
+  Payload displacement from start: 263.890
+  Distance to goal: 2236.973
+Step 77200:
+  Payload position: [285.31597085  96.66893535]
+  Payload displacement from start: 263.877
+  Distance to goal: 2237.035
+Step 77300:
+  Payload position: [285.29926265  96.66225486]
+  Payload displacement from start: 263.859
+  Distance to goal: 2237.051
+Step 77400:
+  Payload position: [285.26981034  96.65903536]
+  Payload displacement from start: 263.830
+  Distance to goal: 2237.073
+Step 77500:
+  Payload position: [285.2260936   96.65890327]
+  Payload displacement from start: 263.787
+  Distance to goal: 2237.102
+Step 77600:
+  Payload position: [285.18053422  96.65460069]
+  Payload displacement from start: 263.742
+  Distance to goal: 2237.135
+Step 77700:
+  Payload position: [285.12392532  96.64256176]
+  Payload displacement from start: 263.684
+  Distance to goal: 2237.182
+Step 77800:
+  Payload position: [285.05551812  96.64405562]
+  Payload displacement from start: 263.619
+  Distance to goal: 2237.226
+Step 77900:
+  Payload position: [284.9640363  96.6387102]
+  Payload displacement from start: 263.529
+  Distance to goal: 2237.291
+Step 78000:
+  Payload position: [284.86223218  96.62949951]
+  Payload displacement from start: 263.428
+  Distance to goal: 2237.365
+Step 78100:
+  Payload position: [284.74758744  96.61243783]
+  Payload displacement from start: 263.313
+  Distance to goal: 2237.454
+Step 78200:
+  Payload position: [284.59467324  96.58779875]
+  Payload displacement from start: 263.158
+  Distance to goal: 2237.574
+Step 78300:
+  Payload position: [284.2654447   96.51583837]
+  Payload displacement from start: 262.822
+  Distance to goal: 2237.846
+Step 78400:
+  Payload position: [284.00225019  96.46428295]
+  Payload displacement from start: 262.554
+  Distance to goal: 2238.060
+Step 78500:
+  Payload position: [283.77849695  96.4387344 ]
+  Payload displacement from start: 262.331
+  Distance to goal: 2238.227
+Step 78600:
+  Payload position: [283.79196794  96.5656121 ]
+  Payload displacement from start: 262.376
+  Distance to goal: 2238.124
+Step 78700:
+  Payload position: [283.93787245  96.6848142 ]
+  Payload displacement from start: 262.548
+  Distance to goal: 2237.938
+Step 78800:
+  Payload position: [284.09121223  96.81052803]
+  Payload displacement from start: 262.728
+  Distance to goal: 2237.742
+Step 78900:
+  Payload position: [284.24728216  96.86642329]
+  Payload displacement from start: 262.893
+  Distance to goal: 2237.596
+Step 79000:
+  Payload position: [284.42043445  96.79059922]
+  Payload displacement from start: 263.041
+  Distance to goal: 2237.538
+Step 79100:
+  Payload position: [284.51328649  96.65023652]
+  Payload displacement from start: 263.096
+  Distance to goal: 2237.581
+Step 79200:
+  Payload position: [284.68797724  96.57476619]
+  Payload displacement from start: 263.245
+  Distance to goal: 2237.522
+Step 79300:
+  Payload position: [284.86422623  96.52657892]
+  Payload displacement from start: 263.404
+  Distance to goal: 2237.441
+Step 79400:
+  Payload position: [285.07708205  96.50201198]
+  Payload displacement from start: 263.604
+  Distance to goal: 2237.318
+Step 79500:
+  Payload position: [285.3869268   96.51934566]
+  Payload displacement from start: 263.908
+  Distance to goal: 2237.099
+Step 79600:
+  Payload position: [285.66940039  96.35551903]
+  Payload displacement from start: 264.140
+  Distance to goal: 2237.034
+Step 79700:
+  Payload position: [285.9452003   96.20670057]
+  Payload displacement from start: 264.370
+  Distance to goal: 2236.963
+Step 79800:
+  Payload position: [286.27870875  96.05101136]
+  Payload displacement from start: 264.654
+  Distance to goal: 2236.858
+Step 79900:
+  Payload position: [286.64816412  95.82301605]
+  Payload displacement from start: 264.955
+  Distance to goal: 2236.784
+Step 80000:
+  Payload position: [287.01105879  95.57740383]
+  Payload displacement from start: 265.245
+  Distance to goal: 2236.727
+Step 80100:
+  Payload position: [287.39064476  95.32531234]
+  Payload displacement from start: 265.551
+  Distance to goal: 2236.664
+Step 80200:
+  Payload position: [287.73399013  95.10833956]
+  Payload displacement from start: 265.831
+  Distance to goal: 2236.599
+Step 80300:
+  Payload position: [287.9969889   94.98327923]
+  Payload displacement from start: 266.055
+  Distance to goal: 2236.518
+Step 80400:
+  Payload position: [288.21466208  94.89779734]
+  Payload displacement from start: 266.245
+  Distance to goal: 2236.438
+Step 80500:
+  Payload position: [288.34851587  94.88665641]
+  Payload displacement from start: 266.372
+  Distance to goal: 2236.358
+Step 80600:
+  Payload position: [288.34710913  94.85848682]
+  Payload displacement from start: 266.364
+  Distance to goal: 2236.380
+Step 80700:
+  Payload position: [288.40728575  94.87203747]
+  Payload displacement from start: 266.426
+  Distance to goal: 2236.330
+Step 80800:
+  Payload position: [288.63131281  94.8615172 ]
+  Payload displacement from start: 266.641
+  Distance to goal: 2236.189
+Step 80900:
+  Payload position: [288.94228074  94.80761193]
+  Payload displacement from start: 266.929
+  Distance to goal: 2236.024
+Step 81000:
+  Payload position: [289.15659092  94.74651354]
+  Payload displacement from start: 267.122
+  Distance to goal: 2235.927
+Step 81100:
+  Payload position: [289.34081944  94.62798008]
+  Payload displacement from start: 267.272
+  Distance to goal: 2235.894
+Step 81200:
+  Payload position: [289.42680502  94.47366447]
+  Payload displacement from start: 267.318
+  Distance to goal: 2235.953
+Step 81300:
+  Payload position: [289.46691909  94.3044766 ]
+  Payload displacement from start: 267.317
+  Distance to goal: 2236.053
+Step 81400:
+  Payload position: [289.84634131  94.09114089]
+  Payload displacement from start: 267.634
+  Distance to goal: 2235.962
+Step 81500:
+  Payload position: [290.22548751  93.97183858]
+  Payload displacement from start: 267.973
+  Distance to goal: 2235.800
+Step 81600:
+  Payload position: [290.59797927  93.84516746]
+  Payload displacement from start: 268.305
+  Distance to goal: 2235.649
+Step 81700:
+  Payload position: [290.87275669  93.70311565]
+  Payload displacement from start: 268.538
+  Distance to goal: 2235.573
+Step 81800:
+  Payload position: [291.28613422  93.53531273]
+  Payload displacement from start: 268.900
+  Distance to goal: 2235.426
+Step 81900:
+  Payload position: [291.667856    93.41013289]
+  Payload displacement from start: 269.241
+  Distance to goal: 2235.267
+Step 82000:
+  Payload position: [291.99407965  93.43283114]
+  Payload displacement from start: 269.564
+  Distance to goal: 2235.034
+Step 82100:
+  Payload position: [292.2544067   93.57673229]
+  Payload displacement from start: 269.851
+  Distance to goal: 2234.754
+Step 82200:
+  Payload position: [292.6949056   93.54412586]
+  Payload displacement from start: 270.271
+  Distance to goal: 2234.488
+Step 82300:
+  Payload position: [293.25282232  93.36168791]
+  Payload displacement from start: 270.771
+  Distance to goal: 2234.256
+Step 82400:
+  Payload position: [293.82165835  93.16267097]
+  Payload displacement from start: 271.277
+  Distance to goal: 2234.029
+Step 82500:
+  Payload position: [294.41062072  92.94532272]
+  Payload displacement from start: 271.800
+  Distance to goal: 2233.803
+Step 82600:
+  Payload position: [295.0231858   92.72890273]
+  Payload displacement from start: 272.346
+  Distance to goal: 2233.561
+Step 82700:
+  Payload position: [295.65974724  92.50800815]
+  Payload displacement from start: 272.915
+  Distance to goal: 2233.307
+Step 82800:
+  Payload position: [296.308164    92.28241148]
+  Payload displacement from start: 273.494
+  Distance to goal: 2233.048
+Step 82900:
+  Payload position: [296.80619057  91.95465324]
+  Payload displacement from start: 273.905
+  Distance to goal: 2232.966
+Step 83000:
+  Payload position: [297.28586389  91.59279821]
+  Payload displacement from start: 274.291
+  Distance to goal: 2232.921
+Step 83100:
+  Payload position: [297.66840648  91.18954179]
+  Payload displacement from start: 274.573
+  Distance to goal: 2232.972
+Step 83200:
+  Payload position: [298.08107342  90.89468365]
+  Payload displacement from start: 274.910
+  Distance to goal: 2232.922
+Step 83300:
+  Payload position: [298.52925702  90.64232025]
+  Payload displacement from start: 275.292
+  Distance to goal: 2232.816
+Step 83400:
+  Payload position: [298.79321237  90.58183728]
+  Payload displacement from start: 275.536
+  Distance to goal: 2232.688
+Step 83500:
+  Payload position: [298.99911741  90.65874574]
+  Payload displacement from start: 275.754
+  Distance to goal: 2232.494
+Step 83600:
+  Payload position: [299.23358613  90.7146298 ]
+  Payload displacement from start: 275.995
+  Distance to goal: 2232.298
+Step 83700:
+  Payload position: [299.43346687  90.85552685]
+  Payload displacement from start: 276.221
+  Distance to goal: 2232.060
+Step 83800:
+  Payload position: [299.61891305  90.98065171]
+  Payload displacement from start: 276.429
+  Distance to goal: 2231.844
+Step 83900:
+  Payload position: [299.80087686  91.1203266 ]
+  Payload displacement from start: 276.637
+  Distance to goal: 2231.619
+Step 84000:
+  Payload position: [299.98267178  91.25778468]
+  Payload displacement from start: 276.845
+  Distance to goal: 2231.396
+Step 84100:
+  Payload position: [300.08226276  91.35531786]
+  Payload displacement from start: 276.964
+  Distance to goal: 2231.257
+Step 84200:
+  Payload position: [300.22267277  91.52746145]
+  Payload displacement from start: 277.139
+  Distance to goal: 2231.035
+Step 84300:
+  Payload position: [300.3508865   91.70148071]
+  Payload displacement from start: 277.302
+  Distance to goal: 2230.819
+Step 84400:
+  Payload position: [300.35999116  91.71472889]
+  Payload displacement from start: 277.314
+  Distance to goal: 2230.803
+Step 84500:
+  Payload position: [300.24104431  91.60538989]
+  Payload displacement from start: 277.174
+  Distance to goal: 2230.964
+Step 84600:
+  Payload position: [300.08145462  91.47601087]
+  Payload displacement from start: 276.990
+  Distance to goal: 2231.166
+Step 84700:
+  Payload position: [299.92549961  91.45004411]
+  Payload displacement from start: 276.832
+  Distance to goal: 2231.289
+Step 84800:
+  Payload position: [299.81409219  91.66085054]
+  Payload displacement from start: 276.770
+  Distance to goal: 2231.203
+Step 84900:
+  Payload position: [299.98863954  92.10827813]
+  Payload displacement from start: 277.040
+  Distance to goal: 2230.752
+Step 85000:
+  Payload position: [300.2474731   92.55500947]
+  Payload displacement from start: 277.393
+  Distance to goal: 2230.245
+Step 85100:
+  Payload position: [300.50428222  93.05469836]
+  Payload displacement from start: 277.756
+  Distance to goal: 2229.700
+Step 85200:
+  Payload position: [300.76787881  93.60817268]
+  Payload displacement from start: 278.139
+  Distance to goal: 2229.110
+Step 85300:
+  Payload position: [301.01504581  94.13208535]
+  Payload displacement from start: 278.500
+  Distance to goal: 2228.553
+Step 85400:
+  Payload position: [301.15283196  94.48605425]
+  Payload displacement from start: 278.715
+  Distance to goal: 2228.196
+Step 85500:
+  Payload position: [301.12186706  94.70713659]
+  Payload displacement from start: 278.737
+  Distance to goal: 2228.051
+Step 85600:
+  Payload position: [301.06426218  95.0106883 ]
+  Payload displacement from start: 278.751
+  Distance to goal: 2227.860
+Step 85700:
+  Payload position: [300.99522948  95.37968549]
+  Payload displacement from start: 278.770
+  Distance to goal: 2227.628
+Step 85800:
+  Payload position: [300.93995715  95.59823386]
+  Payload displacement from start: 278.768
+  Distance to goal: 2227.501
+Step 85900:
+  Payload position: [300.87322008  95.74672857]
+  Payload displacement from start: 278.738
+  Distance to goal: 2227.433
+Step 86000:
+  Payload position: [300.85655353  95.92887376]
+  Payload displacement from start: 278.765
+  Distance to goal: 2227.307
+Step 86100:
+  Payload position: [300.74100298  96.11711081]
+  Payload displacement from start: 278.697
+  Distance to goal: 2227.242
+Step 86200:
+  Payload position: [300.70382699  96.30067539]
+  Payload displacement from start: 278.705
+  Distance to goal: 2227.128
+Step 86300:
+  Payload position: [300.73596156  96.49807688]
+  Payload displacement from start: 278.783
+  Distance to goal: 2226.959
+Step 86400:
+  Payload position: [300.81277826  96.67072609]
+  Payload displacement from start: 278.899
+  Distance to goal: 2226.778
+Step 86500:
+  Payload position: [300.76416052  96.93438181]
+  Payload displacement from start: 278.915
+  Distance to goal: 2226.612
+Step 86600:
+  Payload position: [300.64617119  97.21331076]
+  Payload displacement from start: 278.867
+  Distance to goal: 2226.481
+Step 86700:
+  Payload position: [300.51215007  97.49423101]
+  Payload displacement from start: 278.805
+  Distance to goal: 2226.358
+Step 86800:
+  Payload position: [300.38260232  97.77622956]
+  Payload displacement from start: 278.748
+  Distance to goal: 2226.232
+Step 86900:
+  Payload position: [300.32452126  98.0708254 ]
+  Payload displacement from start: 278.763
+  Distance to goal: 2226.049
+Step 87000:
+  Payload position: [300.43539379  98.34774283]
+  Payload displacement from start: 278.939
+  Distance to goal: 2225.768
+Step 87100:
+  Payload position: [300.54227401  98.62241341]
+  Payload displacement from start: 279.110
+  Distance to goal: 2225.491
+Step 87200:
+  Payload position: [300.62833881  98.91224838]
+  Payload displacement from start: 279.264
+  Distance to goal: 2225.216
+Step 87300:
+  Payload position: [300.71355134  99.20739914]
+  Payload displacement from start: 279.420
+  Distance to goal: 2224.938
+Step 87400:
+  Payload position: [300.80773009  99.44222547]
+  Payload displacement from start: 279.569
+  Distance to goal: 2224.700
+Step 87500:
+  Payload position: [300.81919714  99.58132881]
+  Payload displacement from start: 279.615
+  Distance to goal: 2224.588
+Step 87600:
+  Payload position: [300.7772502   99.66953165]
+  Payload displacement from start: 279.596
+  Distance to goal: 2224.549
+Step 87700:
+  Payload position: [300.72732381  99.75930809]
+  Payload displacement from start: 279.570
+  Distance to goal: 2224.515
+Step 87800:
+  Payload position: [300.8027938   99.91674673]
+  Payload displacement from start: 279.683
+  Distance to goal: 2224.347
+Step 87900:
+  Payload position: [301.02689688 100.03585676]
+  Payload displacement from start: 279.930
+  Distance to goal: 2224.109
+Step 88000:
+  Payload position: [301.34139427 100.07727876]
+  Payload displacement from start: 280.244
+  Distance to goal: 2223.870
+Step 88100:
+  Payload position: [301.48538608 100.04040312]
+  Payload displacement from start: 280.375
+  Distance to goal: 2223.803
+Step 88200:
+  Payload position: [301.55441992  99.96462905]
+  Payload displacement from start: 280.423
+  Distance to goal: 2223.814
+Step 88300:
+  Payload position: [301.61174605  99.97837547]
+  Payload displacement from start: 280.482
+  Distance to goal: 2223.766
+Step 88400:
+  Payload position: [301.89010679 100.14368611]
+  Payload displacement from start: 280.792
+  Distance to goal: 2223.458
+Step 88500:
+  Payload position: [302.21269257 100.17289698]
+  Payload displacement from start: 281.112
+  Distance to goal: 2223.223
+Step 88600:
+  Payload position: [302.55661855 100.20282059]
+  Payload displacement from start: 281.453
+  Distance to goal: 2222.974
+Step 88700:
+  Payload position: [302.90611821 100.22694429]
+  Payload displacement from start: 281.797
+  Distance to goal: 2222.725
+Step 88800:
+  Payload position: [303.22233934 100.18459295]
+  Payload displacement from start: 282.093
+  Distance to goal: 2222.548
+Step 88900:
+  Payload position: [303.50747022 100.14228321]
+  Payload displacement from start: 282.358
+  Distance to goal: 2222.392
+Step 89000:
+  Payload position: [303.77879215 100.13709585]
+  Payload displacement from start: 282.620
+  Distance to goal: 2222.217
+Step 89100:
+  Payload position: [304.06341839 100.14548971]
+  Payload displacement from start: 282.898
+  Distance to goal: 2222.023
+Step 89200:
+  Payload position: [304.35545385 100.15198834]
+  Payload displacement from start: 283.182
+  Distance to goal: 2221.825
+Step 89300:
+  Payload position: [304.65484464 100.1463855 ]
+  Payload displacement from start: 283.471
+  Distance to goal: 2221.632
+Step 89400:
+  Payload position: [304.91775648 100.14611714]
+  Payload displacement from start: 283.726
+  Distance to goal: 2221.459
+Step 89500:
+  Payload position: [305.01480941 100.1696159 ]
+  Payload displacement from start: 283.826
+  Distance to goal: 2221.377
+Step 89600:
+  Payload position: [305.09478814 100.17628521]
+  Payload displacement from start: 283.905
+  Distance to goal: 2221.319
+Step 89700:
+  Payload position: [305.18478356 100.17989873]
+  Payload displacement from start: 283.993
+  Distance to goal: 2221.257
+Step 89800:
+  Payload position: [305.27822309 100.18106464]
+  Payload displacement from start: 284.084
+  Distance to goal: 2221.195
+Step 89900:
+  Payload position: [305.3652574  100.17993427]
+  Payload displacement from start: 284.168
+  Distance to goal: 2221.138
+Step 90000:
+  Payload position: [305.4526912  100.15504644]
+  Payload displacement from start: 284.246
+  Distance to goal: 2221.099
+Step 90100:
+  Payload position: [305.57131447 100.15717088]
+  Payload displacement from start: 284.362
+  Distance to goal: 2221.019
+Step 90200:
+  Payload position: [305.67950688 100.15565414]
+  Payload displacement from start: 284.466
+  Distance to goal: 2220.949
+Step 90300:
+  Payload position: [305.67529667 100.22738609]
+  Payload displacement from start: 284.480
+  Distance to goal: 2220.898
+Step 90400:
+  Payload position: [305.75677587 100.09883425]
+  Payload displacement from start: 284.527
+  Distance to goal: 2220.941
+Step 90500:
+  Payload position: [305.7868096   99.92626526]
+  Payload displacement from start: 284.514
+  Distance to goal: 2221.051
+Step 90600:
+  Payload position: [305.73482667  99.69805286]
+  Payload displacement from start: 284.407
+  Distance to goal: 2221.257
+Step 90700:
+  Payload position: [305.70695356  99.43729673]
+  Payload displacement from start: 284.316
+  Distance to goal: 2221.471
+Step 90800:
+  Payload position: [305.73085961  99.10103818]
+  Payload displacement from start: 284.258
+  Distance to goal: 2221.708
+Step 90900:
+  Payload position: [305.74002919  98.90116001]
+  Payload displacement from start: 284.218
+  Distance to goal: 2221.853
+Step 91000:
+  Payload position: [305.7614712   99.17251542]
+  Payload displacement from start: 284.305
+  Distance to goal: 2221.634
+Step 91100:
+  Payload position: [305.74531538  99.49765883]
+  Payload displacement from start: 284.368
+  Distance to goal: 2221.400
+Step 91200:
+  Payload position: [305.78835888  99.56834358]
+  Payload displacement from start: 284.427
+  Distance to goal: 2221.319
+Step 91300:
+  Payload position: [305.85405715  99.64131714]
+  Payload displacement from start: 284.509
+  Distance to goal: 2221.221
+Step 91400:
+  Payload position: [305.86843364  99.81824909]
+  Payload displacement from start: 284.566
+  Distance to goal: 2221.078
+Step 91500:
+  Payload position: [305.75145584 100.02968456]
+  Payload displacement from start: 284.505
+  Distance to goal: 2220.996
+Step 91600:
+  Payload position: [305.60452305 100.07921077]
+  Payload displacement from start: 284.375
+  Distance to goal: 2221.056
+Step 91700:
+  Payload position: [305.47214528 100.00798428]
+  Payload displacement from start: 284.229
+  Distance to goal: 2221.197
+Step 91800:
+  Payload position: [305.37959796  99.85250017]
+  Payload displacement from start: 284.101
+  Distance to goal: 2221.375
+Step 91900:
+  Payload position: [305.22652584  99.84809577]
+  Payload displacement from start: 283.951
+  Distance to goal: 2221.479
+Step 92000:
+  Payload position: [305.02558282  99.95889404]
+  Payload displacement from start: 283.784
+  Distance to goal: 2221.528
+Step 92100:
+  Payload position: [304.8179981 100.0493952]
+  Payload displacement from start: 283.605
+  Distance to goal: 2221.597
+Step 92200:
+  Payload position: [304.61297717 100.08129032]
+  Payload displacement from start: 283.414
+  Distance to goal: 2221.708
+Step 92300:
+  Payload position: [304.58536624 100.03080829]
+  Payload displacement from start: 283.375
+  Distance to goal: 2221.764
+Step 92400:
+  Payload position: [304.62728983  99.97784811]
+  Payload displacement from start: 283.403
+  Distance to goal: 2221.777
+Step 92500:
+  Payload position: [304.78020309  99.86160427]
+  Payload displacement from start: 283.522
+  Distance to goal: 2221.763
+Step 92600:
+  Payload position: [304.89767838  99.75576879]
+  Payload displacement from start: 283.610
+  Distance to goal: 2221.765
+Step 92700:
+  Payload position: [304.91138526  99.74040469]
+  Payload displacement from start: 283.619
+  Distance to goal: 2221.768
+Step 92800:
+  Payload position: [304.91266891  99.73732606]
+  Payload displacement from start: 283.620
+  Distance to goal: 2221.769
+Step 92900:
+  Payload position: [305.01847463  99.41099517]
+  Payload displacement from start: 283.642
+  Distance to goal: 2221.945
+Step 93000:
+  Payload position: [305.1175312   99.04761315]
+  Payload displacement from start: 283.650
+  Distance to goal: 2222.153
+Step 93100:
+  Payload position: [305.16798748  98.76289019]
+  Payload displacement from start: 283.630
+  Distance to goal: 2222.334
+Step 93200:
+  Payload position: [305.17634781  98.4555504 ]
+  Payload displacement from start: 283.563
+  Distance to goal: 2222.559
+Step 93300:
+  Payload position: [305.16870845  98.39439499]
+  Payload displacement from start: 283.541
+  Distance to goal: 2222.610
+Step 93400:
+  Payload position: [305.16870845  98.39439499]
+  Payload displacement from start: 283.541
+  Distance to goal: 2222.610
+Step 93500:
+  Payload position: [305.27174079  98.48777216]
+  Payload displacement from start: 283.664
+  Distance to goal: 2222.472
+Step 93600:
+  Payload position: [305.366754    98.59833016]
+  Payload displacement from start: 283.783
+  Distance to goal: 2222.326
+Step 93700:
+  Payload position: [305.36935825  98.76949998]
+  Payload displacement from start: 283.827
+  Distance to goal: 2222.196
+Step 93800:
+  Payload position: [305.3940768   98.98691689]
+  Payload displacement from start: 283.903
+  Distance to goal: 2222.016
+Step 93900:
+  Payload position: [305.39230245  99.24241863]
+  Payload displacement from start: 283.964
+  Distance to goal: 2221.825
+Step 94000:
+  Payload position: [305.35154589  99.66585953]
+  Payload displacement from start: 284.028
+  Distance to goal: 2221.534
+Step 94100:
+  Payload position: [305.33074145  99.99655907]
+  Payload displacement from start: 284.089
+  Distance to goal: 2221.299
+Step 94200:
+  Payload position: [305.32194382 100.254171  ]
+  Payload displacement from start: 284.144
+  Distance to goal: 2221.111
+Step 94300:
+  Payload position: [305.31273159 100.34483321]
+  Payload displacement from start: 284.158
+  Distance to goal: 2221.049
+Step 94400:
+  Payload position: [305.31094478 100.37004845]
+  Payload displacement from start: 284.162
+  Distance to goal: 2221.031
+Step 94500:
+  Payload position: [305.3103524  100.35262073]
+  Payload displacement from start: 284.157
+  Distance to goal: 2221.044
+Step 94600:
+  Payload position: [305.21660689 100.28485331]
+  Payload displacement from start: 284.050
+  Distance to goal: 2221.157
+Step 94700:
+  Payload position: [305.07580277 100.27223902]
+  Payload displacement from start: 283.910
+  Distance to goal: 2221.259
+Step 94800:
+  Payload position: [305.02792436 100.24636651]
+  Payload displacement from start: 283.857
+  Distance to goal: 2221.311
+Step 94900:
+  Payload position: [305.01630828 100.21258712]
+  Payload displacement from start: 283.838
+  Distance to goal: 2221.344
+Step 95000:
+  Payload position: [305.0068384  100.19830026]
+  Payload displacement from start: 283.825
+  Distance to goal: 2221.361
+Step 95100:
+  Payload position: [304.98797691 100.14949767]
+  Payload displacement from start: 283.795
+  Distance to goal: 2221.410
+Step 95200:
+  Payload position: [304.94182562 100.12884998]
+  Payload displacement from start: 283.745
+  Distance to goal: 2221.456
+Step 95300:
+  Payload position: [304.87855967 100.10023047]
+  Payload displacement from start: 283.676
+  Distance to goal: 2221.519
+Step 95400:
+  Payload position: [304.87076124 100.03322396]
+  Payload displacement from start: 283.652
+  Distance to goal: 2221.574
+Step 95500:
+  Payload position: [304.84402629 100.0182996 ]
+  Payload displacement from start: 283.623
+  Distance to goal: 2221.603
+Step 95600:
+  Payload position: [304.84005141 100.07138846]
+  Payload displacement from start: 283.632
+  Distance to goal: 2221.566
+Step 95700:
+  Payload position: [304.81237474 100.14606531]
+  Payload displacement from start: 283.624
+  Distance to goal: 2221.528
+Step 95800:
+  Payload position: [304.7627638  100.17158403]
+  Payload displacement from start: 283.582
+  Distance to goal: 2221.542
+Step 95900:
+  Payload position: [304.70291966 100.17957326]
+  Payload displacement from start: 283.526
+  Distance to goal: 2221.575
+Step 96000:
+  Payload position: [304.6631849  100.17962691]
+  Payload displacement from start: 283.487
+  Distance to goal: 2221.601
+Step 96100:
+  Payload position: [304.62531996 100.17661361]
+  Payload displacement from start: 283.450
+  Distance to goal: 2221.628
+Step 96200:
+  Payload position: [304.62131229 100.1345679 ]
+  Payload displacement from start: 283.436
+  Distance to goal: 2221.663
+Step 96300:
+  Payload position: [304.54718096 100.08673897]
+  Payload displacement from start: 283.352
+  Distance to goal: 2221.748
+Step 96400:
+  Payload position: [304.61965792  99.95717812]
+  Payload displacement from start: 283.390
+  Distance to goal: 2221.797
+Step 96500:
+  Payload position: [304.77584878  99.78340145]
+  Payload displacement from start: 283.499
+  Distance to goal: 2221.825
+Step 96600:
+  Payload position: [304.93318259  99.61780814]
+  Payload displacement from start: 283.610
+  Distance to goal: 2221.846
+Step 96700:
+  Payload position: [305.05397798  99.47144957]
+  Payload displacement from start: 283.692
+  Distance to goal: 2221.876
+Step 96800:
+  Payload position: [305.09588094  99.40310444]
+  Payload displacement from start: 283.716
+  Distance to goal: 2221.900
+Step 96900:
+  Payload position: [305.08219354  99.26545891]
+  Payload displacement from start: 283.669
+  Distance to goal: 2222.012
+Step 97000:
+  Payload position: [305.14999841  98.95876399]
+  Payload displacement from start: 283.660
+  Distance to goal: 2222.198
+Step 97100:
+  Payload position: [305.19013184  98.5496533 ]
+  Payload displacement from start: 283.599
+  Distance to goal: 2222.479
+Step 97200:
+  Payload position: [305.18076654  98.0897472 ]
+  Payload displacement from start: 283.480
+  Distance to goal: 2222.831
+Step 97300:
+  Payload position: [305.31611407  97.64314942]
+  Payload displacement from start: 283.504
+  Distance to goal: 2223.078
+Step 97400:
+  Payload position: [305.44481802  97.1663649 ]
+  Payload displacement from start: 283.516
+  Distance to goal: 2223.352
+Step 97500:
+  Payload position: [305.61690641  96.66092665]
+  Payload displacement from start: 283.564
+  Distance to goal: 2223.619
+Step 97600:
+  Payload position: [305.79844282  96.1364396 ]
+  Payload displacement from start: 283.617
+  Distance to goal: 2223.894
+Step 97700:
+  Payload position: [305.97863182  95.7005977 ]
+  Payload displacement from start: 283.691
+  Distance to goal: 2224.104
+Step 97800:
+  Payload position: [306.19831925  95.27980519]
+  Payload displacement from start: 283.808
+  Distance to goal: 2224.276
+Step 97900:
+  Payload position: [306.3895268   94.95500936]
+  Payload displacement from start: 283.920
+  Distance to goal: 2224.395
+Step 98000:
+  Payload position: [306.60033703  94.79804565]
+  Payload displacement from start: 284.089
+  Distance to goal: 2224.374
+Step 98100:
+  Payload position: [306.63460449  94.76806171]
+  Payload displacement from start: 284.115
+  Distance to goal: 2224.374
+Step 98200:
+  Payload position: [306.62170987  94.70818182]
+  Payload displacement from start: 284.089
+  Distance to goal: 2224.428
+Step 98300:
+  Payload position: [306.62170987  94.70818182]
+  Payload displacement from start: 284.089
+  Distance to goal: 2224.428
+Step 98400:
+  Payload position: [306.6316237   94.67216256]
+  Payload displacement from start: 284.091
+  Distance to goal: 2224.448
+Step 98500:
+  Payload position: [306.6316237   94.67216256]
+  Payload displacement from start: 284.091
+  Distance to goal: 2224.448
+Step 98600:
+  Payload position: [306.69653086  94.58878052]
+  Payload displacement from start: 284.135
+  Distance to goal: 2224.468
+Step 98700:
+  Payload position: [306.84183807  94.41912708]
+  Payload displacement from start: 284.238
+  Distance to goal: 2224.501
+Step 98800:
+  Payload position: [306.99592545  94.26655226]
+  Payload displacement from start: 284.354
+  Distance to goal: 2224.514
+Step 98900:
+  Payload position: [307.15555749  94.10438264]
+  Payload displacement from start: 284.472
+  Distance to goal: 2224.531
+Step 99000:
+  Payload position: [307.31948565  93.97101458]
+  Payload displacement from start: 284.602
+  Distance to goal: 2224.524
+Step 99100:
+  Payload position: [307.49281493  93.81236914]
+  Payload displacement from start: 284.735
+  Distance to goal: 2224.530
+Step 99200:
+  Payload position: [307.61649841  93.69500336]
+  Payload displacement from start: 284.830
+  Distance to goal: 2224.537
+Step 99300:
+  Payload position: [307.60941072  93.68778446]
+  Payload displacement from start: 284.821
+  Distance to goal: 2224.547
+Step 99400:
+  Payload position: [307.65396607  93.626111  ]
+  Payload displacement from start: 284.851
+  Distance to goal: 2224.564
+Step 99500:
+  Payload position: [307.81484012  93.49339773]
+  Payload displacement from start: 284.978
+  Distance to goal: 2224.558
+Step 99600:
+  Payload position: [307.98628539  93.3572837 ]
+  Payload displacement from start: 285.115
+  Distance to goal: 2224.548
+Step 99700:
+  Payload position: [308.16364899  93.24379103]
+  Payload displacement from start: 285.263
+  Distance to goal: 2224.517
+Step 99800:
+  Payload position: [308.33862623  93.14538269]
+  Payload displacement from start: 285.412
+  Distance to goal: 2224.476
+Step 99900:
+  Payload position: [308.38995011  93.12609643]
+  Payload displacement from start: 285.457
+  Distance to goal: 2224.457
+Step 100000:
+  Payload position: [308.40760267  93.12436108]
+  Payload displacement from start: 285.474
+  Distance to goal: 2224.447
+Simulation completed in 10835.48 seconds
+Total payload displacement: 285.474
+Final distance to goal: 2224.447
+
+Simulation completed in 10835.48 seconds
+Final step: 100000
+Data saved to: data/snelltesthuge4_5kr60.npz
+Simulation and visualization completed successfully!
+Elapsed time: 10853.4 seconds
+Done.
+                                                                      
