@@ -47,7 +47,7 @@ def compute_all_forces(positions, payload_pos, radii, payload_radius, stiffness,
                 payload_force -= force_particle_payload
 
     # Compute forces between particles and walls (indexed: single-cell lookup per particle)
-    for i in range(n_particles):
+    for i in prange(n_particles):
         wall_force = compute_wall_forces_indexed(positions[i], radii[i], walls,
                                                  wall_grid_offsets, wall_grid_indices,
                                                  n_wall_cells, wall_cell_size, stiffness)
