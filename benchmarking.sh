@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=1mFAABPsPolarity
+#SBATCH --job-name=dualFAABPsPolarity
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=10:00:00
+#SBATCH --time=1:00:00
 #SBATCH --partition=rome
 #SBATCH --cpus-per-task=16
 

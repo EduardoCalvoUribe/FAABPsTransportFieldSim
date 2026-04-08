@@ -113,7 +113,7 @@ RANDOM_SEED = 42
 
 # Simulation parameters
 N_PARTICLES = 1000 #4000 #1000
-BOX_SIZE = 600 # 1200.0 #600
+BOX_SIZE = 600 #1200.0 #600
 MAZE_GRID_SIZE = 10 #20 #10  # W×W grid; larger = more cells, narrower corridors
 N_STEPS = 100000
 
@@ -193,12 +193,12 @@ POLARITY_NUDGE_DUAL = True          # If True: nudge toward nearest of polarity 
 CREATE_VIDEO = True
 SHOW_VECTORS = True              # Display polarity vectors as arrows
 COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "D:/PostThesis/visualizations/localDUAL_1000_10_100k.mp4"           # If None, uses timestamp. Otherwise specify path.
+OUTPUT_FILENAME = "D:/PostThesis/visualizations/snellDUAL_1000_10_100k.mp4"           # If None, uses timestamp. Otherwise specify path.
 
 # Data saving
 
 SAVE_DATA = True
-DATA_OUTPUT_PATH = "data/localDUAL_1000_10_100k.npz"                    # If None, uses timestamp. Otherwise specify path.
+DATA_OUTPUT_PATH = "data/snellDUAL_1000_10_100k.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 
 #####################
