@@ -115,7 +115,7 @@ RANDOM_SEED = 42
 N_PARTICLES = 4000 #1000
 BOX_SIZE = 1200.0 #600
 MAZE_GRID_SIZE = 20 #10  # W×W grid; larger = more cells, narrower corridors
-N_STEPS = 100000
+N_STEPS = 1000000
 
 SAVE_INTERVAL = 10
 DT = 0.01
@@ -197,7 +197,7 @@ OUTPUT_FILENAME = "visualizations/snelltest0.mp4"           # If None, uses time
 # Data saving
 
 SAVE_DATA = True
-DATA_OUTPUT_PATH = "data/snelltesthuge4_5kr60.npz"                    # If None, uses timestamp. Otherwise specify path.
+DATA_OUTPUT_PATH = "data/snell_4000_20_1m.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 
 #####################

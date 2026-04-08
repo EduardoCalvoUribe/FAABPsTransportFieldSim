@@ -1,7 +1,8 @@
+import math
 import numpy as np
 from numba import njit, int64
 
-from .physics_utils import compute_minimum_distance, point_to_curve_distance
+from .physics_utils import point_to_curve_distance
 
 
 ##########################
@@ -9,9 +10,9 @@ from .physics_utils import compute_minimum_distance, point_to_curve_distance
 ##########################
 
 def build_wall_spatial_index(walls, box_size, cell_size, margin):
-    """Build a CSR spatial index mapping grid cells to nearby wall IDs.
+    """Build a Compressed Sparse Row (CSR) spatial index mapping grid cells to nearby wall IDs.
 
-    Each wall's bounding box is expanded by `margin` before insertion into the
+    Each wall's bounding box is expanded by 'margin' before insertion into the
     grid.  Setting margin >= the largest expected interaction distance (e.g.
     payload_radius) means that a force lookup only needs to query the single
     cell that contains the querying position — no neighbourhood needed.
@@ -90,67 +91,95 @@ def build_wall_spatial_index(walls, box_size, cell_size, margin):
 # Force computation      #
 ##########################
 
-@njit(fastmath=True)
-def compute_repulsive_force(pos_i, pos_j, radius_i, radius_j, stiffness, box_size):
-    """Compute repulsive force between two particles.
+# @njit(fastmath=True)
+# def compute_repulsive_force(pos_i, pos_j, radius_i, radius_j, stiffness, box_size):
+#     """Compute repulsive force between two particles.
 
-    Implements the equation:
-    f_ij = { S_0 * (a+b-r_ij) * r_hat_ij, if r_ij <= a+b
-           { 0,                           otherwise
+#     Implements the equation:
+#     f_ij = { S_0 * (a+b-r_ij) * r_hat_ij, if r_ij <= a+b
+#            { 0,                           otherwise
 
-    where:
-    - S_0 is the stiffness
-    - a, b are the particle radii
-    - r_ij is the distance between particles
-    - r_hat_ij is the unit vector from particle i to j
-    """
-    # r_ij = pos_j - pos_i
-    r_ij = compute_minimum_distance(pos_i, pos_j, box_size)
+#     where:
+#     - S_0 is the stiffness
+#     - a, b are the particle radii
+#     - r_ij is the distance between particles
+#     - r_hat_ij is the unit vector from particle i to j
+#     """
 
-    dist = np.sqrt(np.sum(r_ij**2))
+#     dx = pos_j[0] - pos_i[0]
+#     dy = pos_j[1] - pos_i[1]
 
-    if dist < 1e-10:
-        r_ij = np.array([1e-5, 1e-5])
-        dist = np.sqrt(np.sum(r_ij**2))
+#     half_box = 0.5 * box_size
 
-    r_hat = r_ij / dist
+#     # Minimum-image convention; compute_minimum_distance
+#     if dx > half_box:
+#         dx -= box_size
+#     elif dx < -half_box:
+#         dx += box_size
 
-    sum_radii = radius_i + radius_j
+#     if dy > half_box:
+#         dy -= box_size
+#     elif dy < -half_box:
+#         dy += box_size
 
-    if dist < sum_radii:
-        # Force magnitude: S_0 * (a+b-r_ij)
-        force_magnitude = stiffness * (sum_radii - dist)
+#     dist2 = dx * dx + dy * dy
+#     sum_radii = radius_i + radius_j
 
-        # Force direction: -r_hat
-        return -force_magnitude * r_hat
+#     # Early exit: definitely no overlap
+#     if dist2 >= sum_radii * sum_radii:
+#         return np.array((0.0, 0.0))
 
-    # No force if particles don't overlap
-    return np.zeros(2)
+#     # Degenerate overlap case: avoid divide-by-zero
+#     if dist2 < 1e-20:
+#         dx = 1e-5
+#         dy = 1e-5
+#         dist2 = dx * dx + dy * dy
+
+#     dist = math.sqrt(dist2)
+#     overlap = sum_radii - dist
+#     force_magnitude = stiffness * overlap
+#     inv_dist = 1.0 / dist
+
+#     fx = -force_magnitude * dx * inv_dist
+#     fy = -force_magnitude * dy * inv_dist
+
+#     return fx, fy
 
 @njit(fastmath=True)
 def compute_wall_forces_indexed(pos, radius, walls,
-                                wall_grid_offsets, wall_grid_indices,
-                                n_wall_cells, wall_cell_size, stiffness):
+                                   wall_grid_offsets, wall_grid_indices,
+                                   n_wall_cells, wall_cell_size, stiffness):
     """Compute wall forces using the spatial index.
 
     Queries only the single cell that contains `pos`.  This is correct because
     the index was built with margin >= radius, so all walls that could be within
     `radius` of `pos` are guaranteed to appear in that cell.
     """
-    force = np.zeros(2)
     if walls.shape[0] == 0:
-        return force
+        return 0.0, 0.0
 
-    cell_x = min(int(pos[0] / wall_cell_size), n_wall_cells - 1)
-    cell_y = min(int(pos[1] / wall_cell_size), n_wall_cells - 1)
+    px = pos[0]
+    py = pos[1]
+
+    cell_x = int(px / wall_cell_size)
+    cell_y = int(py / wall_cell_size)
+
     if cell_x < 0:
         cell_x = 0
+    elif cell_x >= n_wall_cells:
+        cell_x = n_wall_cells - 1
+
     if cell_y < 0:
         cell_y = 0
+    elif cell_y >= n_wall_cells:
+        cell_y = n_wall_cells - 1
 
     cell_id = cell_y * n_wall_cells + cell_x
     start = wall_grid_offsets[cell_id]
     end = wall_grid_offsets[cell_id + 1]
+
+    fx = 0.0
+    fy = 0.0
 
     for k in range(start, end):
         w = wall_grid_indices[k]
@@ -160,29 +189,33 @@ def compute_wall_forces_indexed(pos, radius, walls,
         y2 = walls[w, 3]
         c = walls[w, 4]
 
-        distance, closest_x, closest_y = point_to_curve_distance(pos[0], pos[1], x1, y1, x2, y2, c)
+        distance, closest_x, closest_y = point_to_curve_distance(px, py, x1, y1, x2, y2, c)
 
         if distance < radius:
             overlap = radius - distance
+
             if distance > 1e-10:
-                normal_x = (pos[0] - closest_x) / distance
-                normal_y = (pos[1] - closest_y) / distance
+                inv_dist = 1.0 / distance
+                normal_x = (px - closest_x) * inv_dist
+                normal_y = (py - closest_y) * inv_dist
             else:
                 wall_dx = x2 - x1
                 wall_dy = y2 - y1
-                wall_len = np.sqrt(wall_dx * wall_dx + wall_dy * wall_dy)
-                if wall_len > 1e-10:
-                    normal_x = -wall_dy / wall_len
-                    normal_y = wall_dx / wall_len
+                wall_len2 = wall_dx * wall_dx + wall_dy * wall_dy
+
+                if wall_len2 > 1e-20:
+                    inv_wall_len = 1.0 / math.sqrt(wall_len2)
+                    normal_x = -wall_dy * inv_wall_len
+                    normal_y = wall_dx * inv_wall_len
                 else:
                     normal_x = 1.0
                     normal_y = 0.0
+
             force_magnitude = stiffness * overlap
-            force[0] += force_magnitude * normal_x
-            force[1] += force_magnitude * normal_y
+            fx += force_magnitude * normal_x
+            fy += force_magnitude * normal_y
 
-    return force
-
+    return fx, fy
 
 @njit(fastmath=True)
 def compute_wall_forces(pos, radius, walls, stiffness):

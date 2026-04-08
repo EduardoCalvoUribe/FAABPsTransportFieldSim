@@ -7,7 +7,7 @@ from .physics_utils import (normalize, line_intersects_any_wall,
                             particles_separated_by_wall_periodic_indexed,
                             compute_minimum_distance,
                             particles_separated_by_wall, particles_separated_by_wall_periodic)
-from .forces import compute_repulsive_force, compute_wall_forces, compute_wall_forces_indexed, create_cell_list
+from .forces import compute_wall_forces, compute_wall_forces_indexed, create_cell_list
 
 
 ##########################
@@ -18,82 +18,175 @@ from .forces import compute_repulsive_force, compute_wall_forces, compute_wall_f
 def compute_all_forces(positions, payload_pos, radii, payload_radius, stiffness, n_particles, box_size, walls,
                        wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
     """Compute all forces acting on particles and the payload"""
-    particle_forces = np.zeros((n_particles, 2)) # Initialize force array for particles
-    payload_force = np.zeros(2) # Initialize force array for payload
+    particle_forces = np.zeros((n_particles, 2))  # Initialize force array for particles
+    payload_force = np.zeros(2)  # Initialize force array for payload
 
-    # Determine maximum interaction distance (for cell size)
-    # max_radius = np.max(radii) # Takes maximum radius of all particles. (Because radius of particles is possibly heterogeneous)
+    # Determine maximum interaction distance (for cell size) - for particle-particle forces
+    # max_radius = np.max(radii)  # Takes maximum radius of all particles. (Because radius of particles is possibly heterogeneous)
     # cell_size = 2 * max_radius  # For particle-particle interactions (not payload-particle)
 
-    # Create cell list (O(N))
+    # Create cell list (O(N)) - for particle-particle forces
     # head, list_next, n_cells = create_cell_list(positions, box_size, cell_size, n_particles)
 
     # Compute forces between particles and payload (O(N))
     for i in range(n_particles):
-        r_ij = compute_minimum_distance(positions[i], payload_pos, box_size)
-        dist_payload = math.sqrt(r_ij[0] * r_ij[0] + r_ij[1] * r_ij[1])
-        if dist_payload < radii[i] + payload_radius:
+        pix = positions[i, 0]
+        piy = positions[i, 1]
+        pjx = payload_pos[0]
+        pjy = payload_pos[1]
+
+        dx = pjx - pix
+        dy = pjy - piy
+
+        half_box = 0.5 * box_size
+
+        # Minimum-image convention
+        if dx > half_box:
+            dx -= box_size
+        elif dx < -half_box:
+            dx += box_size
+
+        if dy > half_box:
+            dy -= box_size
+        elif dy < -half_box:
+            dy += box_size
+
+        dist2 = dx * dx + dy * dy
+        sum_radii = radii[i] + payload_radius
+        sum_radii2 = sum_radii * sum_radii
+
+        # Early reject without sqrt
+        if dist2 < sum_radii2:
+            pos_j_periodic_x = pix + dx
+            pos_j_periodic_y = piy + dy
+
             # Particle is close enough to potentially interact — check wall separation
-            pos_j_periodic = positions[i] + r_ij
             if not line_intersects_any_wall_indexed(
-                positions[i, 0], positions[i, 1],
-                pos_j_periodic[0], pos_j_periodic[1],
+                pix, piy,
+                pos_j_periodic_x, pos_j_periodic_y,
                 walls, wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size
             ):
-                force_particle_payload = compute_repulsive_force(
-                    positions[i], payload_pos, radii[i], payload_radius, stiffness, box_size
-                )
-                particle_forces[i] += force_particle_payload
-                payload_force -= force_particle_payload
+                if dist2 < 1e-20:
+                    dx_force = 1e-5
+                    dy_force = 1e-5
+                    dist2_force = dx_force * dx_force + dy_force * dy_force
+                else:
+                    dx_force = dx
+                    dy_force = dy
+                    dist2_force = dist2
+
+                dist = math.sqrt(dist2_force)
+                overlap = sum_radii - dist
+                force_magnitude = stiffness * overlap
+                inv_dist = 1.0 / dist
+
+                fx = -force_magnitude * dx_force * inv_dist
+                fy = -force_magnitude * dy_force * inv_dist
+
+                particle_forces[i, 0] += fx
+                particle_forces[i, 1] += fy
+                payload_force[0] -= fx
+                payload_force[1] -= fy
 
     # Compute forces between particles and walls (indexed: single-cell lookup per particle)
     for i in prange(n_particles):
-        wall_force = compute_wall_forces_indexed(positions[i], radii[i], walls,
-                                                 wall_grid_offsets, wall_grid_indices,
-                                                 n_wall_cells, wall_cell_size, stiffness)
-        particle_forces[i] += wall_force
+        fx, fy = compute_wall_forces_indexed(
+            positions[i], radii[i], walls,
+            wall_grid_offsets, wall_grid_indices,
+            n_wall_cells, wall_cell_size, stiffness
+        )
+        particle_forces[i, 0] += fx
+        particle_forces[i, 1] += fy
 
     # Compute force between payload and walls (indexed: single-cell lookup)
-    payload_wall_force = compute_wall_forces_indexed(payload_pos, payload_radius, walls,
-                                                     wall_grid_offsets, wall_grid_indices,
-                                                     n_wall_cells, wall_cell_size, stiffness)
-    payload_force += payload_wall_force
+    fx, fy = compute_wall_forces_indexed(
+        payload_pos, payload_radius, walls,
+        wall_grid_offsets, wall_grid_indices,
+        n_wall_cells, wall_cell_size, stiffness
+    )
+    payload_force[0] += fx
+    payload_force[1] += fy
 
-    # NON-INTERACTING
-    # Compute forces between particles using cell list (now O(N))
-    # For each particle
-    # for i in range(n_particles):
-    #     # Find which cell it belongs to
-    #     cell_x = int(positions[i, 0] / cell_size)
-    #     cell_y = int(positions[i, 1] / cell_size)
-
-    #     # Check neighboring cells (including own cell)
-    #     for dx in range(-1, 2):  # -1, 0, 1
-    #         for dy in range(-1, 2):  # -1, 0, 1
-    #             # Get neighboring cell (periodic boundaries)
-    #             neigh_x = (cell_x + dx) % n_cells
-    #             neigh_y = (cell_y + dy) % n_cells
-    #             # neigh_cell_id = neigh_y * n_cells + neigh_x  #in case you use row-major ordering
-
-    #             # Get the first particle in the neighboring cell
-    #             j = head[neigh_x, neigh_y] # head[neigh_cell_id]
-
-    #             # Looping through all particles in this cell
-    #             while j != -1:
-    #                 if i != j:
-    #                     # Only compute forces if particles are not separated by a wall (periodic shortest path)
-    #                     if not particles_separated_by_wall_periodic(positions[i], positions[j], walls, box_size):
-    #                         particle_forces[i] += compute_repulsive_force(
-    #                             positions[i], positions[j], radii[i], radii[j], stiffness, box_size
-    #                         )
-    #                 j = list_next[j] # Check create_cell_list() for more details
-
-
+    # Compute pairwise particle-particle interactions (O(N)) using cell list
+    # NOTE:
+    # If you uncomment this, do NOT use prange directly over particle pairs while
+    # updating particle_forces[i] and particle_forces[j] in place, because that
+    # creates write conflicts. Keep this serial unless you redesign it with
+    # thread-local accumulation.
+    #
+    # for cell_x in range(n_cells):
+    #     for cell_y in range(n_cells):
+    #         i = head[cell_x, cell_y]
+    #         while i != -1:
+    #             pix = positions[i, 0]
+    #             piy = positions[i, 1]
+    #             ri = radii[i]
+    #
+    #             # Check this cell and neighboring cells
+    #             for dcell_x in range(-1, 2):
+    #                 neigh_x = (cell_x + dcell_x) % n_cells
+    #                 for dcell_y in range(-1, 2):
+    #                     neigh_y = (cell_y + dcell_y) % n_cells
+    #
+    #                     j = head[neigh_x, neigh_y]
+    #                     while j != -1:
+    #                         if j > i:
+    #                             pjx = positions[j, 0]
+    #                             pjy = positions[j, 1]
+    #                             rj = radii[j]
+    #
+    #                             dx = pjx - pix
+    #                             dy = pjy - piy
+    #
+    #                             half_box = 0.5 * box_size
+    #
+    #                             if dx > half_box:
+    #                                 dx -= box_size
+    #                             elif dx < -half_box:
+    #                                 dx += box_size
+    #
+    #                             if dy > half_box:
+    #                                 dy -= box_size
+    #                             elif dy < -half_box:
+    #                                 dy += box_size
+    #
+    #                             sum_radii = ri + rj
+    #                             dist2 = dx * dx + dy * dy
+    #
+    #                             # Early reject before sqrt
+    #                             if dist2 < sum_radii * sum_radii:
+    #                                 if dist2 < 1e-20:
+    #                                     dx_force = 1e-5
+    #                                     dy_force = 1e-5
+    #                                     dist2_force = dx_force * dx_force + dy_force * dy_force
+    #                                 else:
+    #                                     dx_force = dx
+    #                                     dy_force = dy
+    #                                     dist2_force = dist2
+    #
+    #                                 dist = math.sqrt(dist2_force)
+    #                                 overlap = sum_radii - dist
+    #                                 force_magnitude = stiffness * overlap
+    #                                 inv_dist = 1.0 / dist
+    #
+    #                                 fx = -force_magnitude * dx_force * inv_dist
+    #                                 fy = -force_magnitude * dy_force * inv_dist
+    #
+    #                                 particle_forces[i, 0] += fx
+    #                                 particle_forces[i, 1] += fy
+    #                                 particle_forces[j, 0] -= fx
+    #                                 particle_forces[j, 1] -= fy
+    #
+    #                         j = list_next[j]
+    #
+    #             i = list_next[i]
 
     return particle_forces, payload_force
 
+
 @njit(fastmath=True, parallel=True)
 def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion, n_particles):
+    new_orientations = np.empty_like(orientations)
     """
     The torque is calculated as:
     torque = k * (n × F)
@@ -108,40 +201,41 @@ def update_orientation_vectors(orientations, forces, curvity, dt, rot_diffusion,
     - k is curvity
     - z is the unit vector pointing out of the 2D plane (implicitly used in the cross product calculation)
     """
-
-    new_orientations = np.zeros_like(orientations)
-
+    
     for i in prange(n_particles):
-        # Calculate torque: τ = curvity * (n × F)
-        # n × F = n_x*F_y - n_y*F_x
-        cross_product = orientations[i, 0] * forces[i, 1] - orientations[i, 1] * forces[i, 0]
-        torque = curvity[i] * cross_product
+        ox = orientations[i, 0]
+        oy = orientations[i, 1]
+        fx = forces[i, 0]
+        fy = forces[i, 1]
 
-        # Calculate orientation change: dn/dt = torque * (n × z)
-        # n × z = (-n_y, n_x)
-        n_cross_z = np.array([-orientations[i, 1], orientations[i, 0]])
-        orientation_change = torque * n_cross_z * dt
+        # torque = k * (n x F) = k * (ox*fy - oy*fx)
+        torque = curvity[i] * (ox * fy - oy * fx)
 
-        # Add rotational diffusion as a random perpendicular vector
-        if rot_diffusion[i] > 0:
-            # Generate noise using normal distribution
-            noise_magnitude = np.sqrt(2 * rot_diffusion[i] * dt)
-            noise_x = np.random.normal(0, noise_magnitude)
-            noise_y = np.random.normal(0, noise_magnitude)
-            noise_vector = np.array([noise_x, noise_y])
+        # (n x z) = (-oy, ox)
+        dx = torque * (-oy) * dt
+        dy = torque * ox * dt
 
-            # Project noise to be perpendicular to orientation using cross product
-            # (n × (noise × n)) = noise - (noise·n)n
-            noise_dot_n = noise_vector[0] * orientations[i, 0] + noise_vector[1] * orientations[i, 1]
-            noise_perp = np.array([
-                noise_vector[0] - noise_dot_n * orientations[i, 0],
-                noise_vector[1] - noise_dot_n * orientations[i, 1]
-            ])
+        if rot_diffusion[i] > 0.0:
+            noise_mag = math.sqrt(2.0 * rot_diffusion[i] * dt)
+            nx = np.random.normal(0.0, noise_mag)
+            ny = np.random.normal(0.0, noise_mag)
 
-            orientation_change += noise_perp
+            # project noise perpendicular to orientation
+            dot = nx * ox + ny * oy
+            dx += nx - dot * ox
+            dy += ny - dot * oy
 
-        # Update orientation and normalize
-        new_orientations[i] = normalize(orientations[i] + orientation_change)
+        newx = ox + dx
+        newy = oy + dy
+
+        norm = math.sqrt(newx * newx + newy * newy)
+        if norm > 0.0:
+            inv = 1.0 / norm
+            new_orientations[i, 0] = newx * inv
+            new_orientations[i, 1] = newy * inv
+        else:
+            new_orientations[i, 0] = ox
+            new_orientations[i, 1] = oy
 
     return new_orientations
 
@@ -387,9 +481,13 @@ def compute_polarity_toward_minscore_ang(pos_i, neighbor_scores, neighbor_positi
 
 
 @njit(fastmath=True)
-def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, n_particles, r, box_size, current_score, head, list_next, n_cells, all_polarity, payload_pos, payload_radius, walls,
-                           wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
-    """Compute polarity vector pointing toward lowest-score neighbor.
+def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i,
+                                r, box_size, head, list_next, n_cells,
+                                payload_pos, payload_radius, walls,
+                                wall_grid_offsets, wall_grid_indices,
+                                n_wall_cells, wall_cell_size):
+    """
+    Compute polarity vector pointing toward lowest-score neighbor.
 
     Score calculation:
     - If goal is within range r: point to goal, return score 0
@@ -401,98 +499,137 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i, 
 
     Uses bounding box optimization for neighbor search.
 
-    Returns:
-        polarity: aligned unit polarity vector
-        score: new score for particle i
-    """
-    x_i, y_i = pos_i
-    x_goal, y_goal = goal_position
 
-    # Quick bounding box check for goal (cheap early rejection)
-    # If goal is outside the bounding box, it's definitely out of range
+    (Memory-lean version of point_polarity_to_goal().)
+
+    Differences vs current version:
+    - no neighbor_scores temporary array
+    - no neighbor_positions temporary array
+    - two-pass reduction:
+        pass 1 -> find min neighbor score
+        pass 2 -> average relative positions of only min-score neighbors
+    - returns (px, py, score) as scalars to avoid tiny array allocations
+    """
+    x_i = pos_i[0]
+    y_i = pos_i[1]
+    x_goal = goal_position[0]
+    y_goal = goal_position[1]
+    r2 = r * r
+
+    # Cheap bounding-box rejection before periodic distance
     goal_in_bbox = (x_goal >= x_i - r and x_goal <= x_i + r and
                     y_goal >= y_i - r and y_goal <= y_i + r)
 
-    # Only compute expensive distance if goal is in bounding box
     if goal_in_bbox:
-        # Check distance to goal (PERIODIC)
         r_goal = compute_minimum_distance(pos_i, goal_position, box_size)
-        dist_to_goal = np.sqrt(np.sum(r_goal**2))
-        dx_goal, dy_goal = r_goal[0], r_goal[1]
+        dx_goal = r_goal[0]
+        dy_goal = r_goal[1]
+        dist2_goal = dx_goal * dx_goal + dy_goal * dy_goal
 
-        # If goal is within range, check line of sight
-        if dist_to_goal <= r:
-            # Check if line of sight is clear (no walls or payload blocking)
-            if has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius, walls,
-                                 wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
-                if dist_to_goal > 0:
-                    return np.array([dx_goal / dist_to_goal, dy_goal / dist_to_goal]), 0
-                return np.array([0.0, 0.0]), 0 # payload is exactly on the goal
+        if dist2_goal <= r2:
+            if has_line_of_sight(pos_i, goal_position, payload_pos, payload_radius,
+                                 walls, wall_grid_offsets, wall_grid_indices,
+                                 n_wall_cells, wall_cell_size):
+                if dist2_goal > 0.0:
+                    inv_dist = 1.0 / math.sqrt(dist2_goal)
+                    return dx_goal * inv_dist, dy_goal * inv_dist, 0
+                return 0.0, 0.0, 0
 
-            # If blocked, fall through to gradient-following behavior
-
-    # Goal out of range - find all neighbors within r and collect their info
-    neighbor_scores = np.empty(n_particles, dtype=np.int64)
-    neighbor_positions = np.empty((n_particles, 2), dtype=np.float64)
-    n_neighbors = 0
-
-    # Determine cell size from the cell list
     cell_size = box_size / n_cells
+    cell_x = int(x_i / cell_size)
+    cell_y = int(y_i / cell_size)
 
-    # Find which cell particle i belongs to
-    cell_x = int(pos_i[0] / cell_size)
-    cell_y = int(pos_i[1] / cell_size)
+    # ----------------------------
+    # Pass 1: find minimum score
+    # ----------------------------
+    found_neighbor = False
+    min_score = 2147483647  # large int
 
-    # Check neighboring cells (including own cell)
-    for dx in range(-1, 2):  # -1, 0, 1
-        for dy in range(-1, 2):  # -1, 0, 1
-
-            # Get neighboring cell (PERIODIC)
-            neigh_x = (cell_x + dx) % n_cells
-            neigh_y = (cell_y + dy) % n_cells
-
-            # Get the first particle in the neighboring cell
+    for dcell_x in range(-1, 2):
+        neigh_x = (cell_x + dcell_x) % n_cells
+        for dcell_y in range(-1, 2):
+            neigh_y = (cell_y + dcell_y) % n_cells
             j = head[neigh_x, neigh_y]
 
-            # Loop through all particles in this cell
             while j != -1:
-                if i != j:
-                    # Compute distance first (cheap) — skip wall check if out of range
+                if j != i:
                     r_ij = compute_minimum_distance(pos_i, positions[j], box_size)
-                    dist_j = np.sqrt(np.sum(r_ij**2))
-                    if dist_j <= r:
-                        # Reuse r_ij to avoid recomputing inside particles_separated_by_wall_periodic
-                        pos_j_periodic = pos_i + r_ij
-                        if not line_intersects_any_wall_indexed(pos_i[0], pos_i[1], pos_j_periodic[0], pos_j_periodic[1],
-                                                               walls, wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
-                            neighbor_scores[n_neighbors] = particle_scores[j]
-                            neighbor_positions[n_neighbors] = positions[j]
-                            n_neighbors += 1
+                    dx = r_ij[0]
+                    dy = r_ij[1]
+                    dist2 = dx * dx + dy * dy
+
+                    if dist2 <= r2:
+                        pos_j_periodic_x = x_i + dx
+                        pos_j_periodic_y = y_i + dy
+
+                        blocked = line_intersects_any_wall_indexed(
+                            x_i, y_i,
+                            pos_j_periodic_x, pos_j_periodic_y,
+                            walls, wall_grid_offsets, wall_grid_indices,
+                            n_wall_cells, wall_cell_size
+                        )
+
+                        if not blocked:
+                            score_j = particle_scores[j]
+                            if score_j < min_score:
+                                min_score = score_j
+                            found_neighbor = True
 
                 j = list_next[j]
 
-    # If no neighbors found, return score 9999 and zero vector
-    if n_neighbors == 0:
-        return np.array([0.0, 0.0]), 9999
+    if not found_neighbor:
+        return 0.0, 0.0, 9999
 
-    # Calculate new score: min(neighbor scores) + 1
-    min_score = min(neighbor_scores[:n_neighbors])
-    new_score = min_score + 1
+    # ---------------------------------------------------
+    # Pass 2: average relative positions of min-score neighbors
+    # ---------------------------------------------------
+    sum_dx = 0.0
+    sum_dy = 0.0
+    count = 0
 
-    # Direction toward particle with lowest score
-    combined_polarity = compute_polarity_toward_minscore_pos(pos_i, neighbor_scores[:n_neighbors], neighbor_positions[:n_neighbors], box_size)
+    for dcell_x in range(-1, 2):
+        neigh_x = (cell_x + dcell_x) % n_cells
+        for dcell_y in range(-1, 2):
+            neigh_y = (cell_y + dcell_y) % n_cells
+            j = head[neigh_x, neigh_y]
 
-    # ALTERNATIVE: Uncomment to use average angle method instead
-    # combined_polarity = compute_polarity_toward_minscore_ang(pos_i, neighbor_scores[:n_neighbors], neighbor_positions[:n_neighbors], box_size)
+            while j != -1:
+                if j != i and particle_scores[j] == min_score:
+                    r_ij = compute_minimum_distance(pos_i, positions[j], box_size)
+                    dx = r_ij[0]
+                    dy = r_ij[1]
+                    dist2 = dx * dx + dy * dy
 
-    # Normalize final vector
-    norm = np.sqrt(np.sum(combined_polarity**2))
-    if norm > 0:
-        combined_polarity = combined_polarity / norm
-    else:
-        combined_polarity = np.array([0.0, 0.0])
+                    if dist2 <= r2:
+                        pos_j_periodic_x = x_i + dx
+                        pos_j_periodic_y = y_i + dy
 
-    return combined_polarity, new_score
+                        blocked = line_intersects_any_wall_indexed(
+                            x_i, y_i,
+                            pos_j_periodic_x, pos_j_periodic_y,
+                            walls, wall_grid_offsets, wall_grid_indices,
+                            n_wall_cells, wall_cell_size
+                        )
+
+                        if not blocked:
+                            sum_dx += dx
+                            sum_dy += dy
+                            count += 1
+
+                j = list_next[j]
+
+    if count == 0:
+        return 0.0, 0.0, 9999
+
+    avg_dx = sum_dx / count
+    avg_dy = sum_dy / count
+    norm2 = avg_dx * avg_dx + avg_dy * avg_dy
+
+    if norm2 > 0.0:
+        inv_norm = 1.0 / math.sqrt(norm2)
+        return avg_dx * inv_norm, avg_dy * inv_norm, min_score + 1
+
+    return 0.0, 0.0, min_score + 1
 
 
 @njit(fastmath=True, parallel=True)
@@ -516,13 +653,19 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
         cell_size = particle_view_range  # Use particle_view_range as cell size for this search
         head_goal, list_next_goal, n_cells_goal = create_cell_list(positions, box_size, cell_size, n_particles)
 
-        for i in range(n_particles):
-            polarity[i], particle_scores[i] = point_polarity_to_goal(
-                positions[i], goal_position, positions, particle_scores, i, n_particles,
-                particle_view_range, box_size, particle_scores[i], head_goal, list_next_goal, n_cells_goal,
-                polarity, payload_pos, payload_radius, walls,
+        old_scores = particle_scores.copy()
+
+        for i in prange(n_particles):
+            px, py, new_score = point_polarity_to_goal(
+                positions[i], goal_position, positions, old_scores, i,
+                particle_view_range, box_size,
+                head_goal, list_next_goal, n_cells_goal,
+                payload_pos, payload_radius, walls,
                 wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size
             )
+            polarity[i, 0] = px
+            polarity[i, 1] = py
+            particle_scores[i] = new_score
 
     curvity = compute_curvity_from_polarity(orientations, polarity, n_particles, max_curvity, min_curvity, mid_curvity)
 
