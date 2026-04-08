@@ -39,3 +39,36 @@ cpus=64, time=571.992 snelltestmid4_5r60.mp4
 cpus=64, time=998.473 snelltestmidr60.mp4
 cpus=64, time=279.888 snelltestmid3kr60.mp4 X
 cpus=128, time=10853.4
+---
+
+cpus=128, time=276.644 10k prange
+cpus=128, time=391.712
+
+--- memory optims, polarity
+cpus=4, time=22.258
+cpus=8, time=18.4354
+cpus=16, time=16.87
+cpus=32, time=16.2902
+cpus=64, time=17.5634
+cpus=128, time=17.9108
+
+--- memory optims, polarity + orientation
+cpus=4, time=22.1127
+cpus=8, time=17.7756
+cpus=16, time=16.0756
+cpus=32, time=16.8371
+cpus=64, time=16.7821
+cpus=128, time=17.6855
+
+10k steps
+cpus=16, time=37.6361
+cpus=16, time=28.4251
+cpus=16, time=29.103
+cpus=16, time=28.4526
+
+100k
+cpus=16, time=160.849
+cpus=16, time=158.941
+
+1m
+cpus=16, time=1162.16
