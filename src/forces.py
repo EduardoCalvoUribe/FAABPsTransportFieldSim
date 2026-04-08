@@ -9,9 +9,9 @@ from .physics_utils import compute_minimum_distance, point_to_curve_distance
 ##########################
 
 def build_wall_spatial_index(walls, box_size, cell_size, margin):
-    """Build a CSR spatial index mapping grid cells to nearby wall IDs.
+    """Build a Compressed Sparse Row (CSR) spatial index mapping grid cells to nearby wall IDs.
 
-    Each wall's bounding box is expanded by `margin` before insertion into the
+    Each wall's bounding box is expanded by 'margin' before insertion into the
     grid.  Setting margin >= the largest expected interaction distance (e.g.
     payload_radius) means that a force lookup only needs to query the single
     cell that contains the querying position — no neighbourhood needed.

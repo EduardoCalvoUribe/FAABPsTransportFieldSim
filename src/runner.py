@@ -1,3 +1,5 @@
+import io
+import zipfile
 import numpy as np
 import time
 
@@ -217,3 +219,30 @@ def extract_simulation_data(filename):
     """Extract simulation data from a file."""
     data = np.load(filename)
     return data
+
+
+FRAME_ARRAYS = {'positions', 'orientations', 'velocities',
+                'payload_positions', 'payload_velocities',
+                'curvity_values', 'polarity', 'particle_scores'}
+
+def thin_npz(source_file, dest_file, keep_every=4):
+    """Copy source_file to dest_file keeping every keep_every-th frame.
+
+    Processes one array at a time so peak memory is a single array, not the
+    entire file.  Works on both compressed and uncompressed NPZ files.
+    """
+    dest_path = dest_file if dest_file.endswith('.npz') else dest_file + '.npz'
+    with zipfile.ZipFile(source_file, 'r') as src_zip, \
+         zipfile.ZipFile(dest_path, 'w', compression=zipfile.ZIP_STORED) as dst_zip:
+        for name in src_zip.namelist():
+            key = name[:-4] if name.endswith('.npy') else name
+            with src_zip.open(name) as f:
+                arr = np.load(io.BytesIO(f.read()))
+            if key in FRAME_ARRAYS and arr.ndim >= 1:
+                arr = arr[::keep_every]
+            buf = io.BytesIO()
+            np.save(buf, arr)
+            dst_zip.writestr(name, buf.getvalue())
+            del arr, buf
+            print(f"  {key}")
+    print(f"Thinned file saved to: {dest_path}")
