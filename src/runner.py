@@ -47,6 +47,7 @@ def run_payload_simulation(params):
     # Extract polarity nudge params
     polarity_nudge_interval = params['polarity_nudge_interval']
     polarity_nudge_strength = params['polarity_nudge_strength']
+    use_dual_polarity_nudge = params.get('use_dual_polarity_nudge', False)
 
     # Initialize particle positions, orientations, and velocities
     positions = np.random.uniform(0, box_size, (n_particles, 2))
@@ -58,13 +59,19 @@ def run_payload_simulation(params):
         angle = np.random.uniform(0, 2*np.pi)
         orientations[i] = np.array([np.cos(angle), np.sin(angle)])
 
-    # Initialize scalar scores and polarity vectors for all particles
+    # Initialize scalar scores and polarity vectors for all particles (goal)
     particle_scores = np.full(n_particles, 9999, dtype=np.int64)
     polarity = np.zeros((n_particles, 2), dtype=np.float64)
     # Initialize all polarity vectors as unit vectors in direction π/4
     angle = np.pi / 4
     polarity[:, 0] = np.cos(angle)
     polarity[:, 1] = np.sin(angle)
+
+    # Initialize scalar scores and polarity vectors for all particles (payload)
+    particle_scores_payload = np.full(n_particles, 9999, dtype=np.int64)
+    polarity_payload = np.zeros((n_particles, 2), dtype=np.float64)
+    polarity_payload[:, 0] = np.cos(angle)
+    polarity_payload[:, 1] = np.sin(angle)
 
     # Initialize payload location from parameters
     payload_pos = params['payload_position'].copy()
@@ -80,6 +87,8 @@ def run_payload_simulation(params):
     saved_curvity = np.zeros((n_saves, n_particles))
     saved_polarity = np.zeros((n_saves, n_particles, 2))
     saved_particle_scores = np.zeros((n_saves, n_particles), dtype=np.int64)
+    saved_polarity_payload = np.zeros((n_saves, n_particles, 2))
+    saved_particle_scores_payload = np.zeros((n_saves, n_particles), dtype=np.int64)
 
     # Set initial curvity
     initial_curvity = np.full(n_particles, -1.0)
@@ -93,6 +102,8 @@ def run_payload_simulation(params):
     saved_curvity[0] = initial_curvity.copy()
     saved_polarity[0] = polarity.copy()
     saved_particle_scores[0] = particle_scores.copy()
+    saved_polarity_payload[0] = polarity_payload.copy()
+    saved_particle_scores_payload[0] = particle_scores_payload.copy()
 
     # Run simulation
     start_time = time.time()
@@ -105,11 +116,13 @@ def run_payload_simulation(params):
         positions, orientations, velocities, payload_pos, payload_vel, curvity = simulate_single_step(
             positions, orientations, velocities, payload_pos, payload_vel,
             params['particle_radius'], params['v0'], params['mobility'], params['payload_mobility'],
-            polarity, particle_scores, params['stiffness'],
+            polarity, particle_scores,
+            polarity_payload, particle_scores_payload,
+            params['stiffness'],
             params['box_size'], params['payload_radius'], params['dt'], params['rot_diffusion'],
             n_particles, step, goal_position, particle_view_range, score_and_polarity_update_interval, walls,
             max_curvity, min_curvity, mid_curvity,
-            polarity_nudge_interval, polarity_nudge_strength,
+            polarity_nudge_interval, polarity_nudge_strength, use_dual_polarity_nudge,
             wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size
         )
 
@@ -135,6 +148,8 @@ def run_payload_simulation(params):
             saved_curvity[save_idx] = curvity.copy()
             saved_polarity[save_idx] = polarity.copy()
             saved_particle_scores[save_idx] = particle_scores.copy()
+            saved_polarity_payload[save_idx] = polarity_payload.copy()
+            saved_particle_scores_payload[save_idx] = particle_scores_payload.copy()
             save_idx += 1
 
             # Report progress periodically
@@ -158,6 +173,8 @@ def run_payload_simulation(params):
     saved_curvity = saved_curvity[:save_idx]
     saved_polarity = saved_polarity[:save_idx]
     saved_particle_scores = saved_particle_scores[:save_idx]
+    saved_polarity_payload = saved_polarity_payload[:save_idx]
+    saved_particle_scores_payload = saved_particle_scores_payload[:save_idx]
 
     # Calculate payload displacement
     total_payload_displacement = np.sqrt(np.sum((saved_payload_positions[-1] - saved_payload_positions[0])**2))
@@ -175,8 +192,12 @@ def run_payload_simulation(params):
         saved_curvity,
         saved_polarity,
         saved_particle_scores,
+        saved_polarity_payload,
+        saved_particle_scores_payload,
         particle_scores,
         polarity,
+        particle_scores_payload,
+        polarity_payload,
         end_time - start_time,
         final_step  # Actual step count when simulation ended
     )
@@ -223,7 +244,8 @@ def extract_simulation_data(filename):
 
 FRAME_ARRAYS = {'positions', 'orientations', 'velocities',
                 'payload_positions', 'payload_velocities',
-                'curvity_values', 'polarity', 'particle_scores'}
+                'curvity_values', 'polarity', 'particle_scores',
+                'polarity_payload', 'particle_scores_payload'}
 
 def thin_npz(source_file, dest_file, keep_every=4):
     """Copy source_file to dest_file keeping every keep_every-th frame.

@@ -153,6 +153,7 @@ SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity
 END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
 POLARITY_NUDGE_INTERVAL = 5        # Every N steps, nudge heading toward polarity
 POLARITY_NUDGE_STRENGTH = 0.01       # Angular nudge magnitude (radians)
+POLARITY_NUDGE_DUAL = True          # If True: nudge toward nearest of polarity or polarity_payload
 
 
 # WALLS = None  # uncomment to disable walls entirely
@@ -269,6 +270,7 @@ if __name__ == "__main__":  # load and render
 #         'end_when_goal_reached': END_WHEN_GOAL_REACHED,
 #         'polarity_nudge_interval': POLARITY_NUDGE_INTERVAL,
 #         'polarity_nudge_strength': POLARITY_NUDGE_STRENGTH,
+#         'use_dual_polarity_nudge': POLARITY_NUDGE_DUAL,
 #         'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),
 #         'v0': np.ones(compile_n_particles) * PARTICLE_V0,
 #         'curvity': np.zeros(compile_n_particles),
@@ -306,6 +308,7 @@ if __name__ == "__main__":  # load and render
 #         'end_when_goal_reached': END_WHEN_GOAL_REACHED,
 #         'polarity_nudge_interval': POLARITY_NUDGE_INTERVAL,
 #         'polarity_nudge_strength': POLARITY_NUDGE_STRENGTH,
+#         'use_dual_polarity_nudge': POLARITY_NUDGE_DUAL,
 
 #         # Wall parameters
 #         'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),

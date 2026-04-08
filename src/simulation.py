@@ -290,6 +290,52 @@ def nudge_orientations_toward_polarity(orientations, polarity, nudge_strength, n
 
 
 @njit(fastmath=True, parallel=True)
+def nudge_orientations_toward_nearest_polarity(orientations, polarity, polarity_payload, nudge_strength, n_particles):
+    """Angularly nudge each particle's orientation toward whichever of polarity or
+    polarity_payload is closest to the current orientation (higher dot product).
+
+    The nudge rotates the orientation by exactly nudge_strength radians toward the chosen target.
+    """
+    new_orientations = np.zeros_like(orientations)
+
+    for i in prange(n_particles):
+        e_x = orientations[i, 0]
+        e_y = orientations[i, 1]
+
+        dot_goal    = e_x * polarity[i, 0]         + e_y * polarity[i, 1]
+        dot_payload = e_x * polarity_payload[i, 0] + e_y * polarity_payload[i, 1]
+
+        # Choose whichever polarity direction is closer to the orientation
+        if dot_goal >= dot_payload:
+            t_x = polarity[i, 0]
+            t_y = polarity[i, 1]
+        else:
+            t_x = polarity_payload[i, 0]
+            t_y = polarity_payload[i, 1]
+
+        # Perpendicular component of target relative to orientation: t - (t·e)*e
+        dot_te = t_x * e_x + t_y * e_y
+        perp_x = t_x - dot_te * e_x
+        perp_y = t_y - dot_te * e_y
+
+        perp_norm = math.sqrt(perp_x * perp_x + perp_y * perp_y)
+
+        if perp_norm > 1e-10:
+            perp_hat_x = perp_x / perp_norm
+            perp_hat_y = perp_y / perp_norm
+
+            cos_a = math.cos(nudge_strength)
+            sin_a = math.sin(nudge_strength)
+            new_orientations[i, 0] = cos_a * e_x + sin_a * perp_hat_x
+            new_orientations[i, 1] = cos_a * e_y + sin_a * perp_hat_y
+        else:
+            new_orientations[i, 0] = e_x
+            new_orientations[i, 1] = e_y
+
+    return new_orientations
+
+
+@njit(fastmath=True, parallel=True)
 def compute_curvity_from_polarity(orientations, polarity, n_particles, max_curvity = 1, min_curvity = -1, mid_curvity = 0.5):
     """Compute curvity for all particles based on their polarity vectors.
 
@@ -632,13 +678,161 @@ def point_polarity_to_goal(pos_i, goal_position, positions, particle_scores, i,
     return 0.0, 0.0, min_score + 1
 
 
+@njit(fastmath=True)
+def point_polarity_to_payload(pos_i, payload_pos, positions, particle_scores_payload, i,
+                               r, box_size, head, list_next, n_cells,
+                               walls, wall_grid_offsets, wall_grid_indices,
+                               n_wall_cells, wall_cell_size):
+    """
+    Compute polarity_payload vector pointing toward the payload (or lowest-score_payload neighbor).
+
+    Score calculation:
+    - If payload center is within range r and no wall blocks LoS: score_payload = 0,
+      polarity_payload points toward payload
+    - Otherwise: score_payload = min(neighbor score_payload within r) + 1
+    - If no neighbors in range: score_payload = 9999
+
+    Polarity points toward the average position of min-score_payload neighbors.
+
+    Memory-lean two-pass implementation (no temporary arrays).
+    """
+    x_i = pos_i[0]
+    y_i = pos_i[1]
+    x_payload = payload_pos[0]
+    y_payload = payload_pos[1]
+    r2 = r * r
+
+    # Cheap bounding-box pre-filter before periodic distance
+    payload_in_bbox = (x_payload >= x_i - r and x_payload <= x_i + r and
+                       y_payload >= y_i - r and y_payload <= y_i + r)
+
+    if payload_in_bbox:
+        r_payload = compute_minimum_distance(pos_i, payload_pos, box_size)
+        dx_payload = r_payload[0]
+        dy_payload = r_payload[1]
+        dist2_payload = dx_payload * dx_payload + dy_payload * dy_payload
+
+        if dist2_payload <= r2:
+            # Check walls only — payload is the target, not an obstacle here
+            pos_payload_periodic_x = x_i + dx_payload
+            pos_payload_periodic_y = y_i + dy_payload
+            blocked = line_intersects_any_wall_indexed(
+                x_i, y_i,
+                pos_payload_periodic_x, pos_payload_periodic_y,
+                walls, wall_grid_offsets, wall_grid_indices,
+                n_wall_cells, wall_cell_size
+            )
+            if not blocked:
+                if dist2_payload > 0.0:
+                    inv_dist = 1.0 / math.sqrt(dist2_payload)
+                    return dx_payload * inv_dist, dy_payload * inv_dist, 0
+                return 0.0, 0.0, 0
+
+    cell_size = box_size / n_cells
+    cell_x = int(x_i / cell_size)
+    cell_y = int(y_i / cell_size)
+
+    # ----------------------------
+    # Pass 1: find minimum score_payload among neighbors
+    # ----------------------------
+    found_neighbor = False
+    min_score = 2147483647  # large int
+
+    for dcell_x in range(-1, 2):
+        neigh_x = (cell_x + dcell_x) % n_cells
+        for dcell_y in range(-1, 2):
+            neigh_y = (cell_y + dcell_y) % n_cells
+            j = head[neigh_x, neigh_y]
+
+            while j != -1:
+                if j != i:
+                    r_ij = compute_minimum_distance(pos_i, positions[j], box_size)
+                    dx = r_ij[0]
+                    dy = r_ij[1]
+                    dist2 = dx * dx + dy * dy
+
+                    if dist2 <= r2:
+                        pos_j_periodic_x = x_i + dx
+                        pos_j_periodic_y = y_i + dy
+
+                        blocked = line_intersects_any_wall_indexed(
+                            x_i, y_i,
+                            pos_j_periodic_x, pos_j_periodic_y,
+                            walls, wall_grid_offsets, wall_grid_indices,
+                            n_wall_cells, wall_cell_size
+                        )
+
+                        if not blocked:
+                            score_j = particle_scores_payload[j]
+                            if score_j < min_score:
+                                min_score = score_j
+                            found_neighbor = True
+
+                j = list_next[j]
+
+    if not found_neighbor:
+        return 0.0, 0.0, 9999
+
+    # ---------------------------------------------------
+    # Pass 2: average relative positions of min-score_payload neighbors
+    # ---------------------------------------------------
+    sum_dx = 0.0
+    sum_dy = 0.0
+    count = 0
+
+    for dcell_x in range(-1, 2):
+        neigh_x = (cell_x + dcell_x) % n_cells
+        for dcell_y in range(-1, 2):
+            neigh_y = (cell_y + dcell_y) % n_cells
+            j = head[neigh_x, neigh_y]
+
+            while j != -1:
+                if j != i and particle_scores_payload[j] == min_score:
+                    r_ij = compute_minimum_distance(pos_i, positions[j], box_size)
+                    dx = r_ij[0]
+                    dy = r_ij[1]
+                    dist2 = dx * dx + dy * dy
+
+                    if dist2 <= r2:
+                        pos_j_periodic_x = x_i + dx
+                        pos_j_periodic_y = y_i + dy
+
+                        blocked = line_intersects_any_wall_indexed(
+                            x_i, y_i,
+                            pos_j_periodic_x, pos_j_periodic_y,
+                            walls, wall_grid_offsets, wall_grid_indices,
+                            n_wall_cells, wall_cell_size
+                        )
+
+                        if not blocked:
+                            sum_dx += dx
+                            sum_dy += dy
+                            count += 1
+
+                j = list_next[j]
+
+    if count == 0:
+        return 0.0, 0.0, 9999
+
+    avg_dx = sum_dx / count
+    avg_dy = sum_dy / count
+    norm2 = avg_dx * avg_dx + avg_dy * avg_dy
+
+    if norm2 > 0.0:
+        inv_norm = 1.0 / math.sqrt(norm2)
+        return avg_dx * inv_norm, avg_dy * inv_norm, min_score + 1
+
+    return 0.0, 0.0, min_score + 1
+
+
 @njit(fastmath=True, parallel=True)
 def simulate_single_step(positions, orientations, velocities, payload_pos, payload_vel,
                          radii, v0s, mobilities, payload_mobility, polarity, particle_scores,
+                         polarity_payload, particle_scores_payload,
                          stiffness, box_size, payload_radius, dt, rot_diffusion, n_particles,
                          step, goal_position, particle_view_range, score_and_polarity_update_interval, walls,
                          max_curvity, min_curvity, mid_curvity,
-                         polarity_nudge_interval, polarity_nudge_strength,
+                         polarity_nudge_interval, polarity_nudge_strength, use_dual_polarity_nudge,
                          wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size):
     """Simulate a single time step"""
     # Compute forces on particles and payload
@@ -649,11 +843,12 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
 
     # Update polarity vectors and scores based on goal (at update interval)
     if step % score_and_polarity_update_interval == 0:
-        # Create cell list for efficient neighbor search
+        # Create cell list for efficient neighbor search (shared by both goal and payload updates)
         cell_size = particle_view_range  # Use particle_view_range as cell size for this search
         head_goal, list_next_goal, n_cells_goal = create_cell_list(positions, box_size, cell_size, n_particles)
 
         old_scores = particle_scores.copy()
+        old_scores_payload = particle_scores_payload.copy()
 
         for i in prange(n_particles):
             px, py, new_score = point_polarity_to_goal(
@@ -667,6 +862,17 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
             polarity[i, 1] = py
             particle_scores[i] = new_score
 
+        for i in prange(n_particles):
+            px, py, new_score = point_polarity_to_payload(
+                positions[i], payload_pos, positions, old_scores_payload, i,
+                particle_view_range, box_size,
+                head_goal, list_next_goal, n_cells_goal,
+                walls, wall_grid_offsets, wall_grid_indices, n_wall_cells, wall_cell_size
+            )
+            polarity_payload[i, 0] = px
+            polarity_payload[i, 1] = py
+            particle_scores_payload[i] = new_score
+
     curvity = compute_curvity_from_polarity(orientations, polarity, n_particles, max_curvity, min_curvity, mid_curvity)
 
     # Update particle orientations
@@ -676,9 +882,14 @@ def simulate_single_step(positions, orientations, velocities, payload_pos, paylo
 
     # Polarity nudge: angularly push heading toward polarity every nudge interval
     if step % polarity_nudge_interval == 0:
-        orientations = nudge_orientations_toward_polarity(
-            orientations, polarity, polarity_nudge_strength, n_particles
-        )
+        if use_dual_polarity_nudge:
+            orientations = nudge_orientations_toward_nearest_polarity(
+                orientations, polarity, polarity_payload, polarity_nudge_strength, n_particles
+            )
+        else:
+            orientations = nudge_orientations_toward_polarity(
+                orientations, polarity, polarity_nudge_strength, n_particles
+            )
 
     # Update particle positions and apply goal-based modulation if enabled
     for i in prange(n_particles):
