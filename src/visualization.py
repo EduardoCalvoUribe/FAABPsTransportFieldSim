@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter, FFMpegWriter
 from matplotlib.patches import Circle
+import colorsys
+import os
 import time
 
 
@@ -19,6 +21,11 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         polarity: Array of polarity vectors over time (n_frames, n_particles, 2)
         particle_scores: Array of particle scores over time (n_frames, n_particles). If provided, colors particles by score instead of curvity.
     """
+
+    if output_file is None:
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        os.makedirs("visualizations", exist_ok=True)
+        output_file = f"visualizations/payload_animation_{timestamp}.mp4"
 
     print("Creating animation...")
 
@@ -63,21 +70,12 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
 
         return (r, g, b)
 
-    # DEBUG: Color mapping: score 0 (blue) -> 999+ (orange)
+    # Color mapping: rainbow cycling every 50 score units, starting at purple
     def get_particle_color_based_on_score(score_value):
-        """Map score value to RGB color with linear gradient.
-        0: blue (0, 0, 1), 20+: orange (1, 0.5, 0)"""
-        # Clamp score to [0, 50] range
-        s = np.clip(score_value, 0, 10)
-
-        # Linear interpolation from blue to orange
-        t = s / 10.0  # Map [0, 50] to [0, 1]
-
-        r = 0.0 + t * 1.0  # 0 -> 1
-        g = 0.0 + t * 0.5  # 0 -> 0.5
-        b = 1.0 - t * 1.0  # 1 -> 0
-
-        return (r, g, b)
+        """Map score value to RGB using a rainbow colormap, looping every 50 steps.
+        score 0: purple, cycles ROYGBIV, loops back to purple at score=50."""
+        hue = (0.75 + (score_value % 50) / 50.0) % 1.0
+        return colorsys.hsv_to_rgb(hue, 1.0, 1.0)
 
     # Initialize particle colors
     if particle_scores is not None:
@@ -90,7 +88,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     scatter = ax.scatter(
         positions[0, :, 0],
         positions[0, :, 1],
-        s=np.pi * (params['particle_radius'] * 1)**2,  # Area of circle #BIG, particle size (* 3)
+        s=np.pi * (params['particle_radius'] * 2)**2,  # Area of circle #BIG, particle size (* 3)
         c=particle_colors,
         alpha=0.7
     )
@@ -151,9 +149,10 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     trajectory, = ax.plot(
         payload_positions[0:1, 0],
         payload_positions[0:1, 1],
-        'k--',
-        alpha=0.5,
-        linewidth=1.0
+        # '--',
+        color="#31DC13",
+        alpha=0.8,
+        linewidth=2.0
     )
 
     # Add parameters text
@@ -237,7 +236,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     # Create animation
     n_frames = positions.shape[0]
 
-    sim_seconds_per_real_second = 75 # Increase frame skip for fewer frames to render if its too slow
+    sim_seconds_per_real_second = 150 #75 # Increase frame skip for fewer frames to render if its too slow
     target_fps = 15
 
     # Calculate frame skip to maintain consistent sim-time to real-time ratio
