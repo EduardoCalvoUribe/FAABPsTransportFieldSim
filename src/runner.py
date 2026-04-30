@@ -11,8 +11,14 @@ from .forces import build_wall_spatial_index
 # Main simulation runner functions                  #
 #####################################################
 
-def run_payload_simulation(params):
-    """Run the complete payload transport simulation."""
+def run_payload_simulation(params, light=False):
+    """Run the complete payload transport simulation.
+
+    light=True: skip pre-allocating per-particle time-series arrays (positions,
+    orientations, velocities, curvity, polarity, scores).  Only payload positions
+    are accumulated; the final particle state is returned as a 1-frame array.
+    Use this when only the last frame is needed (e.g. render_final_frame.py).
+    """
     print(f"Running payload transport simulation with {params['n_particles']} particles for {params['n_steps']} steps...")
 
     # Initialize arrays
@@ -72,27 +78,29 @@ def run_payload_simulation(params):
 
     # Pre-allocate arrays for storing simulation data
     n_saves = n_steps // save_interval + 1
-    saved_positions = np.zeros((n_saves, n_particles, 2))
-    saved_orientations = np.zeros((n_saves, n_particles, 2))
-    saved_velocities = np.zeros((n_saves, n_particles, 2))
     saved_payload_positions = np.zeros((n_saves, 2))
     saved_payload_velocities = np.zeros((n_saves, 2))
-    saved_curvity = np.zeros((n_saves, n_particles))
-    saved_polarity = np.zeros((n_saves, n_particles, 2))
-    saved_particle_scores = np.zeros((n_saves, n_particles), dtype=np.int64)
+    if not light:
+        saved_positions = np.zeros((n_saves, n_particles, 2))
+        saved_orientations = np.zeros((n_saves, n_particles, 2))
+        saved_velocities = np.zeros((n_saves, n_particles, 2))
+        saved_curvity = np.zeros((n_saves, n_particles))
+        saved_polarity = np.zeros((n_saves, n_particles, 2))
+        saved_particle_scores = np.zeros((n_saves, n_particles), dtype=np.int64)
 
     # Set initial curvity
     initial_curvity = np.full(n_particles, -1.0)
 
     # Store initial state
-    saved_positions[0] = positions.copy()
-    saved_orientations[0] = orientations.copy()
-    saved_velocities[0] = velocities.copy()
     saved_payload_positions[0] = payload_pos.copy()
     saved_payload_velocities[0] = payload_vel.copy()
-    saved_curvity[0] = initial_curvity.copy()
-    saved_polarity[0] = polarity.copy()
-    saved_particle_scores[0] = particle_scores.copy()
+    if not light:
+        saved_positions[0] = positions.copy()
+        saved_orientations[0] = orientations.copy()
+        saved_velocities[0] = velocities.copy()
+        saved_curvity[0] = initial_curvity.copy()
+        saved_polarity[0] = polarity.copy()
+        saved_particle_scores[0] = particle_scores.copy()
 
     # Run simulation
     start_time = time.time()
@@ -127,14 +135,15 @@ def run_payload_simulation(params):
 
         # Save data at specified intervals
         if step % save_interval == 0:
-            saved_positions[save_idx] = positions
-            saved_orientations[save_idx] = orientations
-            saved_velocities[save_idx] = velocities
             saved_payload_positions[save_idx] = payload_pos
             saved_payload_velocities[save_idx] = payload_vel
-            saved_curvity[save_idx] = curvity.copy()
-            saved_polarity[save_idx] = polarity.copy()
-            saved_particle_scores[save_idx] = particle_scores.copy()
+            if not light:
+                saved_positions[save_idx] = positions
+                saved_orientations[save_idx] = orientations
+                saved_velocities[save_idx] = velocities
+                saved_curvity[save_idx] = curvity.copy()
+                saved_polarity[save_idx] = polarity.copy()
+                saved_particle_scores[save_idx] = particle_scores.copy()
             save_idx += 1
 
             # Report progress periodically
@@ -150,14 +159,22 @@ def run_payload_simulation(params):
     print(f"Simulation completed in {end_time - start_time:.2f} seconds")
 
     # Trim arrays to only include saved frames
-    saved_positions = saved_positions[:save_idx]
-    saved_orientations = saved_orientations[:save_idx]
-    saved_velocities = saved_velocities[:save_idx]
     saved_payload_positions = saved_payload_positions[:save_idx]
     saved_payload_velocities = saved_payload_velocities[:save_idx]
-    saved_curvity = saved_curvity[:save_idx]
-    saved_polarity = saved_polarity[:save_idx]
-    saved_particle_scores = saved_particle_scores[:save_idx]
+    if not light:
+        saved_positions = saved_positions[:save_idx]
+        saved_orientations = saved_orientations[:save_idx]
+        saved_velocities = saved_velocities[:save_idx]
+        saved_curvity = saved_curvity[:save_idx]
+        saved_polarity = saved_polarity[:save_idx]
+        saved_particle_scores = saved_particle_scores[:save_idx]
+    else:
+        saved_positions = positions[np.newaxis]           # (1, N, 2)
+        saved_orientations = orientations[np.newaxis]     # (1, N, 2)
+        saved_velocities = velocities[np.newaxis]         # (1, N, 2)
+        saved_curvity = curvity[np.newaxis]               # (1, N)
+        saved_polarity = polarity[np.newaxis]             # (1, N, 2)
+        saved_particle_scores = particle_scores[np.newaxis]  # (1, N)
 
     # Calculate payload displacement
     total_payload_displacement = np.sqrt(np.sum((saved_payload_positions[-1] - saved_payload_positions[0])**2))

@@ -288,7 +288,7 @@ if __name__ == "__main__":  # simulation runner
         'mid_curvity': MID_CURVITY
     }
 
-    run_payload_simulation(compile_params)
+    run_payload_simulation(compile_params, light=LIGHT_NPZ)
     print("JIT compilation complete.\n")
 
     #####################################################
@@ -334,7 +334,7 @@ if __name__ == "__main__":  # simulation runner
     # RUN SIMULATION                                    #
     #####################################################
 
-    result = run_payload_simulation(params)
+    result = run_payload_simulation(params, light=LIGHT_NPZ)
 
     # Unpack results
     (saved_positions, saved_orientations, saved_velocities,
