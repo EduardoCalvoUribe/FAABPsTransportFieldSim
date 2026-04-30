@@ -240,8 +240,9 @@ if __name__ == "__main__":
     # ── JIT warm-up ───────────────────────────────────────────────────────────
     print("Warming up JIT (10-particle test run)...")
     compile_params = dict(params)
-    compile_params['n_particles'] = 10
-    compile_params['n_steps']     = 10
+    compile_params['n_particles']      = 10
+    compile_params['n_steps']          = 10
+    compile_params['payload_position'] = init_payload_pos.copy()
     for key in ('v0', 'curvity', 'particle_radius', 'mobility', 'rot_diffusion'):
         compile_params[key] = np.ones(10) * params[key][0]
     run_payload_simulation(compile_params, light=True)
