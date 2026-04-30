@@ -14,8 +14,8 @@ import matplotlib.patches as mpatches
 import numpy as np
 
 
-SOURCE_FILE  = "D:/snell_9000_30_100k.npz"
-OUTPUT_IMAGE = "D:/PostThesis/visualizations/snell_9000_30_100k_final.png"
+SOURCE_FILE  = "D:/snell_9000_30_2m.npz"
+OUTPUT_IMAGE = "D:/PostThesis/visualizations/snell_9000_30_2m_final.png"
 COLOR_BY_SCORE = False   # True = rainbow by score, False = curvity blue/red
 
 
