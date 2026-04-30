@@ -112,9 +112,9 @@ def maze_to_walls(passages, grid_size, box_size, include_boundary=True):
 RANDOM_SEED = 42
 
 # Simulation parameters
-N_PARTICLES = 100 #4000 #1000
-BOX_SIZE = 600 #1200.0 #600
-MAZE_GRID_SIZE = 10 #20 #10  # W×W grid; larger = more cells, narrower corridors
+N_PARTICLES = 9000 #1000 #4000 #1000
+BOX_SIZE = 1800.0 #600 #1200.0 #600
+MAZE_GRID_SIZE = 30 #10 #20 #10  # W×W grid; larger = more cells, narrower corridors
 N_STEPS = 10000
 
 SAVE_INTERVAL = 10
@@ -147,8 +147,8 @@ CELL_SIZE = BOX_SIZE / MAZE_GRID_SIZE
 
 # Goal parameters
 PAYLOAD_START_POSITION = np.array([CELL_SIZE / 2, CELL_SIZE / 2])
-GOAL_POSITION = np.array([610.0, 610.0])#np.array([BOX_SIZE - (CELL_SIZE / 2), BOX_SIZE - (CELL_SIZE / 2)]) # np.array([270.0, 270.0])  # Top-right corner
-PARTICLE_VIEW_RANGE = 1200 # CELL_SIZE * 1.5 # Range for goal & neighbor detection
+GOAL_POSITION =np.array([BOX_SIZE - (CELL_SIZE / 2), BOX_SIZE - (CELL_SIZE / 2)])# np.array([610.0, 610.0])#  # np.array([270.0, 270.0])  # Top-right corner
+PARTICLE_VIEW_RANGE = CELL_SIZE * 1.5 #1200 # CELL_SIZE * 1.5 # Range for goal & neighbor detection
 SCORE_AND_POLARITY_UPDATE_INTERVAL = 20  # How often to update scores & polarity (timesteps)
 END_WHEN_GOAL_REACHED = True        # If True, simulation ends when payload reaches goal
 POLARITY_NUDGE_INTERVAL = 5        # Every N steps, nudge heading toward polarity
@@ -175,30 +175,30 @@ POLARITY_NUDGE_STRENGTH = 0.01       # Angular nudge magnitude (radians)
 #     [2 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 2.5*BOX_SIZE/7, 0], #inner top
 #     [5 * BOX_SIZE/7, 2.5 * BOX_SIZE/7, 5 * BOX_SIZE/7, 0,             0], #inner right
 # ], dtype=np.float64)
-WALLS = np.array([
-    # Boundary walls                                                    c
-    [0, 0, 0, BOX_SIZE,                                                 0],
-    [0, 0, BOX_SIZE, 0,                                                 0],
-    [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE,                                   0],
-    [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0,                                   0],
-    # walls inside
-    # [0, 33.3, 66.6, 33.3,                                             0],
-    # [33.3, 66.6, 100.0, 66.3,                                         0],
-    # [BOX_SIZE * 0.8, BOX_SIZE, BOX_SIZE, BOX_SIZE * 0.8,                0],
-], dtype=np.float64)
+# WALLS = np.array([
+#     # Boundary walls                                                    c
+#     [0, 0, 0, BOX_SIZE,                                                 0],
+#     [0, 0, BOX_SIZE, 0,                                                 0],
+#     [BOX_SIZE, BOX_SIZE, 0, BOX_SIZE,                                   0],
+#     [BOX_SIZE, BOX_SIZE, BOX_SIZE, 0,                                   0],
+#     # walls inside
+#     # [0, 33.3, 66.6, 33.3,                                             0],
+#     # [33.3, 66.6, 100.0, 66.3,                                         0],
+#     # [BOX_SIZE * 0.8, BOX_SIZE, BOX_SIZE, BOX_SIZE * 0.8,                0],
+# ], dtype=np.float64)
 
 
 # Visualization parameters
 
-CREATE_VIDEO = True
+CREATE_VIDEO = False
 SHOW_VECTORS = False              # Display polarity vectors as arrows
-COLOR_BY_SCORE = True           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = None #"D:/PostThesis/visualizations/snell3_1000_10_1k.mp4"           # If None, uses timestamp. Otherwise specify path.
+COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
+OUTPUT_FILENAME = "D:/PostThesis/visualizations/snell_9000_30_10k.mp4"
 
 # Data saving
 
-SAVE_DATA = False
-DATA_OUTPUT_PATH = "data/snell_4000_20_1m.npz"                    # If None, uses timestamp. Otherwise specify path.
+SAVE_DATA = True
+DATA_OUTPUT_PATH = "data/snell_9000_30_10k.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 
 #####################
@@ -206,16 +206,22 @@ DATA_OUTPUT_PATH = "data/snell_4000_20_1m.npz"                    # If None, use
 #####################
 
 # if __name__ == "__main__":  # load and render
-#     # SOURCE_FILE = "D:/PostThesis/data/snell_4000_20_1m.npz"
+#     SOURCE_FILE = "D:/PostThesis/data/snell_4000_20_1m.npz"
 
-#     # thin_npz(SOURCE_FILE, "D:/PostThesis/data/snell_4000_20_1m_short10.npz", keep_every=10)
+#     if OUTPUT_FILENAME:
+#         os.makedirs(os.path.dirname(OUTPUT_FILENAME), exist_ok=True)
 
-#     data = np.load("./data/snell_1000_10_100k.npz", mmap_mode='r')
+#     print(f"Loading data from {SOURCE_FILE} ...")
+#     t0 = time.time()
+#     data = np.load(SOURCE_FILE, mmap_mode='r')
 #     saved_positions = data['positions']
 #     saved_payload_positions = data['payload_positions']
 #     saved_curvity = data['curvity_values']
 #     saved_polarity = data['polarity']
 #     saved_particle_scores = data['particle_scores']
+#     print(f"  positions shape : {saved_positions.shape}")
+#     print(f"  payload shape   : {saved_payload_positions.shape}")
+#     print(f"Data mapped in {time.time() - t0:.1f}s")
 #     params = {
 #         'n_particles': saved_positions.shape[1],
 #         'box_size': float(data['box_size']),
@@ -235,8 +241,8 @@ DATA_OUTPUT_PATH = "data/snell_4000_20_1m.npz"                    # If None, use
 #         polarity=saved_polarity,
 #         particle_scores=saved_particle_scores if COLOR_BY_SCORE else None
 #     )
-        
-if __name__ == "__main__":
+
+if __name__ == "__main__":  # simulation runner 
     # Set random seed
     np.random.seed(RANDOM_SEED)
 
