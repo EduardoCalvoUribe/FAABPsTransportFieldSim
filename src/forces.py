@@ -271,7 +271,7 @@ def compute_wall_forces(pos, radius, walls, stiffness):
 @njit(fastmath=True)
 def create_cell_list(positions, box_size, cell_size, n_particles):
     """Create a cell list for efficient neighbor searching. Uses a linked list implementation"""
-    n_cells = int(np.floor(box_size / cell_size)) # cell_size is at least 2*max_radius (particle-particle max interaction)
+    n_cells = max(1, int(np.floor(box_size / cell_size))) # cell_size is at least 2*max_radius (particle-particle max interaction)
 
     # Initialize cell lists with -1 (empty indicator)
     head = np.ones((n_cells, n_cells), dtype=int64) * -1  # First particle in each cell # n_cells * n_cells
