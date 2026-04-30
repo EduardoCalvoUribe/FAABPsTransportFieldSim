@@ -80,3 +80,4 @@ cpus=16, time=44.785
 cpus=16, time=336.511
 
 2m 30x30
+cpus=16, time=8332.3
