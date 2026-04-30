@@ -4,7 +4,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=1:00:00
 #SBATCH --partition=rome
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=32
 
 set -euo pipefail
 

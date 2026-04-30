@@ -72,3 +72,4 @@ cpus=16, time=158.941
 
 1m
 cpus=16, time=1162.16
+cpus=32, time=74.6338
