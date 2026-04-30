@@ -3,7 +3,7 @@ import time
 import os
 
 from src import wilson
-from src.runner import run_payload_simulation, thin_npz
+from src.runner import run_payload_simulation, thin_npz, save_light_simulation_data
 from src.visualization import create_payload_animation
 
 
@@ -115,7 +115,7 @@ RANDOM_SEED = 42
 N_PARTICLES = 9000 #1000 #4000 #1000
 BOX_SIZE = 1800.0 #600 #1200.0 #600
 MAZE_GRID_SIZE = 30 #10 #20 #10  # W×W grid; larger = more cells, narrower corridors
-N_STEPS = 10000
+N_STEPS = 2000000
 
 SAVE_INTERVAL = 10
 DT = 0.01
@@ -198,7 +198,8 @@ OUTPUT_FILENAME = "D:/PostThesis/visualizations/snell_9000_30_10k.mp4"
 # Data saving
 
 SAVE_DATA = True
-DATA_OUTPUT_PATH = "data/snell_9000_30_10k.npz"                    # If None, uses timestamp. Otherwise specify path.
+LIGHT_NPZ = True                                                    # If True, save only data needed by render_final_frame.py (much smaller)
+DATA_OUTPUT_PATH = "data/snell_9000_30_2m.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 
 #####################
@@ -347,12 +348,19 @@ if __name__ == "__main__":  # simulation runner
     # Save data if enabled
     if SAVE_DATA:
         from src.runner import save_simulation_data
-        save_simulation_data(
-            DATA_OUTPUT_PATH,
-            saved_positions, saved_orientations, saved_velocities,
-            saved_payload_positions, saved_payload_velocities,
-            params, saved_curvity, saved_polarity, saved_particle_scores
-        )
+        if LIGHT_NPZ:
+            save_light_simulation_data(
+                DATA_OUTPUT_PATH,
+                saved_positions, saved_payload_positions,
+                saved_curvity, saved_particle_scores, params
+            )
+        else:
+            save_simulation_data(
+                DATA_OUTPUT_PATH,
+                saved_positions, saved_orientations, saved_velocities,
+                saved_payload_positions, saved_payload_velocities,
+                params, saved_curvity, saved_polarity, saved_particle_scores
+            )
         print(f"Data saved to: {DATA_OUTPUT_PATH}")
 
     if CREATE_VIDEO:

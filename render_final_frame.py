@@ -14,8 +14,8 @@ import matplotlib.patches as mpatches
 import numpy as np
 
 
-SOURCE_FILE  = "D:/PostThesis/data/snell_4000_20_1m.npz"
-OUTPUT_IMAGE = "D:/PostThesis/visualizations/snell_4000_20_1m_final.png"
+SOURCE_FILE  = "D:/snell_9000_30_100k.npz"
+OUTPUT_IMAGE = "D:/PostThesis/visualizations/snell_9000_30_100k_final.png"
 COLOR_BY_SCORE = False   # True = rainbow by score, False = curvity blue/red
 
 
@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     r = float(particle_radius[0]) if particle_radius.ndim > 0 else float(particle_radius)
     ax.scatter(last_positions[:, 0], last_positions[:, 1],
-               s=np.pi * (r * 2)**2, c=colors, alpha=0.7, zorder=6)
+               s=np.pi * (r * 1)**2, c=colors, alpha=0.7, zorder=6)
 
     # Payload (final position)
     payload_patch = mpatches.Circle(

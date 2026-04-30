@@ -182,6 +182,28 @@ def run_payload_simulation(params):
     )
 
 
+def save_light_simulation_data(filename, positions, payload_positions, curvity_values,
+                               particle_scores, params):
+    """Save only the data required by render_final_frame.py.
+
+    Keeps only the last frame of per-particle arrays (positions, curvity, scores)
+    while retaining the full payload trajectory for the path plot.  The arrays are
+    stored as 1-element slices so that data['positions'][-1] etc. still work.
+    """
+    np.savez(
+        filename,
+        positions=positions[-1:],             # (1, N, 2)
+        payload_positions=payload_positions,   # (T, 2) — full trajectory
+        curvity_values=curvity_values[-1:],   # (1, N)
+        particle_scores=particle_scores[-1:], # (1, N)
+        box_size=params['box_size'],
+        payload_radius=params['payload_radius'],
+        particle_radius=params['particle_radius'],
+        goal_position=params['goal_position'],
+        walls=params['walls'],
+    )
+
+
 def save_simulation_data(filename, positions, orientations, velocities, payload_positions,
                         payload_velocities, params, curvity_values, polarity, particle_scores):
     """Save simulation data including individual particle parameters."""
