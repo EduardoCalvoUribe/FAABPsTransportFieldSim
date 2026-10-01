@@ -50,14 +50,27 @@ echo "CPUs: $SLURM_CPUS_PER_TASK"
 # ---------------------------
 # TIMING START
 # ---------------------------
-start=$(date +%s.%N)
+LOG_FILE="$PROJECT_HOME/sequential_log.txt"
+declare -A run_counts
 
-python continue_sim.py
+for N in 500 500 500 500 500 1000 1000 1000 1000 1000 2000 2000 2000 2000 2000 4000 4000 4000 4000 4000 250 250 250 250 250; do
+    run_counts[$N]=$(( ${run_counts[$N]:-0} + 1 ))
+    run_id=${run_counts[$N]}
 
-end=$(date +%s.%N)
+    output_name="results_${N}_run${run_id}"
 
-elapsed=$(awk "BEGIN {print $end - $start}")
+    echo "--- Running N=$N, repeat=$run_id ---" >> "$LOG_FILE"
 
+    start=$(date +%s.%N)
+
+    python main.py "$N" "$output_name" >> "$LOG_FILE" 2>&1
+
+    end=$(date +%s.%N)
+    elapsed=$(awk "BEGIN {print $end - $start}")
+
+    echo "N=${N}: run=${run_id}, cpus=${SLURM_CPUS_PER_TASK}, output=${output_name}, time=${elapsed}" >> "$RESULT_FILE"
+    echo "N=${N}, run=${run_id} elapsed: $elapsed seconds" >> "$LOG_FILE"
+done
 # ---------------------------
 # SAVE RESULT
 # ---------------------------

@@ -36,9 +36,9 @@ from src.runner import (
 )
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
-SOURCE_NPZ   = "data/snell_9000_30_2m.npz"         # light NPZ from the original run
-OUTPUT_NPZ   = "data/snell_9000_30_cont.npz"        # combined-path NPZ to write
-OUTPUT_IMAGE = "visualizations/snell_9000_30_cont_final.png"
+SOURCE_NPZ   = "data/snell_9000_30_cont.npz"         # light NPZ from the original run
+OUTPUT_NPZ   = "data/snell_9000_30_cont2.npz"        # combined-path NPZ to write
+OUTPUT_IMAGE = "visualizations/snell_9000_30_cont2_final.png"
 
 # ─── How many additional steps ────────────────────────────────────────────────
 N_STEPS_CONT = 500_000

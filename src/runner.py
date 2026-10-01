@@ -376,6 +376,7 @@ def save_light_simulation_data(filename, positions, payload_positions, curvity_v
         particle_radius=params['particle_radius'],
         goal_position=params['goal_position'],
         walls=params['walls'],
+        opened_wall_segment=params.get('opened_wall_segment', np.zeros(4, dtype=np.float64)),
     )
 
 

@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=contFAABPsPolarity
+#SBATCH --job-name=polarityFAABPs
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=10:00:00
+#SBATCH --time=5:00:00
 #SBATCH --partition=rome
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=32
 
 set -euo pipefail
 
@@ -41,30 +41,25 @@ rsync -a \
 
 cd "$PROJECT_SCRATCH"
 mkdir -p data visualizations
-cp "$PROJECT_HOME/data/snell_9000_30_2m.npz" data/
 
 echo "Running from: $(pwd)"
 echo "TMPDIR: ${TMPDIR:-/tmp}"
 echo "CPUs: $SLURM_CPUS_PER_TASK"
 
-# ---------------------------
-# TIMING START
-# ---------------------------
-start=$(date +%s.%N)
-
-python continue_sim.py
-
-end=$(date +%s.%N)
-
-elapsed=$(awk "BEGIN {print $end - $start}")
-
-# ---------------------------
-# SAVE RESULT
-# ---------------------------
 RESULT_FILE="$PROJECT_HOME/benchmarks.txt"
-echo "cpus=${SLURM_CPUS_PER_TASK}, time=${elapsed}" >> "$RESULT_FILE"
 
-echo "Elapsed time: $elapsed seconds"
+# ---------------------------
+# SEQUENTIAL BENCHMARK RUNS
+# ---------------------------
+for N in 250 500 1000 2000 4000; do
+    echo "--- Running N=$N ---"
+    start=$(date +%s.%N)
+    python main.py "$N" "results_${N}"
+    end=$(date +%s.%N)
+    elapsed=$(awk "BEGIN {print $end - $start}")
+    echo "N=${N}: cpus=${SLURM_CPUS_PER_TASK}, time=${elapsed}" >> "$RESULT_FILE"
+    echo "N=${N} elapsed: $elapsed seconds"
+done
 
 # ---------------------------
 # COPY OUTPUT BACK

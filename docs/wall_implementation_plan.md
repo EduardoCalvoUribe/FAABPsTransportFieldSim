@@ -15,7 +15,9 @@ Static walls in the FAABP simulation that:
 ## 1. Wall Data Structure
 
 ### 1.1 Wall Representation
-- **Format**: NumPy array of shape `(n_walls, 4)` containing `[x1, y1, x2, y2]` for each wall segment
+- **Format**: NumPy array of shape `(n_walls, 5)` containing `[x1, y1, x2, y2, c]` for each wall segment
+  - `x1, y1, x2, y2`: endpoints of the wall
+  - `c`: chord-normalised arc curvature (`c = chord / (2R)`). `c = 0` means a straight segment. `c > 0` bulges left of p1→p2; `c < 0` bulges right.
 - **Type**: `np.float64` for numba compatibility
 - **Storage**: Add to `params['walls']` dictionary
 
@@ -24,12 +26,12 @@ For a maze forcing right → left → goal path:
 ```python
 box_size = 350
 walls = np.array([
-    # Wall 1: Vertical barrier on right (blocks direct diagonal path)
-    [box_size*0.6, box_size*0.2, box_size*0.6, box_size*0.7],  # x1, y1, x2, y2
+    # Wall 1: Vertical barrier on right (blocks direct diagonal path)  x1             y1             x2             y2             c
+    [box_size*0.6, box_size*0.2, box_size*0.6, box_size*0.7, 0],  # straight segment
 
     # Wall 2: Vertical barrier on left (forces turn to goal)
-    [box_size*0.3, box_size*0.4, box_size*0.3, box_size*0.9]
-])
+    [box_size*0.3, box_size*0.4, box_size*0.3, box_size*0.9, 0],  # straight segment
+], dtype=np.float64)
 ```
 
 **Path created**:
@@ -41,7 +43,7 @@ walls = np.array([
 
 ### 1.3 Alternative: Empty Walls
 ```python
-walls = np.zeros((0, 4), dtype=np.float64)  # Empty array for no walls
+walls = np.zeros((0, 5), dtype=np.float64)  # Empty array for no walls
 ```
 
 ---
@@ -106,19 +108,22 @@ def line_intersects_any_wall(p1_x, p1_y, p2_x, p2_y, walls):
     Args:
         p1_x, p1_y: Start point coordinates
         p2_x, p2_y: End point coordinates
-        walls: np.ndarray of shape (n_walls, 4) with [x1, y1, x2, y2] per wall
+        walls: np.ndarray of shape (n_walls, 5) with [x1, y1, x2, y2, c] per wall
 
     Returns:
         bool: True if line intersects any wall, False otherwise
     """
     n_walls = walls.shape[0]
     for i in range(n_walls):
-        if line_segments_intersect(p1_x, p1_y, p2_x, p2_y,
-                                   walls[i, 0], walls[i, 1],
-                                   walls[i, 2], walls[i, 3]):
+        if line_intersects_arc(p1_x, p1_y, p2_x, p2_y,
+                               walls[i, 0], walls[i, 1],
+                               walls[i, 2], walls[i, 3],
+                               walls[i, 4]):   # c = arc curvature
             return True
     return False
 ```
+
+An indexed variant (`line_intersects_any_wall_indexed`) uses a spatial grid to test only walls whose bounding boxes overlap the query segment, giving sub-linear average cost in mazes with many walls.
 
 ---
 
@@ -550,18 +555,17 @@ Expected behavior:
 ## 11. Performance Considerations
 
 ### 11.1 Computational Complexity
-- **Wall collision forces**: O(N × W) where N = particles, W = walls
-  - For 1000 particles and 2 walls: 2000 distance calculations per step
-  - Negligible compared to O(N) particle-particle forces
+Wall lookups use a **spatial grid index** (built once at startup) so each query tests only walls whose bounding boxes overlap the query segment, not all W walls.
 
-- **Line-of-sight checks**: O(N × W) during goal updates
-  - Only executed every `goal_update_interval` steps (default: 10)
-  - For 1000 particles, 2 walls: 2000 intersection tests per 10 steps
+- **Wall collision forces**: O(N × W_local) where W_local ≪ W in maze environments
+  - Each particle looks up at most the walls in its grid cell(s)
+  - Uses `compute_wall_forces_indexed`
 
-- **Neighbor filtering**: O(N × neighbors × W)
-  - Average neighbors ≈ 10-20 per particle
-  - For 1000 particles, 15 avg neighbors, 2 walls: ~30k tests per goal update
-  - Still much faster than O(N²) brute force
+- **Line-of-sight / neighbor checks**: O(N × W_local) during score/polarity updates
+  - Only executed every `score_and_polarity_update_interval` steps (default: 20)
+  - Uses `line_intersects_any_wall_indexed` which sweeps only cells overlapping the segment's bounding box
+
+- **Brute-force fallback** (`line_intersects_any_wall`, `particles_separated_by_wall`): O(W) — still present but used only in non-indexed paths
 
 ### 11.2 Optimization Notes
 - All geometry functions are `@njit` compiled (zero Python overhead)
@@ -580,7 +584,7 @@ Expected behavior:
 ## 12. Edge Cases & Error Handling
 
 ### 12.1 Empty Walls
-- `walls = np.zeros((0, 4))` → loops over 0 walls, no forces/checks
+- `walls = np.zeros((0, 5))` → loops over 0 walls, no forces/checks
 - Simulation behaves identically to no-wall case
 - No performance penalty
 
@@ -651,7 +655,7 @@ Expected behavior:
 
 ### Not Implemented in This Plan
 1. **Moving walls**: All walls are static
-2. **Curved walls**: Only straight line segments supported
+2. **Curved walls**: ~~Only straight line segments supported~~ **IMPLEMENTED** — walls support circular arc segments via chord-normalised curvature `c` (5th column); `c = 0` is a straight segment
 3. **Wall friction**: Walls are frictionless (only normal force)
 4. **Wall thickness**: Walls are infinitesimally thin line segments
 5. **Partial transparency**: Walls completely block line-of-sight (no partial visibility)
@@ -660,10 +664,8 @@ Expected behavior:
 
 ### Possible Future Work
 - Add wall-tangential friction force
-- Support circular arc walls
 - Implement wall thickness with two parallel segments
 - Add wall "porosity" for partial line-of-sight blocking
-- Generate maze walls procedurally
 
 ---
 

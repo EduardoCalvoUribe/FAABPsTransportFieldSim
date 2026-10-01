@@ -1,0 +1,22 @@
+=== Optimal Path Analysis ===
+Maze        : 10×10 grid,  seed = 42
+Box size    : 600.0 simulation units  (cell size = 60.0)
+Start cell  : (0, 0)
+Goal cell   : (9, 9)
+
+Opened wall : cell (0, 1) ↔ cell (0, 2)
+              path-index gain = 14 cells,  shortcut saves 4 steps
+
+────────────────────────────────────────────────────────────────────────
+Path 1  (original / longer):
+  Cells  : 23
+  Steps  : 22
+  Length : 1320.00 simulation units
+
+Path 2  (shortcut / shorter):
+  Cells  : 19
+  Steps  : 18
+  Length : 1080.00 simulation units
+
+Ratio   : 1.2222×  (path 1 is 22.2% longer than path 2)
+────────────────────────────────────────────────────────────────────────

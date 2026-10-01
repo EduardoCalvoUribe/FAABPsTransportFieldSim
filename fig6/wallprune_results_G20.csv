@@ -1,0 +1,12 @@
+G,M,prune_step,walls_remaining,prune_seed,final_step,goal_reached,sim_time,output
+20,361,0,361,7,956226,True,1840.78,wallprune_G20_step000
+20,361,1,360,7,671060,True,1207.52,wallprune_G20_step001
+20,361,2,359,7,485464,True,799.76,wallprune_G20_step002
+20,361,4,357,7,748811,True,1301.50,wallprune_G20_step004
+20,361,8,353,7,285496,True,431.33,wallprune_G20_step008
+20,361,16,345,7,229777,True,337.01,wallprune_G20_step016
+20,361,32,329,7,243431,True,353.24,wallprune_G20_step032
+20,361,64,297,7,214671,True,304.95,wallprune_G20_step064
+20,361,128,233,7,133357,True,170.10,wallprune_G20_step128
+20,361,256,105,7,123640,True,135.75,wallprune_G20_step256
+20,361,361,0,7,102997,True,98.98,wallprune_G20_step361

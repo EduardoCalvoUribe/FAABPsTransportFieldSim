@@ -1,0 +1,116 @@
+\documentclass{article}
+\usepackage{amsmath,amssymb}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+
+\DeclareMathOperator{\unit}{unit}
+\SetKw{KwInParallel}{in parallel}
+
+\begin{document}
+
+\begin{algorithm}[t]
+\caption{Communication layer: a hop-count gradient toward the goal sets each particle's polarity and curvity}
+\label{alg:comm}
+\KwIn{particle positions $\mathbf{x}_i$ and headings $\hat{\mathbf{e}}_i$; previous scores $s_i^{(t-1)}$;
+      goal $\mathbf{g}$; view range $r$}
+\KwOut{polarity $\mathbf{p}_i$, score $s_i^{(t)}$ and curvity $\kappa_i$ for every particle $i$}
+\BlankLine
+\For{each particle $i$}{
+  $\mathcal{V}_i \leftarrow$ particles within range $r$ of $i$ with no wall in between\;
+  \BlankLine
+  \uIf{$i$ sees the goal}{
+    $\mathbf{p}_i \leftarrow \unit(\mathbf{g} - \mathbf{x}_i)$\;
+    $s_i^{(t)} \leftarrow 0$\;
+  }
+  \uElseIf{$\mathcal{V}_i = \emptyset$}{
+    $\mathbf{p}_i \leftarrow \mathbf{0}$\;
+    $s_i^{(t)} \leftarrow \infty$\;
+  }
+  \Else{
+    $s^{*} \leftarrow \min_{j \in \mathcal{V}_i} s_j^{(t-1)}$\;
+    $\mathcal{B}_i \leftarrow \{\, j \in \mathcal{V}_i : s_j^{(t-1)} = s^{*} \,\}$\;
+    $\mathbf{p}_i \leftarrow \unit\bigl(\operatorname{mean}_{j \in \mathcal{B}_i} \mathbf{x}_j - \mathbf{x}_i\bigr)$\;
+    $s_i^{(t)} \leftarrow s^{*} + 1$\;
+  }
+  \BlankLine
+  $\kappa_i \leftarrow -\,\hat{\mathbf{e}}_i \cdot \mathbf{p}_i$\;
+}
+\end{algorithm}
+
+% "i sees the goal": the goal is within range r of i, with no wall and no part of
+% the payload on the line between them.
+% All distances and directions use the shortest path across the periodic box.
+
+% =====================================================================
+% SIMPLIFICATIONS: details of the implementation (src/simulation.py)
+% that were left out of the pseudocode for clarity.
+% =====================================================================
+%
+% Curvity
+%  - Code: curvity is not kappa = -(e . p). It is a piecewise-linear map of
+%    e . p with three anchor values (MIN_CURVITY = -1.0 at e.p = +1,
+%    MID_CURVITY = -0.25 at e.p = 0, MAX_CURVITY = +0.5 at e.p = -1).
+%    With these values kappa turns positive only for headings roughly more
+%    than 109 degrees from p.
+%  - Curvity is recomputed every step from the current heading and the
+%    stored polarity, so it also changes as the heading rotates.
+%
+% Update schedule
+%  - Code: scores and polarities are refreshed only every
+%    score_and_polarity_update_interval steps and held fixed in between.
+%    The pseudocode refreshes them every step.
+%  - The synchronous update is done by copying the scores once
+%    (old_scores) and reading only the copy; the pseudocode expresses this
+%    with the time indices (t-1) and (t).
+%
+% Polarity nudge (omitted entirely)
+%  - Every polarity_nudge_interval steps the heading is rotated by
+%    polarity_nudge_strength radians toward p (toward -p if e.p < 0).
+%    This is separate from the curvity mechanism and is not shown.
+%
+% Isolated robots and score values
+%  - Code: an isolated robot gets the integer sentinel 9999, not infinity.
+%    Scores are integers (hop counts).
+%  - Zero-length directions (goal exactly at the robot, or the mean
+%    displacement to the best neighbours is exactly zero) return the zero
+%    vector instead of a unit vector; unit(0) is left undefined above.
+%
+% Visibility
+%  - Goal visibility: the goal must be within range r (periodic distance)
+%    AND the straight line to the goal must be free of walls AND free of
+%    the payload disc. The payload blocks sight of the goal, but it does
+%    NOT block sight of other robots: neighbour visibility (V_i) is
+%    blocked by walls only.
+%  - The line-of-sight test to the goal does not wrap across the periodic
+%    boundary, while the distance test does. The pseudocode treats both as
+%    periodic.
+%  - Neighbour wall tests use the periodic image of the neighbour.
+%  - Walls are line segments or circular arcs (a curvature parameter per
+%    wall); the pseudocode just says "wall".
+%
+% Polarity direction
+%  - Polarity points toward the mean of the relative displacements to the
+%    best-scoring neighbours (all weighted equally), not toward a weighted
+%    or per-neighbour-normalised average. An alternative that averages unit
+%    vectors exists in the code (compute_polarity_toward_minscore_ang) but
+%    is not used.
+%  - CLAUDE.md and docs/algorithm_notes.md describe a DIRECTEDNESS blend
+%    between a Vicsek-style weighted alignment term and the gradient term.
+%    The function transcribed here only contains the gradient term; the
+%    blend is not shown.
+%
+% Efficiency machinery (no effect on the result)
+%  - Neighbour search uses a cell list with cell size equal to the view
+%    range and scans the 3x3 block of cells around the robot.
+%  - Walls are looked up through a precomputed spatial grid.
+%  - Neighbour search is two-pass (first the minimum score, then the
+%    average over the minimum-score neighbours) to avoid temporary arrays.
+%  - The goal test first does a cheap bounding-box rejection.
+%  - The per-robot loop runs in parallel (numba prange).
+%
+% Left out as outside the communication layer
+%  - Forces (payload, wall), the force-aligning heading update with
+%    rotational noise, self-propulsion, position update and the periodic
+%    wrap. Particle-particle repulsion is switched off in the code.
+%  - Goal-reached detection and the end-of-run logic in runner.py.
+
+\end{document}

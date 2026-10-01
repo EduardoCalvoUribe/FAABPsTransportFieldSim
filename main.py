@@ -1,10 +1,27 @@
+import json
 import numpy as np
 import time
 import os
 
+import optimal_path
 from src import wilson
 from src.runner import run_payload_simulation, thin_npz, save_light_simulation_data
 from src.visualization import create_payload_animation
+
+
+def load_walls_from_json(path: str) -> np.ndarray:
+    """Load a WALLS array from a JSON file produced by save_maze_json.py.
+
+    Usage::
+
+        WALLS = load_walls_from_json("mazes/maze_G20_seed41.json")
+
+    The JSON must contain a ``"walls"`` key whose value is a list of
+    ``[x1, y1, x2, y2, c]`` rows (c = chord-normalised curvature).
+    """
+    with open(path) as f:
+        data = json.load(f)
+    return np.array(data["walls"], dtype=np.float64)
 
 
 def K_to_c(K, x1, y1, x2, y2):
@@ -109,13 +126,13 @@ def maze_to_walls(passages, grid_size, box_size, include_boundary=True):
 #####################################################
 
 # Set random seed for reproducibility
-RANDOM_SEED = 42
+RANDOM_SEED = None
 
 # Simulation parameters
-N_PARTICLES = 9000 #1000 #4000 #1000
-BOX_SIZE = 1800.0 #600 #1200.0 #600
-MAZE_GRID_SIZE = 30 #10 #20 #10  # W×W grid; larger = more cells, narrower corridors
-N_STEPS = 2000000
+N_PARTICLES = 1000 #9000 #4000
+BOX_SIZE = 600 #1800.0 #1200.0
+MAZE_GRID_SIZE = 10 #30 #20
+N_STEPS = 20000000
 
 SAVE_INTERVAL = 10
 DT = 0.01
@@ -243,7 +260,41 @@ DATA_OUTPUT_PATH = "data/snell_9000_30_2m.npz"                    # If None, use
 #         particle_scores=saved_particle_scores if COLOR_BY_SCORE else None
 #     )
 
-if __name__ == "__main__":  # simulation runner 
+if __name__ == "__main__":  # simulation runner
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("maze_grid_size", type=int)
+    parser.add_argument("output_name", type=str)
+    parser.add_argument("--no-shortcut", action="store_true",
+                        help="Use the original perfect maze (no wall removed)")
+    args = parser.parse_args()
+
+    MAZE_GRID_SIZE = args.maze_grid_size
+    BOX_SIZE = 60.0 * MAZE_GRID_SIZE
+    N_PARTICLES = 10 * MAZE_GRID_SIZE ** 2
+
+    CELL_SIZE = BOX_SIZE / MAZE_GRID_SIZE
+    PAYLOAD_START_POSITION = np.array([CELL_SIZE / 2, CELL_SIZE / 2])
+    GOAL_POSITION = np.array([BOX_SIZE - (CELL_SIZE / 2), BOX_SIZE - (CELL_SIZE / 2)])
+    PARTICLE_VIEW_RANGE = CELL_SIZE * 1.5
+
+    DATA_OUTPUT_PATH = f"data/{args.output_name}.npz"
+    OUTPUT_FILENAME = f"visualizations/{args.output_name}.mp4"
+
+    if args.no_shortcut:
+        _passages  = wilson.generate(MAZE_GRID_SIZE, seed=42)
+        _path_info = {}
+    else:
+        _passages, _path_info = optimal_path.open_best_shortcut(
+            grid_size     = MAZE_GRID_SIZE,
+            seed          = 42,
+            start_cell    = (0, 0),
+            goal_cell     = (MAZE_GRID_SIZE - 1, MAZE_GRID_SIZE - 1),
+            box_size      = BOX_SIZE,
+            output_prefix = f"optimal_path_G{MAZE_GRID_SIZE}",
+        )
+    WALLS = maze_to_walls(_passages, MAZE_GRID_SIZE, BOX_SIZE)
+
     # Set random seed
     np.random.seed(RANDOM_SEED)
 
@@ -317,6 +368,7 @@ if __name__ == "__main__":  # simulation runner
 
         # Wall parameters
         'walls': WALLS if WALLS is not None else np.zeros((0, 4), dtype=np.float64),
+        'opened_wall_segment': _path_info.get('opened_wall_segment', np.zeros(4)),
 
         # Particle-specific parameters (arrays)
         'v0': np.ones(N_PARTICLES) * PARTICLE_V0,

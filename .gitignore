@@ -7,3 +7,8 @@ __pycache__
 /.claude/
 /.pytest_cache/
 CLAUDE.md
+# Large generated outputs (animations, simulation data, rendered figures)
+*.gif
+*.mp4
+*.npz
+*.png

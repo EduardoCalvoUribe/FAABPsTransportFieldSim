@@ -16,11 +16,17 @@ import numpy as np
 
 
 SOURCE_FILE      = "maze_G5_run1.npz"
-OUTPUT_IMAGE     = "visualizations/maze_G5_run1.png"
+OUTPUT_IMAGE     = "graph.png"           # bare filename → saves in cwd (fig3c/)
 COLOR_BY_SCORE   = False   # True = rainbow by score, False = curvity blue/red
 DRAW_OPENED_WALL = False   # True = draw red line where shortcut wall was removed
 DRAW_SCORE_EDGES = True    # True = draw one directed edge per particle (score graph)
+SHOW_PAYLOAD_PATH = False  # True = draw payload trajectory line
 VIEW_RANGE       = 90.0    # Particle observation range r; overridden by NPZ if stored
+
+# Curvity piecewise-linear parameters — must match the run that produced the NPZ
+MAX_CURVITY =  0.5
+MIN_CURVITY = -1.0
+MID_CURVITY = -0.25
 
 import sys as _sys
 if len(_sys.argv) > 1:
@@ -39,48 +45,37 @@ def _los_blocked_batch(x1, y1, x2s, y2s, wx1, wy1, wx2, wy2):
     """Check whether the straight line from (x1, y1) to each of the
     target points (x2s[k], y2s[k]) is blocked by any wall segment.
 
-    Args:
-        x1, y1   – source point (scalars)
-        x2s, y2s – arrays of target x/y coordinates, shape (T,)
-        wx1/wy1/wx2/wy2 – wall endpoint arrays, shape (W,)
-
-    Returns:
-        blocked  – boolean array of shape (T,); True if that target is blocked
+    Returns a boolean array of shape (T,); True means blocked.
     """
     n_targets = len(x2s)
     n_walls   = len(wx1)
-
     if n_walls == 0 or n_targets == 0:
         return np.zeros(n_targets, dtype=bool)
 
-    # Broadcast shapes: T = targets, W = walls
-    dx_ab = (x2s - x1)[:, None]          # (T, 1)  source→target vector
+    dx_ab = (x2s - x1)[:, None]
     dy_ab = (y2s - y1)[:, None]
 
-    dx_ac = wx1[None, :] - x1            # (1, W)  source→wall-start
+    dx_ac = wx1[None, :] - x1
     dy_ac = wy1[None, :] - y1
-    dx_ad = wx2[None, :] - x1            # (1, W)  source→wall-end
+    dx_ad = wx2[None, :] - x1
     dy_ad = wy2[None, :] - y1
 
-    # Cross products: do C and D lie on opposite sides of AB?
-    d1 = dx_ab * dy_ac - dy_ab * dx_ac   # (T, W)
-    d2 = dx_ab * dy_ad - dy_ab * dx_ad   # (T, W)
+    d1 = dx_ab * dy_ac - dy_ab * dx_ac
+    d2 = dx_ab * dy_ad - dy_ab * dx_ad
     cond1 = d1 * d2 < 0
 
-    dx_cd = (wx2 - wx1)[None, :]         # (1, W)  wall vector
+    dx_cd = (wx2 - wx1)[None, :]
     dy_cd = (wy2 - wy1)[None, :]
-
-    dx_ca = x1 - wx1[None, :]            # (1, W)  wall-start→source
+    dx_ca = x1 - wx1[None, :]
     dy_ca = y1 - wy1[None, :]
-    dx_cb = x2s[:, None] - wx1[None, :]  # (T, W)  wall-start→target
+    dx_cb = x2s[:, None] - wx1[None, :]
     dy_cb = y2s[:, None] - wy1[None, :]
 
-    # Do A and B lie on opposite sides of CD?
-    d3 = dx_cd * dy_ca - dy_cd * dx_ca   # (1, W)
-    d4 = dx_cd * dy_cb - dy_cd * dx_cb   # (T, W)
+    d3 = dx_cd * dy_ca - dy_cd * dx_ca
+    d4 = dx_cd * dy_cb - dy_cd * dx_cb
     cond2 = d3 * d4 < 0
 
-    return np.any(cond1 & cond2, axis=1)  # (T,) – True if any wall blocks
+    return np.any(cond1 & cond2, axis=1)
 
 
 def compute_score_edges(positions, scores, goal, walls, box_size, view_range,
@@ -88,30 +83,22 @@ def compute_score_edges(positions, scores, goal, walls, box_size, view_range,
     """Compute one outgoing directed edge per particle for the score graph.
 
     Rules (matching the simulation algorithm):
-      • If the goal is within `view_range` AND no wall blocks the LoS →
-        edge points to the goal.
-      • Otherwise → edge points to the in-range, LoS-unblocked neighbor
-        with the lowest score (ties broken by proximity).
+      • Goal within view_range with unobstructed LoS → edge to goal.
+      • Otherwise → edge to in-range, LoS-visible neighbor with lowest score
+        (ties broken by proximity).
       • Particles with no visible neighbors get no edge.
 
-    The returned arrow endpoint is placed at the *edge* of the target
-    particle's display circle (so arrowheads land just outside the disk).
-
-    Returns:
-        from_xy     – list of (fx, fy) source positions
-        to_xy       – list of (tx, ty) arrow tip positions
-        is_goal     – list of bools; True when the edge targets the goal
+    Arrow tips are placed at the edge of the target particle's display circle.
+    Returns (from_xy, to_xy, is_goal) lists.
     """
     n    = len(positions)
     r2   = view_range ** 2
     half = box_size / 2.0
 
-    # Ensure display_radii is a 1-D array of length n
     dr = np.asarray(display_radii, dtype=float)
     if dr.ndim == 0:
         dr = np.full(n, float(dr))
 
-    # Pre-extract wall endpoints for the vectorised LoS check
     if walls.ndim == 2 and walls.shape[0] > 0:
         wx1 = walls[:, 0].astype(float)
         wy1 = walls[:, 1].astype(float)
@@ -120,14 +107,12 @@ def compute_score_edges(positions, scores, goal, walls, box_size, view_range,
     else:
         wx1 = wy1 = wx2 = wy2 = np.zeros(0)
 
-    from_xy    = []
-    to_xy      = []
-    is_goal_l  = []
+    from_xy, to_xy, is_goal_l = [], [], []
 
     for i in range(n):
         xi, yi = float(positions[i, 0]), float(positions[i, 1])
 
-        # ── 1. Goal check ──────────────────────────────────────────────────
+        # ── goal check ────────────────────────────────────────────────────
         gdx = goal[0] - xi
         gdy = goal[1] - yi
         if gdx >  half: gdx -= box_size
@@ -136,36 +121,30 @@ def compute_score_edges(positions, scores, goal, walls, box_size, view_range,
         elif gdy < -half: gdy += box_size
 
         if gdx * gdx + gdy * gdy <= r2:
-            gx_near, gy_near = xi + gdx, yi + gdy
-            blocked_g = _los_blocked_batch(
-                xi, yi,
-                np.array([gx_near]), np.array([gy_near]),
-                wx1, wy1, wx2, wy2,
-            )
-            if not blocked_g[0]:
+            gx_n, gy_n = xi + gdx, yi + gdy
+            if not _los_blocked_batch(xi, yi,
+                                      np.array([gx_n]), np.array([gy_n]),
+                                      wx1, wy1, wx2, wy2)[0]:
                 from_xy.append((xi, yi))
-                to_xy.append((gx_near, gy_near))
+                to_xy.append((gx_n, gy_n))
                 is_goal_l.append(True)
                 continue
 
-        # ── 2. Find best neighbor ──────────────────────────────────────────
+        # ── neighbor search ───────────────────────────────────────────────
         dxv = positions[:, 0] - xi
         dyv = positions[:, 1] - yi
-        # Minimum-image convention
         dxv = np.where(dxv >  half, dxv - box_size,
               np.where(dxv < -half, dxv + box_size, dxv))
         dyv = np.where(dyv >  half, dyv - box_size,
               np.where(dyv < -half, dyv + box_size, dyv))
         dist2 = dxv * dxv + dyv * dyv
 
-        mask = (dist2 <= r2) & (np.arange(n) != i)
-        cand  = np.where(mask)[0]
+        cand = np.where((dist2 <= r2) & (np.arange(n) != i))[0]
         if len(cand) == 0:
             continue
 
-        cand_x = xi + dxv[cand]
-        cand_y = yi + dyv[cand]
-        blocked = _los_blocked_batch(xi, yi, cand_x, cand_y,
+        blocked = _los_blocked_batch(xi, yi,
+                                     xi + dxv[cand], yi + dyv[cand],
                                      wx1, wy1, wx2, wy2)
         cand = cand[~blocked]
         if len(cand) == 0:
@@ -174,24 +153,80 @@ def compute_score_edges(positions, scores, goal, walls, box_size, view_range,
         cand_scores = scores[cand]
         min_s  = cand_scores.min()
         tied   = cand[cand_scores == min_s]
-        best_j = tied[np.argmin(dist2[tied])]   # closest among tied min-scorers
+        best_j = tied[np.argmin(dist2[tied])]
 
-        bdx, bdy  = float(dxv[best_j]), float(dyv[best_j])
-        norm      = float(np.sqrt(dist2[best_j]))
-        rj        = float(dr[best_j])
-        # Arrow tip placed at edge of target circle
-        scale     = max(0.0, (norm - rj) / norm) if norm > rj else 1.0
-        tx        = xi + bdx * scale
-        ty        = yi + bdy * scale
+        bdx, bdy = float(dxv[best_j]), float(dyv[best_j])
+        norm     = float(np.sqrt(dist2[best_j]))
+        rj       = float(dr[best_j]) * 2.5
+        scale    = max(0.0, (norm - rj) / norm) if norm > rj else 1.0
 
         from_xy.append((xi, yi))
-        to_xy.append((tx, ty))
+        to_xy.append((xi + bdx * scale, yi + bdy * scale))
         is_goal_l.append(False)
 
     return from_xy, to_xy, is_goal_l
 
 
-# ── Colour helpers ────────────────────────────────────────────────────────────
+def compute_polarity_vectors(positions, scores, goal, walls, box_size, view_range):
+    """Return (N, 2) unit polarity vectors — same neighbour logic as compute_score_edges
+    but pointing to the exact target centre rather than the display-circle edge."""
+    n    = len(positions)
+    r2   = view_range ** 2
+    half = box_size / 2.0
+    polarity = np.zeros((n, 2), dtype=float)
+
+    if walls.ndim == 2 and walls.shape[0] > 0:
+        wx1 = walls[:, 0].astype(float); wy1 = walls[:, 1].astype(float)
+        wx2 = walls[:, 2].astype(float); wy2 = walls[:, 3].astype(float)
+    else:
+        wx1 = wy1 = wx2 = wy2 = np.zeros(0)
+
+    for i in range(n):
+        xi, yi = float(positions[i, 0]), float(positions[i, 1])
+
+        gdx = goal[0] - xi;  gdy = goal[1] - yi
+        if gdx >  half: gdx -= box_size
+        elif gdx < -half: gdx += box_size
+        if gdy >  half: gdy -= box_size
+        elif gdy < -half: gdy += box_size
+
+        if gdx * gdx + gdy * gdy <= r2:
+            gx_n, gy_n = xi + gdx, yi + gdy
+            if not _los_blocked_batch(xi, yi, np.array([gx_n]), np.array([gy_n]),
+                                      wx1, wy1, wx2, wy2)[0]:
+                nm = np.sqrt(gdx * gdx + gdy * gdy)
+                if nm > 1e-10:
+                    polarity[i] = [gdx / nm, gdy / nm]
+                continue
+
+        dxv = positions[:, 0] - xi;  dyv = positions[:, 1] - yi
+        dxv = np.where(dxv >  half, dxv - box_size, np.where(dxv < -half, dxv + box_size, dxv))
+        dyv = np.where(dyv >  half, dyv - box_size, np.where(dyv < -half, dyv + box_size, dyv))
+        dist2 = dxv * dxv + dyv * dyv
+
+        cand = np.where((dist2 <= r2) & (np.arange(n) != i))[0]
+        if len(cand) == 0:
+            continue
+        blocked = _los_blocked_batch(xi, yi, xi + dxv[cand], yi + dyv[cand],
+                                     wx1, wy1, wx2, wy2)
+        cand = cand[~blocked]
+        if len(cand) == 0:
+            continue
+
+        cand_scores = scores[cand]
+        min_s = cand_scores.min()
+        tied  = cand[cand_scores == min_s]
+        best_j = tied[np.argmin(dist2[tied])]
+
+        bdx, bdy = float(dxv[best_j]), float(dyv[best_j])
+        nm = np.sqrt(bdx * bdx + bdy * bdy)
+        if nm > 1e-10:
+            polarity[i] = [bdx / nm, bdy / nm]
+
+    return polarity
+
+
+# ── Arc / colour helpers ──────────────────────────────────────────────────────
 
 def _arc_points(x1, y1, x2, y2, c, n_pts=64):
     if abs(c) < 1e-9:
@@ -249,7 +284,9 @@ PATH_COLOR     = '#D62728'   # red
 
 
 if __name__ == "__main__":
-    os.makedirs(os.path.dirname(OUTPUT_IMAGE), exist_ok=True)
+    _out_dir = os.path.dirname(OUTPUT_IMAGE)
+    if _out_dir:
+        os.makedirs(_out_dir, exist_ok=True)
 
     print(f"Loading {SOURCE_FILE} ...")
     t0 = time.time()
@@ -305,6 +342,55 @@ if __name__ == "__main__":
 
     print(f"  {n_particles} particles, {payload_trajectory.shape[0]} trajectory frames  ({time.time()-t0:.1f}s)")
 
+    # ── Compute & save polarity + heading vectors ─────────────────────────
+    print("  Computing polarity vectors ...")
+    polarity_vecs = compute_polarity_vectors(
+        last_positions, last_scores, goal_position, walls, box_size, VIEW_RANGE,
+    )
+
+    # Invert piecewise-linear map: curvity → dot = orientation · polarity
+    c = last_curvity.ravel()
+    dot = np.where(
+        c <= MID_CURVITY,
+        (c - MID_CURVITY) / (MIN_CURVITY - MID_CURVITY),
+        (c - MAX_CURVITY) / (MID_CURVITY - MAX_CURVITY) - 1.0,
+    )
+    dot = np.clip(dot, -1.0, 1.0)
+    sin_theta = np.sqrt(np.maximum(0.0, 1.0 - dot ** 2))
+    signs = np.random.choice([-1.0, 1.0], size=n_particles)
+    perp = np.column_stack([-polarity_vecs[:, 1], polarity_vecs[:, 0]])  # (-py, px)
+    heading_vecs = dot[:, None] * polarity_vecs + (signs * sin_theta)[:, None] * perp
+    hn = np.linalg.norm(heading_vecs, axis=1, keepdims=True)
+    safe_hn = np.where(hn > 1e-10, hn, 1.0)
+    heading_vecs = np.where(hn > 1e-10, heading_vecs / safe_hn, heading_vecs)
+
+    # For particles touching/near the payload: override random sign with the heading
+    # that most closely points toward the goal.
+    px_final, py_final = payload_trajectory[-1, 0], payload_trajectory[-1, 1]
+    near_thresh = payload_radius + float(particle_radius[0]) * 1.5
+    to_goal = goal_position - last_positions          # (N, 2), unnormalised
+    for i in range(n_particles):
+        dx = last_positions[i, 0] - px_final
+        dy = last_positions[i, 1] - py_final
+        if dx * dx + dy * dy <= near_thresh ** 2:
+            h_pos = dot[i] * polarity_vecs[i] + sin_theta[i] * perp[i]
+            h_neg = dot[i] * polarity_vecs[i] - sin_theta[i] * perp[i]
+            if np.dot(h_pos, to_goal[i]) >= np.dot(h_neg, to_goal[i]):
+                heading_vecs[i] = h_pos
+            else:
+                heading_vecs[i] = h_neg
+            nm = np.linalg.norm(heading_vecs[i])
+            if nm > 1e-10:
+                heading_vecs[i] /= nm
+
+    # Re-save NPZ with the two new arrays appended
+    existing = {k: np.array(data[k]) for k in data.keys()}
+    existing['polarity'] = polarity_vecs
+    existing['orientations'] = heading_vecs
+    _save_stem = SOURCE_FILE[:-4] if SOURCE_FILE.endswith('.npz') else SOURCE_FILE
+    np.savez(_save_stem, **existing)
+    print(f"  Saved polarity + orientations -> {SOURCE_FILE}")
+
     # ── Plot ──────────────────────────────────────────────────────────────
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.set_xlim(0, box_size)
@@ -316,7 +402,7 @@ if __name__ == "__main__":
     wall_lw = 1.3 if box_size > 1200 else 1.8
     for i in range(walls.shape[0]):
         xs, ys = _arc_points(walls[i,0], walls[i,1], walls[i,2], walls[i,3], walls[i,4])
-        ax.plot(xs, ys, color='#505050', linewidth=wall_lw, solid_capstyle='round', zorder=10)
+        ax.plot(xs, ys, color='#282828', linewidth=wall_lw, solid_capstyle='round', zorder=10)
 
     # Opened wall — red solid line where the shortcut wall was removed
     if DRAW_OPENED_WALL and opened_wall_seg is not None:
@@ -326,8 +412,9 @@ if __name__ == "__main__":
                 solid_capstyle='round', zorder=11)
 
     # Payload trajectory — solid line, drawn over payload (zorder=8 > payload zorder=7)
-    ax.plot(payload_trajectory[:, 0], payload_trajectory[:, 1],
-            color=PATH_COLOR, linewidth=3.0, linestyle='-', alpha=0.75, zorder=8)
+    if SHOW_PAYLOAD_PATH:
+        ax.plot(payload_trajectory[:, 0], payload_trajectory[:, 1],
+                color=PATH_COLOR, linewidth=3.0, linestyle='-', alpha=0.75, zorder=8)
 
     # Particles (final frame)
     if COLOR_BY_SCORE:
@@ -373,6 +460,7 @@ if __name__ == "__main__":
             '*', color=GOAL_COLOR, markersize=18, markeredgewidth=0.8, markeredgecolor='#003A0E', zorder=11)
 
     # ── Score-graph directed edges ────────────────────────────────────────
+    from_xy, to_xy, is_goal_flags = [], [], []
     if DRAW_SCORE_EDGES:
         print(f"  Computing score edges (N={n_particles}, r={VIEW_RANGE}, "
               f"W={walls.shape[0]}) ...")
@@ -383,7 +471,6 @@ if __name__ == "__main__":
         )
         print(f"  {len(from_xy)} edges computed  ({time.time()-t_edge:.1f}s)")
 
-        # Separate into normal and goal edges for layered drawing
         norm_from, norm_to = [], []
         goal_from, goal_to = [], []
         for fxy, txy, ig in zip(from_xy, to_xy, is_goal_flags):
@@ -394,111 +481,121 @@ if __name__ == "__main__":
                 norm_from.append(fxy)
                 norm_to.append(txy)
 
-        # Scale arrowhead by maze size so it looks consistent across G2–G30
-        ms_norm = max(4, min(10, box_size / 80.0))
-        ms_goal = max(6, min(14, box_size / 60.0))
+        ms_norm = max(6, min(15, box_size / 55.0)) * 1.3
+        ms_goal = max(8, min(18, box_size / 45.0)) * 1.3
 
-        # Draw normal (neighbour) edges — thin dark arrows, semi-transparent
-        # zorder=12: above walls (10) and particles (6) so arrowheads are visible
+        # Normal (neighbour) edges — thin dark arrows, zorder=12 (above walls)
         for (fx, fy), (tx, ty) in zip(norm_from, norm_to):
-            ap = mpatches.FancyArrowPatch(
+            ax.add_patch(mpatches.FancyArrowPatch(
                 (fx, fy), (tx, ty),
-                arrowstyle='-|>',
-                mutation_scale=ms_norm,
-                color='#222222',
-                linewidth=0.55,
-                alpha=0.30,
-                zorder=12,
-            )
-            ax.add_patch(ap)
+                arrowstyle='-|>', mutation_scale=ms_norm,
+                color='#222222', linewidth=0.7, alpha=0.6, zorder=12,
+            ))
 
-        # Draw goal edges — slightly bolder green arrows on top
+        # Goal edges — bolder arrows, same gray as normal edges
         for (fx, fy), (tx, ty) in zip(goal_from, goal_to):
-            ap = mpatches.FancyArrowPatch(
+            ax.add_patch(mpatches.FancyArrowPatch(
                 (fx, fy), (tx, ty),
-                arrowstyle='-|>',
-                mutation_scale=ms_goal,
-                color=GOAL_COLOR,
-                linewidth=1.1,
-                alpha=0.70,
-                zorder=13,
-            )
-            ax.add_patch(ap)
+                arrowstyle='-|>', mutation_scale=ms_goal,
+                color='#222222', linewidth=0.7, alpha=0.6, zorder=13,
+            ))
 
     # ── Fill figure exactly, then place inset ────────────────────────────
     ax.set_position([0, 0, 1, 1])
 
-    # ── Inset: zoomed payload view — only for G10+ (box_size > 300) ──────
-    if box_size > 300:
-        # Use fig.add_axes (top-level) so the inset is fully opaque over the main axes.
-        zoom_half = 40
-        _ap = ax.get_position()   # read position AFTER tight_layout
-        inset_ax = fig.add_axes([
-            _ap.x0 + 0.02 * _ap.width,
-            _ap.y0 + 0.73 * _ap.height,
-            0.25 * _ap.width,
-            0.25 * _ap.height,
-        ])
-        inset_ax.set_xlim(-zoom_half, zoom_half)
-        inset_ax.set_ylim(-zoom_half, zoom_half)
-        inset_ax.set_aspect('equal')
-        inset_ax.set_xticks([])
-        inset_ax.set_yticks([])
-        inset_ax.set_title('Payload zoom', fontsize=7, pad=2)
-        for spine in inset_ax.spines.values():
-            spine.set_linewidth(3)
-        inset_ax.set_facecolor('white')
+    # ── Inset: zoom of square [150,220] x [150,220], bottom-right ────────
+    INSET_X0, INSET_X1 = 150.0, 220.0
+    INSET_Y0, INSET_Y1 = 150.0, 220.0
+    _ap = ax.get_position()
+    _inset_w = 0.43 * _ap.width
+    _inset_h = 0.43 * _ap.height
+    inset_ax = fig.add_axes([
+        _ap.x0 + _ap.width - 0.02 * _ap.width - _inset_w,
+        _ap.y0 + 0.02 * _ap.height,
+        _inset_w,
+        _inset_h,
+    ])
+    inset_ax.set_xlim(INSET_X0, INSET_X1)
+    inset_ax.set_ylim(INSET_Y0, INSET_Y1)
+    inset_ax.set_aspect('equal')
+    inset_ax.set_xticks([])
+    inset_ax.set_yticks([])
+    for spine in inset_ax.spines.values():
+        spine.set_linewidth(2)
+    inset_ax.set_facecolor('white')
 
-        # Particle positions relative to final payload centre — no periodic wrapping
-        rel_x = last_positions[:, 0] - px_final
-        rel_y = last_positions[:, 1] - py_final
-        inset_circles = [mpatches.Circle((dx, dy), radius=ri)
-                         for dx, dy, ri in zip(rel_x, rel_y, particle_radius)]
-        inset_pc = PatchCollection(inset_circles, facecolors=colors, alpha=0.7, linewidths=0, zorder=6)
-        inset_ax.add_collection(inset_pc)
+    # Faint box around the target area in the main axes
+    ax.add_patch(mpatches.Rectangle(
+        (INSET_X0, INSET_Y0), INSET_X1 - INSET_X0, INSET_Y1 - INSET_Y0,
+        linewidth=1.0, edgecolor='#888888', facecolor='#AAAAAA', alpha=0.28,
+        linestyle='--', zorder=15,
+    ))
 
-        # Particle ID labels — shown only for particles inside the visible zoom window
-        label_offset = r * 1.4   # nudge label to the left of each particle (true radius)
-        for i in range(n_particles):
-            if abs(rel_x[i]) < zoom_half and abs(rel_y[i]) < zoom_half:
-                inset_ax.text(rel_x[i] - label_offset, rel_y[i],
-                              str(i), fontsize=6, ha='right', va='center',
-                              color='black', zorder=9)
-
-        # Payload at origin — solid gold disk
-        inset_ax.add_patch(mpatches.Circle(
-            (0, 0), radius=payload_radius,
-            facecolor=PAYLOAD_COLOR, edgecolor='none',
-            alpha=1.0, zorder=7,
+    # Connector lines from inset corners to corresponding points in main axes
+    for _xy in [(INSET_X0, INSET_Y0), (INSET_X1, INSET_Y1)]:
+        fig.add_artist(mpatches.ConnectionPatch(
+            xyA=_xy, coordsA='data', axesA=inset_ax,
+            xyB=_xy, coordsB='data', axesB=ax,
+            color='#888888', linewidth=0.8, alpha=0.4, linestyle='--', zorder=20,
         ))
 
-        # Goal in payload-relative coordinates — no periodic wrapping
-        gx_rel = goal_position[0] - px_final
-        gy_rel = goal_position[1] - py_final
-        inset_ax.plot(gx_rel, gy_rel, '*', color=GOAL_COLOR, markersize=24,
-                      markeredgewidth=0.8, markeredgecolor='#003A0E', zorder=100)
+    # Particles in the inset region
+    in_idx = [i for i in range(n_particles)
+              if INSET_X0 - float(display_radii[i]) <= last_positions[i, 0] <= INSET_X1 + float(display_radii[i])
+              and INSET_Y0 - float(display_radii[i]) <= last_positions[i, 1] <= INSET_Y1 + float(display_radii[i])]
+    if in_idx:
+        inset_circles = [mpatches.Circle((last_positions[i, 0], last_positions[i, 1]),
+                                         radius=float(display_radii[i])) for i in in_idx]
+        inset_pc = PatchCollection(inset_circles, facecolors=[colors[i] for i in in_idx],
+                                   alpha=0.7, linewidths=0, zorder=6)
+        inset_ax.add_collection(inset_pc)
 
-        # Walls in payload-relative coordinates — no periodic wrapping
-        for i in range(walls.shape[0]):
-            wx1 = walls[i, 0] - px_final
-            wy1 = walls[i, 1] - py_final
-            wx2 = walls[i, 2] - px_final
-            wy2 = walls[i, 3] - py_final
-            xs, ys = _arc_points(wx1, wy1, wx2, wy2, walls[i, 4])
-            inset_ax.plot(xs, ys, color='#505050', linewidth=1.5, solid_capstyle='round', zorder=10)
+    # Walls — draw all; axes clipping handles the rest
+    for i in range(walls.shape[0]):
+        xs, ys = _arc_points(walls[i, 0], walls[i, 1], walls[i, 2], walls[i, 3], walls[i, 4])
+        inset_ax.plot(xs, ys, color='#282828', linewidth=1.5, solid_capstyle='round', zorder=10)
 
-        # Opened wall in payload-relative coordinates
-        if DRAW_OPENED_WALL and opened_wall_seg is not None:
-            inset_ax.plot(
-                [opened_wall_seg[0] - px_final, opened_wall_seg[2] - px_final],
-                [opened_wall_seg[1] - py_final, opened_wall_seg[3] - py_final],
-                color='red', linewidth=2.0, linestyle='-',
-                solid_capstyle='round', zorder=11)
+    # Goal if inside the inset region
+    if INSET_X0 <= goal_position[0] <= INSET_X1 and INSET_Y0 <= goal_position[1] <= INSET_Y1:
+        inset_ax.plot(goal_position[0], goal_position[1],
+                      '*', color=GOAL_COLOR, markersize=18,
+                      markeredgewidth=0.8, markeredgecolor='#003A0E', zorder=11)
 
-        # Payload trajectory relative to final payload position — no periodic wrapping
-        traj_x = payload_trajectory[:, 0] - px_final
-        traj_y = payload_trajectory[:, 1] - py_final
-        inset_ax.plot(traj_x, traj_y, color=PATH_COLOR, linewidth=3.0, linestyle='-', alpha=0.75, zorder=8)
+    # Score edges as fixed-length arrows (direction only, length = 10 data units)
+    unit_len = 10.0
+    for (fx, fy), (tx, ty), ig in zip(from_xy, to_xy, is_goal_flags):
+        if not (INSET_X0 <= fx <= INSET_X1 and INSET_Y0 <= fy <= INSET_Y1):
+            continue
+        dx, dy = tx - fx, ty - fy
+        d = np.sqrt(dx * dx + dy * dy)
+        if d < 1e-10:
+            continue
+        ex, ey = fx + dx / d * unit_len, fy + dy / d * unit_len
+        inset_ax.add_patch(mpatches.FancyArrowPatch(
+            (fx, fy), (ex, ey),
+            arrowstyle='-|>', mutation_scale=8,
+            color=GOAL_COLOR if ig else '#222222',
+            linewidth=0.7, alpha=0.8, zorder=12,
+        ))
+
+    # Shade the corridor between the target box and the inset.
+    # Hexagon: target-box bottom-right face → connector2 → inset top-left face → connector1.
+    # This polygon never overlaps the inset interior.
+    fig.canvas.draw()
+    _main_to_fig  = ax.transData       + fig.transFigure.inverted()
+    _inset_to_fig = inset_ax.transData + fig.transFigure.inverted()
+    _p_main_bl  = _main_to_fig.transform( [INSET_X0, INSET_Y0])
+    _p_main_br  = _main_to_fig.transform( [INSET_X1, INSET_Y0])
+    _p_main_tr  = _main_to_fig.transform( [INSET_X1, INSET_Y1])
+    _p_inset_tr = _inset_to_fig.transform([INSET_X1, INSET_Y1])
+    _p_inset_tl = _inset_to_fig.transform([INSET_X0, INSET_Y1])
+    _p_inset_bl = _inset_to_fig.transform([INSET_X0, INSET_Y0])
+    fig.add_artist(mpatches.Polygon(
+        [_p_main_bl, _p_main_br, _p_main_tr,
+         _p_inset_tr, _p_inset_tl, _p_inset_bl],
+        facecolor='#AAAAAA', alpha=0.075, edgecolor='none',
+        transform=fig.transFigure, zorder=14,
+    ))
 
     plt.savefig(OUTPUT_IMAGE, dpi=150, bbox_inches='tight', pad_inches=0)
     plt.close()

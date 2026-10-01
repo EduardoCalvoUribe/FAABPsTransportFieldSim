@@ -44,8 +44,35 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     # Set axis limits
     ax.set_xlim(0, box_size)
     ax.set_ylim(0, box_size)
-    ax.set_title('FAABP Cooperative Transport Simulation')
-    ax.grid(True, alpha=0.3)
+    ax.axis('off')
+    ax.set_position([0, 0, 1, 1])
+
+    # --- Inset axes: zoomed payload view locked to payload (top-left corner) ---
+    # Use fig.add_axes (top-level) so the inset renders on top of all main-ax artists
+    zoom_half = 40
+    _ap = ax.get_position()
+    inset_ax = fig.add_axes([
+        _ap.x0 + 0.02 * _ap.width,
+        _ap.y0 + 0.73 * _ap.height,
+        0.25 * _ap.width,
+        0.25 * _ap.height,
+    ])
+    inset_ax.set_xlim(-zoom_half, zoom_half)
+    inset_ax.set_ylim(-zoom_half, zoom_half)
+    inset_ax.set_aspect('equal')
+    inset_ax.set_xticks([])
+    inset_ax.set_yticks([])
+    inset_ax.set_title('Payload zoom', fontsize=7, pad=2)
+    for spine in inset_ax.spines.values():
+        spine.set_linewidth(1.5)
+    inset_ax.set_facecolor('white')
+
+    # Initial relative positions for inset (periodic-corrected, payload at origin)
+    px0, py0 = payload_positions[0, 0], payload_positions[0, 1]
+    rel_x0 = positions[0, :, 0] - px0
+    rel_y0 = positions[0, :, 1] - py0
+    rel_x0 -= box_size * np.round(rel_x0 / box_size)
+    rel_y0 -= box_size * np.round(rel_y0 / box_size)
 
     # Color mapping functions
     # STANDARD: Color mapping: curvity -1 (dark blue) -> 0 (gray) -> +1 (red)
@@ -92,19 +119,63 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         c=particle_colors,
         alpha=0.7
     )
+    inset_scatter = inset_ax.scatter(
+        rel_x0, rel_y0,
+        s=np.pi * (params['particle_radius'] * 2)**2,
+        c=particle_colors,
+        alpha=0.7
+    )
 
-    # Create payload
-    payload = Circle(
+    # Create payload: dark green outer disc + green inner disc to produce a thick interior ring
+    border_fraction = 0.13  # dark green ring is 13 % of payload_radius wide
+    payload_border = Circle(
         (payload_positions[0, 0], payload_positions[0, 1]),
         radius=payload_radius,
-        color='gray',
-        alpha=0.7
+        facecolor='darkgreen',
+        edgecolor='none',
+        alpha=0.85
+    )
+    ax.add_patch(payload_border)
+    payload = Circle(
+        (payload_positions[0, 0], payload_positions[0, 1]),
+        radius=payload_radius * (1 - border_fraction),
+        facecolor='green',
+        edgecolor='none',
+        alpha=0.85
     )
     ax.add_patch(payload)
 
+    # Inset payload circles (payload is always at origin in the inset frame)
+    inset_payload_border = Circle(
+        (0, 0), radius=payload_radius, facecolor='darkgreen', edgecolor='none', alpha=0.85
+    )
+    inset_ax.add_patch(inset_payload_border)
+    inset_payload_patch = Circle(
+        (0, 0), radius=payload_radius * (1 - border_fraction), facecolor='green', edgecolor='none', alpha=0.85
+    )
+    inset_ax.add_patch(inset_payload_patch)
+
     # Create goal visualization
-    goal, = ax.plot(goal_position[0], goal_position[1], 'g*', markersize=15, markeredgewidth=1.5, markeredgecolor='darkgreen')
-    # Green star marker for goal point
+    goal_marker_size = 22.5
+    goal, = ax.plot(goal_position[0], goal_position[1], 'g*', markersize=goal_marker_size, markeredgewidth=1.5, markeredgecolor='darkgreen')
+    # Green circle whose radius places its edge at the star tips (markersize/2 pts → data units)
+    goal_circle_radius = (goal_marker_size / 2) * box_size / (10 * 72) * 1.45
+    goal_circle = Circle(
+        (goal_position[0], goal_position[1]),
+        radius=goal_circle_radius,
+        facecolor='none',
+        edgecolor='green',
+        linewidth=2,
+        zorder=5
+    )
+    ax.add_patch(goal_circle)
+
+    # Inset goal marker (position updated each frame relative to payload)
+    gx0_rel = goal_position[0] - px0
+    gy0_rel = goal_position[1] - py0
+    gx0_rel -= box_size * np.round(gx0_rel / box_size)
+    gy0_rel -= box_size * np.round(gy0_rel / box_size)
+    inset_goal, = inset_ax.plot(gx0_rel, gy0_rel, 'g*', markersize=8, markeredgewidth=1, markeredgecolor='darkgreen', zorder=5)
 
     # Draw walls (straight or curved)
     def _arc_plot_points(x1, y1, x2, y2, c, n_pts=64):
@@ -145,6 +216,24 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         )
         wall_lines.append(line)
 
+    def _inset_wall_data(wall_idx, px, py):
+        """Return (xs, ys) for a wall segment in payload-relative inset coordinates."""
+        mx = (walls[wall_idx, 0] + walls[wall_idx, 2]) / 2
+        my = (walls[wall_idx, 1] + walls[wall_idx, 3]) / 2
+        shift_x = -box_size * np.round((mx - px) / box_size)
+        shift_y = -box_size * np.round((my - py) / box_size)
+        wx1 = walls[wall_idx, 0] - px + shift_x
+        wy1 = walls[wall_idx, 1] - py + shift_y
+        wx2 = walls[wall_idx, 2] - px + shift_x
+        wy2 = walls[wall_idx, 3] - py + shift_y
+        return _arc_plot_points(wx1, wy1, wx2, wy2, walls[wall_idx, 4])
+
+    inset_wall_lines = []
+    for i in range(walls.shape[0]):
+        xs, ys = _inset_wall_data(i, px0, py0)
+        line, = inset_ax.plot(xs, ys, color='black', linewidth=1.5, solid_capstyle='round', zorder=10)
+        inset_wall_lines.append(line)
+
     # Create payload trajectory
     trajectory, = ax.plot(
         payload_positions[0:1, 0],
@@ -152,18 +241,15 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
         # '--',
         color="#31DC13",
         alpha=0.8,
-        linewidth=2.0
+        linewidth=2.5
     )
-
-    # Add parameters text
-    params_text = ax.text(-0.02, -0.065, f'n_particles: {n_particles}, particle radius: {params["particle_radius"][0]}, payload radius: {payload_radius}', transform=ax.transAxes, fontsize=12,
-                        verticalalignment='top')
-    params_text_2 = ax.text(-0.02, -0.093, f'orientational noise: {params["rot_diffusion"][0]}, particle mobility: {params["mobility"][0]}, payload mobility: {params["payload_mobility"]}', transform=ax.transAxes, fontsize=12,
-                        verticalalignment='top')
-
-    # Add time counter
-    time_text = ax.text(0.02, 0.98, 'Frame: 0', transform=ax.transAxes, fontsize=12,
-                        verticalalignment='top')
+    inset_trajectory, = inset_ax.plot(
+        [0], [0],
+        color="#31DC13",
+        alpha=0.8,
+        linewidth=2.5,
+        zorder=3
+    )
 
     # Create quiver plot for polarity vectors if enabled
     quiver = None
@@ -187,24 +273,24 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
 
     def init():
         """Initialize the animation."""
-        artists = [scatter, payload, trajectory, time_text, params_text, params_text_2, goal]
+        artists = [scatter, payload_border, payload, trajectory, goal]
         if quiver is not None:
             artists.append(quiver)
-        # Add wall lines (they don't change, but include for completeness)
         artists.extend(wall_lines)
+        artists.extend([inset_scatter, inset_goal, inset_trajectory])
+        artists.extend(inset_wall_lines)
         return artists
 
     def update(frame):
         """Update the animation for each frame."""
-        # Update time counter
-        time_text.set_text(f'Frame: {frame}')
-
-        # Report progress periodically
         if frame % 50 == 0:
             print(f"Progress: Frame {frame}")
 
+        px, py = payload_positions[frame, 0], payload_positions[frame, 1]
+
         # Update payload
-        payload.center = (payload_positions[frame, 0], payload_positions[frame, 1])
+        payload_border.center = (px, py)
+        payload.center = (px, py)
 
         # Update payload trajectory
         trajectory_end = min(frame + 1, len(payload_positions))
@@ -213,24 +299,51 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
             payload_positions[:trajectory_end, 1]
         )
 
+        # Update inset trajectory (payload-relative positions with periodic correction)
+        traj_x = payload_positions[:trajectory_end, 0] - px
+        traj_y = payload_positions[:trajectory_end, 1] - py
+        traj_x -= box_size * np.round(traj_x / box_size)
+        traj_y -= box_size * np.round(traj_y / box_size)
+        inset_trajectory.set_data(traj_x, traj_y)
+
         # Particle positions & colors update
         scatter.set_offsets(positions[frame])
-        # Color by score if available, otherwise by curvity
         if particle_scores is not None:
-            scatter.set_color([get_particle_color_based_on_score(score) for score in particle_scores[frame]])
+            colors = [get_particle_color_based_on_score(score) for score in particle_scores[frame]]
         else:
-            scatter.set_color([get_particle_color_based_on_curvity(cv) for cv in curvity_values[frame]])
+            colors = [get_particle_color_based_on_curvity(cv) for cv in curvity_values[frame]]
+        scatter.set_color(colors)
 
         # Update polarity vectors if enabled
         if quiver is not None and polarity is not None:
-            arrow_length = 8.0  # Same as initialization
+            arrow_length = 8.0
             quiver.set_offsets(positions[frame])
             quiver.set_UVC(polarity[frame, :, 0] * arrow_length,
                           polarity[frame, :, 1] * arrow_length)
 
-        artists = [scatter, payload, trajectory, time_text]
+        # --- Update inset (zoomed payload view, payload fixed at origin) ---
+        rel_x = positions[frame, :, 0] - px
+        rel_y = positions[frame, :, 1] - py
+        rel_x -= box_size * np.round(rel_x / box_size)
+        rel_y -= box_size * np.round(rel_y / box_size)
+        inset_scatter.set_offsets(np.column_stack([rel_x, rel_y]))
+        inset_scatter.set_color(colors)
+
+        gx_rel = goal_position[0] - px
+        gy_rel = goal_position[1] - py
+        gx_rel -= box_size * np.round(gx_rel / box_size)
+        gy_rel -= box_size * np.round(gy_rel / box_size)
+        inset_goal.set_data([gx_rel], [gy_rel])
+
+        for i, line in enumerate(inset_wall_lines):
+            xs, ys = _inset_wall_data(i, px, py)
+            line.set_data(xs, ys)
+
+        artists = [scatter, payload_border, payload, trajectory]
         if quiver is not None:
             artists.append(quiver)
+        artists.extend([inset_scatter, inset_goal, inset_trajectory])
+        artists.extend(inset_wall_lines)
         return artists
 
     # Create animation
@@ -246,14 +359,14 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     frames = range(0, n_frames, skip)
     print(f"Number of frames: {n_frames}")
 
-    plt.rcParams['savefig.dpi'] = 170  # Lower dpi for faster rendering
+    plt.rcParams['savefig.dpi'] = 150  # Lower dpi for faster rendering
 
     anim = FuncAnimation(
         fig,
         update,
         frames=frames,
         init_func=init,
-        blit=True,
+        blit=False,
         interval=120  # Increased from 50
     )
 

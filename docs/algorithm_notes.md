@@ -12,7 +12,7 @@ Every particle `i` has:
 - **s_i** ∈ ℤ: Score (initialized to 9999)
 - **p_i** ∈ ℝ²: Polarity unit vector (||p_i|| = 1)
 - **e_i** ∈ ℝ²: Heading/orientation vector (||e_i|| = 1)
-- **r**: View range (hyperparameter, default: 0.1 × box_size)
+- **r**: View range (hyperparameter, `particle_view_range`; default: 1.5 × maze cell size)
 
 ### 2. Core Update Rules (Executed Every `score_and_polarity_update_interval` Steps)
 
@@ -60,70 +60,45 @@ where s* = min{s_j : j ∈ N_i}
 
 ---
 
-##### **Step 3: Polarity Alignment (Hybrid: Score-Weighted + Gradient)**
+##### **Step 3: Polarity — Direction Toward Min-Score Neighbors**
 
-**p_i** is computed as a weighted combination of two components:
+**p_i** points toward the average position of all min-score neighbors.
+
+Two-pass computation over N_i (using scores from the previous update):
 
 ```
-p_i = ((1-d) · p_weighted + d · p_gradient) / ||(1-d) · p_weighted + d · p_gradient||
+Pass 1 — find minimum score:
+    s* = min{s_j : j ∈ N_i}
 
-where:
-- d ∈ [0, 1]: directedness hyperparameter (default: 0.5)
-- p_weighted: score-weighted alignment with neighbors
-- p_gradient: direction toward lowest-score neighbor(s)
+Pass 2 — average displacement to all min-score neighbors:
+    J = {j ∈ N_i : s_j = s*}
+    avg_delta = (1/|J|) · Σ_{j ∈ J} (x_j - x_i)_periodic
+
+p_i = avg_delta / ||avg_delta||    (zero vector if ||avg_delta|| = 0)
 ```
 
-**Component 1 - Score-Weighted Alignment** (weight: 1-d):
-```
-p_weighted = (Σ_j w_j · p_j) / ||Σ_j w_j · p_j||    where j ∈ N_i
+where `(x_j - x_i)_periodic` is the minimum-image displacement under periodic boundaries.
 
-with weights:
-w_j = exp(-(s_j - s*))
-
-where s* = min{s_j : j ∈ N_i}
-```
-- Exponentially weighted by score difference
-- Particles with minimum score s* get weight w = 1.0
-- Higher scores decay exponentially (s* + 1 → w ≈ 0.368, s* + 2 → w ≈ 0.135)
-- Vicsek-style alignment that favors following lower-score neighbors
-
-**Component 2 - Gradient Following** (weight: d):
-```
-p_gradient = (**x*** - **x_i**) / ||**x*** - **x_i**||
-
-where **x*** = (1/|J|) · Σ_j **x_j**    for j ∈ J
-      J = {j ∈ N_i : s_j = s*}
-```
-- Points directly toward the average position of minimum-score neighbor(s)
-- Uses periodic boundary conditions to compute relative positions
-- Pure gradient descent behavior (most direct path)
-
-**Directedness Parameter** (d):
-- d = 0: Pure score-weighted Vicsek alignment (smooth, consensus-based)
-- d = 0.5: Balanced hybrid (default)
-- d = 1: Pure gradient descent (direct pursuit)
-- Higher d = more direct/aggressive goal-seeking
-- Lower d = more collective/smooth navigation
-
-**Normalization**:
-```
-p_i = combined / ||combined||    [normalize to unit vector]
-```
+- All particles update in parallel using a frozen snapshot of scores from the **previous** update, so the score wave advances by exactly one hop per update interval.
+- Both passes exclude neighbors blocked by walls along the periodic shortest path.
 
 ---
 
 ### 3. Curvity Calculation
 
-Once **p_i** is computed, it determines particle curvity:
+Once **p_i** is computed, curvity κ_i is a piecewise linear function of the dot product **e_i · p_i**:
 
 ```
-κ_i = -(e_i · p_i)
+Let α = e_i · p_i  ∈ [-1, 1]
+
+κ_i = mid_curvity + (min_curvity - mid_curvity) · α     if α ≥ 0
+      max_curvity + (mid_curvity - max_curvity) · (α+1) if α < 0
 ```
 
-Where:
-- **e_i**: Current heading/orientation (unit vector)
-- **p_i**: Computed polarity vector (unit vector)
-- κ_i ∈ [-1, 1]: Curvity parameter
+Breakpoints:
+- α = +1 (heading aligned with polarity)      → κ = min_curvity
+- α =  0 (heading perpendicular to polarity)  → κ = mid_curvity
+- α = −1 (heading anti-aligned with polarity) → κ = max_curvity
 
 **Effect on dynamics**:
 Curvity influences orientation update via torque:
@@ -157,26 +132,20 @@ Uses cell-list algorithm with O(N) complexity:
 
 ## Key Properties
 
-1. **Gradient Formation**: Scores form discrete gradient field pointing toward goal
-2. **Information Propagation**: Score=0 spreads from goal at ~1 cell per update
-3. **Alignment Consensus**: Particles align with lowest-score neighbors (follow the gradient)
-4. **Scale Invariance**: Exponential weighting ensures relative influence independent of absolute scores
-5. **Isolation Handling**: Isolated particles reset to s=9999, preventing stale information
+1. **Gradient Formation**: Scores form a discrete distance field (BFS wavefront) pointing toward goal
+2. **Information Propagation**: Score=0 spreads from goal-visible particles at ~1 hop per update interval
+3. **Polarity Follows Gradient**: Each particle's polarity points toward the average position of its lowest-score visible neighbors
+4. **Parallel Update from Frozen Scores**: All particles read last-step's scores simultaneously; wave advances one hop per interval
+5. **Isolation Handling**: Particles with no wall-unblocked neighbors in range reset to s=9999, preventing stale information
 
 ---
 
 ## Physical Interpretation
 
 This algorithm creates **emergent cooperative transport**:
-1. Particles with clear line of sight to goal (within range, unobstructed by walls/payload) orient toward it (s=0)
-2. Their neighbors align with them and get s=1
-3. Information cascades outward, forming gradient
-4. Particles far from goal follow the gradient through hybrid alignment:
-   - **Score-weighted component (1-d)**: Aligns with neighbors' polarity vectors, but strongly favors lower-score neighbors via exponential weighting. Maintains collective behavior while following the gradient.
-   - **Gradient component (d)**: Direct spatial pursuit of lowest-score neighbor position (using periodic boundaries). Most direct path but ignores polarity field structure.
-5. Combined with FAABP dynamics (forces, curvity, self-propulsion), this creates collective payload pushing toward goal
-
-The **directedness parameter** allows tuning between:
-- **Low d (→ 0)**: Pure score-weighted Vicsek alignment. Smooth, collective navigation that follows the polarity field gradient. More robust to noise and obstacles.
-- **High d (→ 1)**: Pure spatial gradient descent. Direct, aggressive pursuit of best neighbor. Faster but may create sharp turns or get stuck.
-- **Balanced d=0.5**: Compromise between smooth polarity-field following and direct spatial pursuit.
+1. Particles with clear line of sight to goal (within range, unobstructed by walls/payload) set s=0 and polarity pointing to goal
+2. Their visible, wall-unblocked neighbors set s=1 and polarity pointing toward those s=0 particles
+3. The score wave cascades outward hop-by-hop (one hop per `score_and_polarity_update_interval` timesteps), forming a discrete distance field
+4. Each particle's polarity points toward the average position of its lowest-score neighbors — pure spatial gradient following
+5. Curvity derived from `e·p` determines how strongly the particle steers: aligned → low curvity, anti-aligned → high curvity
+6. Combined with FAABP dynamics (forces, curvity, self-propulsion), this produces collective payload pushing toward goal
