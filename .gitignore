@@ -12,3 +12,4 @@ CLAUDE.md
 *.mp4
 *.npz
 *.png
+!optimality_comparison.png

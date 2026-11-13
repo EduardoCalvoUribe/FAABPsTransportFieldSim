@@ -24,7 +24,7 @@ from tslearn.barycenters import dtw_barycenter_averaging
 # ── Hyperparameters ──────────────────────────────────────────────────────────
 # Reference file: supplies particles, walls, box geometry, goal
 SOURCE_FILE      = "fig1e/optimal_G20_run1.npz"
-OUTPUT_IMAGE     = "fig1e/optimality_comparison2.png"
+OUTPUT_IMAGE     = "fig1e/optimality_comparison.png"
 COLOR_BY_SCORE   = True     # True = gradient by score, False = curvity blue/red
 DRAW_OPENED_WALL = True    # True = draw red line where shortcut wall was removed
 
@@ -61,8 +61,8 @@ RED_COLOR     = '#D62728'
 PAYLOAD_COLOR = '#737BA8'
 GOAL_COLOR    = '#008F25'   # dark green
 
-# Score gradient: amber (score 0 = direct LoS to goal) → deep purple (far from goal)
-# Both ends are clearly distinct from the blue/red paths and green goal.
+PARTICLE_RADIUS_SCALE = 1.5   # display-size multiplier for particle circles (main view + inset)
+DISCONNECTED_SCORE = 1000    # clipped to the worst colour
 SCORE_CMAP_LOW  = '#F4D03F'   # warm amber  — best (score 0)
 SCORE_CMAP_HIGH = '#8E44AD'   # deep purple — worst (highest score)
 
@@ -125,7 +125,8 @@ if __name__ == "__main__":
     last_positions   = np.array(data['positions'][-1])       # (N, 2)
     last_curvity     = np.array(data['curvity_values'][-1])  # (N,)
     last_scores      = np.array(data['particle_scores'][-1]) # (N,)
-    score_max_global = max(int(data['particle_scores'].max()), 1)  # true max across all timesteps
+    _valid_scores = last_scores[last_scores < DISCONNECTED_SCORE]
+    score_max_global = max(int(_valid_scores.max()) if _valid_scores.size else 0, 1)
     ref_payload_traj = np.array(data['payload_positions'])   # (T, 2) — for inset
 
     box_size        = float(data['box_size'])
@@ -270,7 +271,7 @@ if __name__ == "__main__":
         if COLOR_BY_SCORE:
             score_cmap = LinearSegmentedColormap.from_list(
                 'score', [SCORE_CMAP_LOW, SCORE_CMAP_HIGH])
-            score_norm = Normalize(vmin=0, vmax=score_max_global)
+            score_norm = Normalize(vmin=0, vmax=60, clip=True) #score_max_global, clip=True)
             colors = [score_cmap(score_norm(s))[:3] for s in last_scores]
         else:
             colors = [curvity_color(c) for c in last_curvity]
@@ -282,7 +283,7 @@ if __name__ == "__main__":
             min_r = box_size / 400.0
         else:
             min_r = box_size / 300.0
-        display_radii = np.maximum(particle_radius, min_r)
+        display_radii = np.maximum(particle_radius, min_r) * PARTICLE_RADIUS_SCALE
         circles = [mpatches.Circle((x, y), radius=ri)
                    for (x, y), ri in zip(last_positions, display_radii)]
         pc = PatchCollection(circles, facecolors=colors, alpha=0.7, linewidths=0, zorder=6)
@@ -341,7 +342,7 @@ if __name__ == "__main__":
             # Particle positions relative to final payload centre (reference file)
             rel_x = last_positions[:, 0] - px_final
             rel_y = last_positions[:, 1] - py_final
-            inset_circles = [mpatches.Circle((dx, dy), radius=ri)
+            inset_circles = [mpatches.Circle((dx, dy), radius=ri * PARTICLE_RADIUS_SCALE)
                              for dx, dy, ri in zip(rel_x, rel_y, particle_radius)]
             inset_pc = PatchCollection(inset_circles, facecolors=colors, alpha=0.7, linewidths=0, zorder=6)
             inset_ax.add_collection(inset_pc)
@@ -407,22 +408,22 @@ if __name__ == "__main__":
         if draw_default:
             legend_handles += [
                 mlines.Line2D([], [], color=DARK_BLUE, alpha=0.30, linewidth=1.5,
-                              label='default runs'),
+                              label='original runs'),
                 mlines.Line2D([], [], color=DARK_BLUE, alpha=1.0,  linewidth=2.5,
-                              label='default average'),
+                              label='original average'),
             ]
         if draw_optimal:
             legend_handles += [
                 mlines.Line2D([], [], color=RED_COLOR, alpha=0.30, linewidth=1.5,
-                              label='optimal runs'),
+                              label='adapted runs'),
                 mlines.Line2D([], [], color=RED_COLOR, alpha=1.0,  linewidth=2.5,
-                              label='optimal average'),
+                              label='adapted average'),
             ]
         leg = ax.legend(
             handles=legend_handles,
             loc='upper left',
             bbox_to_anchor=(0.02, 0.71),
-            fontsize=9,
+            fontsize=12,
             frameon=True,
             edgecolor='#aaaaaa',
         )
