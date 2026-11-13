@@ -12,4 +12,10 @@ CLAUDE.md
 *.mp4
 *.npz
 *.png
+
+# fig1e
 !optimality_comparison.png
+
+# fig4b, 4d
+!payload_pathway_curvity_pradius_*.png
+!payload_pathway_full.png
