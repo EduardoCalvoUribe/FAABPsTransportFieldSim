@@ -5,7 +5,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXTERNAL_DIR = 'E:/BachelorThesisData'                # external drive holding the original data
 DATA_DIR = EXTERNAL_DIR + '/data'                     # .npz simulation output
 VIS_DIR = EXTERNAL_DIR + '/visualizations'            # mp4 / gif animations
-FIG_DIR = os.path.join(ROOT, 'figures')               # analysis plots (png)
+FIG_DIR = ROOT                                        # analysis plots (png), written into figures/fig4/
 
 
 def out_path(path):

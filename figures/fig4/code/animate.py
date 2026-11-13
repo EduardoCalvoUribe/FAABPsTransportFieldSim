@@ -1,3 +1,5 @@
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # repo root, so `figures.fig4.code` imports work when run directly
 from figures.fig4.code.faabp_sim import extract_simulation_data, create_payload_animation, default_payload_params
 import os
 from figures.fig4.code.paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path

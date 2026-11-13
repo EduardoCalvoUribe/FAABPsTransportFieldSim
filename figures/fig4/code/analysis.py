@@ -1,5 +1,7 @@
 import numpy as np
 import os
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))  # repo root, so `figures.fig4.code` imports work when run directly
 from figures.fig4.code.paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -81,7 +83,7 @@ def dynamic_v0_payloadspeed():
         plt.xticks(ticks=[0, 1, 2], labels=unique_vOn)
         plt.yticks(ticks=[0, 1, 2], labels=unique_vOff)
         plt.tight_layout()
-        plt.savefig(out_path(f'{FIG_DIR}/dynamic_v0/payload_speed_3/dynamicvO_heatmap_curvity_{c}.png'))
+        plt.savefig(out_path(f'{FIG_DIR}/c/dynamicvO_heatmap_curvity_{c}.png'))
         plt.show()
     
 
@@ -149,23 +151,23 @@ def dynamic_curvity_payloadspeed():
         )
         
         # tickmarks for cOff * pradius < -1
-        for i_cOff, cOff_val in enumerate(unique_cOff):
-            for i_cOn, cOn_val in enumerate(unique_cOn):
-                if float(cOff_val) * float(c) < -1:
-                    plt.plot(i_cOn, i_cOff, 'wo', markersize=8, markerfacecolor='none')  # White plus sign
-                if float(cOn_val) * float(c) < -1:
-                    plt.plot(i_cOn, i_cOff, 'wx', markersize=8)  # White x mark
+        # for i_cOff, cOff_val in enumerate(unique_cOff):
+        #     for i_cOn, cOn_val in enumerate(unique_cOn):
+        #         if float(cOff_val) * float(c) < -1:
+        #             plt.plot(i_cOn, i_cOff, 'wo', markersize=8, markerfacecolor='none')  # White plus sign
+        #         if float(cOn_val) * float(c) < -1:
+        #             plt.plot(i_cOn, i_cOff, 'wx', markersize=8)  # White x mark
 
         
         # plot
         plt.colorbar(label='⟨vp⟩/v0')
-        plt.title(f'Average Payload Speed (Payload Radius = {c})')
-        plt.xlabel('Curvity with Line-Of-Sight to Goal (x marker for ka < -1)')
-        plt.ylabel('Curvity while Occluded (o marker for ka < -1)')
-        plt.xticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], labels=unique_cOn)
-        plt.yticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], labels=unique_cOff)
+        plt.title(f'Average Payload Speed (α = {c})')
+        plt.xlabel('Κ while having line-of-sight with goal') #'Curvity with Line-Of-Sight to Goal (x marker for ka < -1)'
+        plt.ylabel('Κ while occluded by payload') #'Curvity while Occluded (o marker for ka < -1)'
+        # plt.xticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], labels=unique_cOn)
+        # plt.yticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], labels=unique_cOff)
         plt.tight_layout()
-        plt.savefig(out_path(f'{FIG_DIR}/dynamiccurviy_heatmap_pradius_{c}.png'))
+        plt.savefig(out_path(f'{FIG_DIR}/c/dynamiccurviy_heatmap_pradius_{c}.png'))
         plt.show()
 
 
@@ -215,9 +217,7 @@ def unravel_trajectory(trajectory, box_size=350):
     return unraveled
 
 def mark_goal_start_box(ax, box_size, goal_position):
-    """Draw the periodic box outline (grey), the goal (green star) and the payload start (red dot)."""
-    ax.add_patch(plt.Rectangle((0, 0), box_size, box_size, fill=False,
-                               edgecolor='gray', linewidth=3, zorder=2))
+    """Draw the the goal (green star) and the payload start (red dot)."""
     ax.plot(*goal_position, marker='*', color='green', markersize=22,
             markeredgecolor='darkgreen', linestyle='none', zorder=5)
     ax.plot(box_size / 4, box_size / 4, marker='o', color='red', markersize=3.6,
@@ -226,7 +226,6 @@ def mark_goal_start_box(ax, box_size, goal_position):
         Line2D([], [], marker='o', color='red', markersize=3.6, linestyle='none', label='payload start'),
         Line2D([], [], marker='*', color='green', markeredgecolor='darkgreen', markersize=14,
                linestyle='none', label='target'),
-        Line2D([], [], color='gray', linewidth=3, label='periodic boundary'),
     ]
     ax.legend(handles=handles, loc='upper left', framealpha=0.9)
 
@@ -276,8 +275,8 @@ def graph_pathway():
     goal_position = [4*(box_size / 5), 4*(box_size / 5)]
     mark_goal_start_box(ax, box_size, goal_position)
 
-    ax.set_xlim(-400, 350)
-    ax.set_ylim(-500, 350)
+    ax.set_xlim(0, 350)
+    ax.set_ylim(0, 350)
     ax.set_title('Payload Paths for Dynamic v0')
     ax.grid(True, alpha=0.3)
     
@@ -288,7 +287,7 @@ def graph_pathway():
     plt.colorbar(sm, ax=ax, label='κ', shrink=0.8, aspect=20)
     
     plt.tight_layout()
-    plt.savefig(out_path(f'{FIG_DIR}/paths/payload_pathway_full.png'), dpi=300)
+    plt.savefig(out_path(f'{FIG_DIR}/d/payload_pathway_v0.png'), dpi=300)
     plt.show()
 
 def graph_pathway_curvity(payload_radii=None):
@@ -329,17 +328,22 @@ def graph_pathway_curvity(payload_radii=None):
         mark_goal_start_box(ax, box_size, goal_position)
         ax.set_title(f'Payload Paths for Dynamic Curvity (Payload Radius = {r})')
         ax.grid(True, alpha=0.3)
+        ax.set_xlim(0, 350)
+        ax.set_ylim(0, 350)
         ax.set_aspect('equal')
         sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
         sm.set_array([])
         plt.colorbar(sm, ax=ax, label='Δκ', shrink=0.8, aspect=20)
         plt.tight_layout()
-        plt.savefig(out_path(f'{FIG_DIR}/paths/payload_pathway_curvity_pradius_{r}.png'), dpi=300)
+        plt.savefig(out_path(f'{FIG_DIR}/b/payload_pathway_curvity_pradius_{r}.png'), dpi=300)
         plt.close(fig)
 
 if __name__ == "__main__":
     # graph_pathway()
-    dynamic_v0_payloadspeed()
+    # graph_pathway_curvity()
+    dynamic_curvity_payloadspeed()
+    
+    
     # data = np.load(f'{DATA_DIR}/dynamic_v0/sim_data_vOn_{3.75}_vOff_{10}_curvity_{0.6}.npz')
     # n_saved_states = len(data['positions'])
     # original_steps = (n_saved_states - 1) * 10
