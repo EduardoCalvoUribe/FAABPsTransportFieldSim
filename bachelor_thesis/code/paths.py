@@ -1,9 +1,10 @@
-"""Project-relative locations for data, videos and figures (all inside bachelor_thesis/)."""
+"""Project-relative locations for data, videos and figures (data and videos on the external drive, figures inside bachelor_thesis/)."""
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(ROOT, 'data')                 # .npz simulation output
-VIS_DIR = os.path.join(ROOT, 'visualizations')        # mp4 / gif animations
+EXTERNAL_DIR = 'E:/BachelorThesisData'                # external drive holding the original data
+DATA_DIR = EXTERNAL_DIR + '/data'                     # .npz simulation output
+VIS_DIR = EXTERNAL_DIR + '/visualizations'            # mp4 / gif animations
 FIG_DIR = os.path.join(ROOT, 'figures')               # analysis plots (png)
 
 
