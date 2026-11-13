@@ -1,9 +1,9 @@
 import numpy as np
 import os
-from paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
+from figures.fig4.code.paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from faabp_sim import create_payload_animation
+from figures.fig4.code.faabp_sim import create_payload_animation
 
 def dynamic_v0_payloadspeed():
     data_dir = f'{DATA_DIR}/dynamic_v0'

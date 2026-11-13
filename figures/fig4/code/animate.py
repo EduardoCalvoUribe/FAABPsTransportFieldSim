@@ -1,6 +1,6 @@
-from faabp_sim import extract_simulation_data, create_payload_animation, default_payload_params
+from figures.fig4.code.faabp_sim import extract_simulation_data, create_payload_animation, default_payload_params
 import os
-from paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
+from figures.fig4.code.paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
 
 params = default_payload_params(curvity_on=0.4, curvity_off=-0.4, payload_radius=18.7)
 # # data = extract_simulation_data(f'{DATA_DIR}/dynamic_curvity/sim_data_cOn_1_cOff_0_pradius_18.7.npz')

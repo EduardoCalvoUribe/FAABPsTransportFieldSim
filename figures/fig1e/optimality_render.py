@@ -23,8 +23,8 @@ from tslearn.barycenters import dtw_barycenter_averaging
 
 # ── Hyperparameters ──────────────────────────────────────────────────────────
 # Reference file: supplies particles, walls, box geometry, goal
-SOURCE_FILE      = "fig1e/optimal_G20_run2.npz"
-OUTPUT_IMAGE     = "fig1e/optimality_comparison.png"
+SOURCE_FILE      = "figures/fig1e/optimal_G20_run2.npz"
+OUTPUT_IMAGE     = "figures/fig1e/optimality_comparison.png"
 COLOR_BY_SCORE   = True     # True = gradient by score, False = curvity blue/red
 DRAW_OPENED_WALL = True    # True = draw red line where shortcut wall was removed
 
@@ -32,8 +32,8 @@ DRAW_OPENED_WALL = True    # True = draw red line where shortcut wall was remove
 #   OUTPUT_IMAGE_DEFAULT → blue (default) paths only, no red opened-wall line
 #   OUTPUT_IMAGE_OPTIMAL → red (optimal) paths only, with opened-wall line
 SPLIT_OUTPUT         = False
-OUTPUT_IMAGE_DEFAULT = "fig1e/optimality_default2.png"
-OUTPUT_IMAGE_OPTIMAL = "fig1e/optimality_optimal2.png"
+OUTPUT_IMAGE_DEFAULT = "figures/fig1e/optimality_default2.png"
+OUTPUT_IMAGE_OPTIMAL = "figures/fig1e/optimality_optimal2.png"
 
 # DBA parameters
 DBA_BARYCENTER_SIZE = 100
@@ -41,18 +41,18 @@ DBA_MAX_ITER        = 10
 
 # Input file groups
 DEFAULT_FILES = [
-    "fig1e/default_opt_G20_run1.npz",
-    "fig1e/default_opt_G20_run2.npz",
-    "fig1e/default_opt_G20_run3.npz",
-    "fig1e/default_opt_G20_run4.npz",
-    "fig1e/default_opt_G20_run5.npz",
+    "figures/fig1e/default_opt_G20_run1.npz",
+    "figures/fig1e/default_opt_G20_run2.npz",
+    "figures/fig1e/default_opt_G20_run3.npz",
+    "figures/fig1e/default_opt_G20_run4.npz",
+    "figures/fig1e/default_opt_G20_run5.npz",
 ]
 OPTIMAL_FILES = [
-    "fig1e/optimal_G20_run1.npz",
-    "fig1e/optimal_G20_run2.npz",
-    "fig1e/optimal_G20_run3.npz",
-    "fig1e/optimal_G20_run4.npz",
-    "fig1e/optimal_G20_run5.npz",
+    "figures/fig1e/optimal_G20_run1.npz",
+    "figures/fig1e/optimal_G20_run2.npz",
+    "figures/fig1e/optimal_G20_run3.npz",
+    "figures/fig1e/optimal_G20_run4.npz",
+    "figures/fig1e/optimal_G20_run5.npz",
 ]
 
 # Colors
@@ -144,7 +144,7 @@ if __name__ == "__main__":
             opened_wall_seg = ows
     else:
         try:
-            import fig1e.optimal_path as _op
+            import figures.fig1e.optimal_path as _op
             from src import wilson as _wil
             _gs = int(round(box_size / 60.0))
             if abs(_gs * 60.0 - box_size) < 0.5 and _gs >= 2:

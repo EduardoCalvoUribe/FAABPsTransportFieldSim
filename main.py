@@ -3,7 +3,7 @@ import numpy as np
 import time
 import os
 
-import fig1e.optimal_path as optimal_path
+import figures.fig1e.optimal_path as optimal_path
 from src import wilson
 from src.runner import run_payload_simulation, thin_npz, save_light_simulation_data
 from src.visualization import create_payload_animation

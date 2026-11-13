@@ -5,7 +5,7 @@ from matplotlib.animation import FuncAnimation, PillowWriter, FFMpegWriter
 from matplotlib.patches import Circle
 import time
 import os
-from paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
+from figures.fig4.code.paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
 import math
 from numba import njit, float64, int64
 

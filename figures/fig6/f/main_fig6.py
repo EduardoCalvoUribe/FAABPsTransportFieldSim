@@ -15,7 +15,7 @@ import time
 from src import wilson
 from src.runner import run_payload_simulation, thin_npz, save_light_simulation_data
 from src.visualization import create_payload_animation
-from maze_pruning import get_interior_wall_keys, build_pruned_passages
+from figures.fig6.f.maze_pruning import get_interior_wall_keys, build_pruned_passages
 
 
 def K_to_c(K, x1, y1, x2, y2):

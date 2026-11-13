@@ -3,14 +3,14 @@ import numpy as np
 import argparse
 import sys
 import os
-from paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
+from figures.fig4.code.paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
 import matplotlib.pyplot as plt
 import re
 import random
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from analysis import unravel_trajectory
+from figures.fig4.code.analysis import unravel_trajectory
 
 def parse_filename_parameters_velocity(filename):
     if filename.endswith('.npz'):
