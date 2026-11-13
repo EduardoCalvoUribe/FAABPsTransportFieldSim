@@ -12,7 +12,7 @@ import random
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from figures.fig4.code.analysis import unravel_trajectory
+from figures.fig4.code.trajectory_utils import unravel_trajectory
 
 def parse_filename_parameters_velocity(filename):
     if filename.endswith('.npz'):
