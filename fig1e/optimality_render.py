@@ -23,7 +23,7 @@ from tslearn.barycenters import dtw_barycenter_averaging
 
 # ── Hyperparameters ──────────────────────────────────────────────────────────
 # Reference file: supplies particles, walls, box geometry, goal
-SOURCE_FILE      = "fig1e/optimal_G20_run1.npz"
+SOURCE_FILE      = "fig1e/optimal_G20_run2.npz"
 OUTPUT_IMAGE     = "fig1e/optimality_comparison.png"
 COLOR_BY_SCORE   = True     # True = gradient by score, False = curvity blue/red
 DRAW_OPENED_WALL = True    # True = draw red line where shortcut wall was removed
@@ -422,7 +422,7 @@ if __name__ == "__main__":
         leg = ax.legend(
             handles=legend_handles,
             loc='upper left',
-            bbox_to_anchor=(0.02, 0.71),
+            bbox_to_anchor=(0.02, 1.71),
             fontsize=12,
             frameon=True,
             edgecolor='#aaaaaa',
