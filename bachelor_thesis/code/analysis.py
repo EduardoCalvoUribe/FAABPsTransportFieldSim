@@ -2,6 +2,7 @@ import numpy as np
 import os
 from paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from faabp_sim import create_payload_animation
 
 def dynamic_v0_payloadspeed():
@@ -213,6 +214,22 @@ def unravel_trajectory(trajectory, box_size=350):
         
     return unraveled
 
+def mark_goal_start_box(ax, box_size, goal_position):
+    """Draw the periodic box outline (grey), the goal (green star) and the payload start (red dot)."""
+    ax.add_patch(plt.Rectangle((0, 0), box_size, box_size, fill=False,
+                               edgecolor='gray', linewidth=3, zorder=2))
+    ax.plot(*goal_position, marker='*', color='green', markersize=22,
+            markeredgecolor='darkgreen', linestyle='none', zorder=5)
+    ax.plot(box_size / 4, box_size / 4, marker='o', color='red', markersize=3.6,
+            linestyle='none', zorder=5)
+    handles = [
+        Line2D([], [], marker='o', color='red', markersize=3.6, linestyle='none', label='payload start'),
+        Line2D([], [], marker='*', color='green', markeredgecolor='darkgreen', markersize=14,
+               linestyle='none', label='target'),
+        Line2D([], [], color='gray', linewidth=3, label='periodic boundary'),
+    ]
+    ax.legend(handles=handles, loc='upper left', framealpha=0.9)
+
 def graph_pathway():
     data_dir = f'{DATA_DIR}/dynamic_v0'
     data_dir_2 = f'{DATA_DIR}/dynamic_v0_2'
@@ -257,22 +274,18 @@ def graph_pathway():
 
     box_size = 350
     goal_position = [4*(box_size / 5), 4*(box_size / 5)]
-    goal_circle = plt.Circle(goal_position, 10, color='darkgreen', alpha=0.6, label='Goal', 
-                           edgecolor='darkgreen', facecolor='darkgreen')
-    ax.add_patch(goal_circle)
+    mark_goal_start_box(ax, box_size, goal_position)
 
     ax.set_xlim(-400, 350)
     ax.set_ylim(-500, 350)
     ax.set_title('Payload Paths for Dynamic v0')
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
     ax.grid(True, alpha=0.3)
     
     ax.set_aspect('equal')
     
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([])
-    plt.colorbar(sm, ax=ax, label='Curvity')
+    plt.colorbar(sm, ax=ax, label='κ', shrink=0.8, aspect=20)
     
     plt.tight_layout()
     plt.savefig(out_path(f'{FIG_DIR}/paths/payload_pathway_full.png'), dpi=300)
@@ -283,7 +296,7 @@ def graph_pathway_curvity(payload_radii=None):
 
     Mirrors graph_pathway(), but for files named
     sim_data_cOn_<cOn>_cOff_<cOff>_pradius_<r>.npz. Each path is coloured by
-    cOn - cOff (curvity with line-of-sight minus curvity while occluded).
+    Δκ = cOn - cOff (curvity with line-of-sight minus curvity while occluded).
     """
     import re
     data_dir = f'{DATA_DIR}/dynamic_curvity'
@@ -313,15 +326,13 @@ def graph_pathway_curvity(payload_radii=None):
             ax.plot(payload_positions_unraveled[:, 0], payload_positions_unraveled[:, 1],
                     color=cmap(norm(c_on - c_off)), alpha=0.4)
 
-        ax.add_patch(plt.Circle(goal_position, 10, color='darkgreen', alpha=0.6, label='Goal'))
+        mark_goal_start_box(ax, box_size, goal_position)
         ax.set_title(f'Payload Paths for Dynamic Curvity (Payload Radius = {r})')
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
         ax.grid(True, alpha=0.3)
         ax.set_aspect('equal')
         sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
         sm.set_array([])
-        plt.colorbar(sm, ax=ax, label='cOn - cOff')
+        plt.colorbar(sm, ax=ax, label='Δκ', shrink=0.8, aspect=20)
         plt.tight_layout()
         plt.savefig(out_path(f'{FIG_DIR}/paths/payload_pathway_curvity_pradius_{r}.png'), dpi=300)
         plt.close(fig)
