@@ -7,6 +7,7 @@ Barycenter Average (DBA) paths.  A legend is placed in the top-left corner (no i
 All other rendering logic (walls, particles, inset, goal, etc.) is identical
 to render_final_frame.py.
 """
+from pathlib import Path
 
 import os
 import time
@@ -23,8 +24,9 @@ from tslearn.barycenters import dtw_barycenter_averaging
 
 # ── Hyperparameters ──────────────────────────────────────────────────────────
 # Reference file: supplies particles, walls, box geometry, goal
-SOURCE_FILE      = "figures/fig1e/optimal_G20_run2.npz"
-OUTPUT_IMAGE     = "figures/fig1e/optimality_comparison.png"
+BASEPATH         = Path(__file__).parent
+SOURCE_FILE      = BASEPATH / "fig1e_data/optimal_G20_run2.npz"
+OUTPUT_IMAGE     = BASEPATH / "optimality_comparison.png"
 COLOR_BY_SCORE   = True     # True = gradient by score, False = curvity blue/red
 DRAW_OPENED_WALL = True    # True = draw red line where shortcut wall was removed
 
@@ -32,8 +34,8 @@ DRAW_OPENED_WALL = True    # True = draw red line where shortcut wall was remove
 #   OUTPUT_IMAGE_DEFAULT → blue (default) paths only, no red opened-wall line
 #   OUTPUT_IMAGE_OPTIMAL → red (optimal) paths only, with opened-wall line
 SPLIT_OUTPUT         = False
-OUTPUT_IMAGE_DEFAULT = "figures/fig1e/optimality_default2.png"
-OUTPUT_IMAGE_OPTIMAL = "figures/fig1e/optimality_optimal2.png"
+OUTPUT_IMAGE_DEFAULT = BASEPATH / "optimality_default2.png"
+OUTPUT_IMAGE_OPTIMAL = BASEPATH / "optimality_optimal2.png"
 
 # DBA parameters
 DBA_BARYCENTER_SIZE = 100
@@ -41,18 +43,18 @@ DBA_MAX_ITER        = 10
 
 # Input file groups
 DEFAULT_FILES = [
-    "figures/fig1e/default_opt_G20_run1.npz",
-    "figures/fig1e/default_opt_G20_run2.npz",
-    "figures/fig1e/default_opt_G20_run3.npz",
-    "figures/fig1e/default_opt_G20_run4.npz",
-    "figures/fig1e/default_opt_G20_run5.npz",
+    BASEPATH / "fig1e_data/default_opt_G20_run1.npz",
+    BASEPATH / "fig1e_data/default_opt_G20_run2.npz",
+    BASEPATH / "fig1e_data/default_opt_G20_run3.npz",
+    BASEPATH / "fig1e_data/default_opt_G20_run4.npz",
+    BASEPATH / "fig1e_data/default_opt_G20_run5.npz",
 ]
 OPTIMAL_FILES = [
-    "figures/fig1e/optimal_G20_run1.npz",
-    "figures/fig1e/optimal_G20_run2.npz",
-    "figures/fig1e/optimal_G20_run3.npz",
-    "figures/fig1e/optimal_G20_run4.npz",
-    "figures/fig1e/optimal_G20_run5.npz",
+    BASEPATH / "fig1e_data/optimal_G20_run1.npz",
+    BASEPATH / "fig1e_data/optimal_G20_run2.npz",
+    BASEPATH / "fig1e_data/optimal_G20_run3.npz",
+    BASEPATH / "fig1e_data/optimal_G20_run4.npz",
+    BASEPATH / "fig1e_data/optimal_G20_run5.npz",
 ]
 
 # Colors
@@ -363,23 +365,19 @@ if __name__ == "__main__":
         # ── Legend — top-left corner ───────────────
         legend_handles = []
         if draw_default:
-            legend_handles += [
-                mlines.Line2D([], [], color=DARK_BLUE, alpha=0.30, linewidth=1.5,
-                              label='original runs'),
+            legend_handles += [                
                 mlines.Line2D([], [], color=DARK_BLUE, alpha=1.0,  linewidth=2.5,
-                              label='original average'),
+                              label='Original path'),
             ]
         if draw_optimal:
             legend_handles += [
-                mlines.Line2D([], [], color=RED_COLOR, alpha=0.30, linewidth=1.5,
-                              label='adapted runs'),
                 mlines.Line2D([], [], color=RED_COLOR, alpha=1.0,  linewidth=2.5,
-                              label='adapted average'),
+                              label='Adapted path'),
             ]
         leg = ax.legend(
             handles=legend_handles,
             loc='upper left',
-            bbox_to_anchor=(0.02, 0.98),
+            bbox_to_anchor=(0.07, 0.98),
             fontsize=18,
             frameon=True,
             edgecolor='#aaaaaa',
