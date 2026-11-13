@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=contFAABPsPolarity
+#SBATCH --job-name=FAABPsPolarity
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=10:00:00
+#SBATCH --time=20:00:00
 #SBATCH --partition=rome
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=32
 
 set -euo pipefail
 

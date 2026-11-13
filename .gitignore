@@ -7,15 +7,6 @@ __pycache__
 /.claude/
 /.pytest_cache/
 CLAUDE.md
-# Large generated outputs (animations, simulation data, rendered figures)
-*.gif
-*.mp4
+
+*.txt
 *.npz
-*.png
-
-# fig1e
-!optimality_comparison.png
-
-# fig4b, 4d
-!payload_pathway_curvity_pradius_*.png
-!payload_pathway_full.png

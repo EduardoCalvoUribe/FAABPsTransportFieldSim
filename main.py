@@ -127,11 +127,12 @@ def maze_to_walls(passages, grid_size, box_size, include_boundary=True):
 
 # Set random seed for reproducibility
 RANDOM_SEED = None
+RANDOM_SEED = None
 
 # Simulation parameters
-N_PARTICLES = 1000 #9000 #4000
-BOX_SIZE = 600 #1800.0 #1200.0
-MAZE_GRID_SIZE = 10 #30 #20
+N_PARTICLES = 250 #4000 #9000 #1000 #4000
+BOX_SIZE = 300 #1200 #1800.0 #600 #1200.0
+MAZE_GRID_SIZE = 5 #20 #30 #10 #20  # W×W grid; larger = more cells, narrower corridors
 N_STEPS = 20000000
 
 SAVE_INTERVAL = 10
@@ -210,13 +211,13 @@ POLARITY_NUDGE_STRENGTH = 0.01       # Angular nudge magnitude (radians)
 CREATE_VIDEO = False
 SHOW_VECTORS = False              # Display polarity vectors as arrows
 COLOR_BY_SCORE = False           # If True: color by score, if False: color by curvity
-OUTPUT_FILENAME = "D:/PostThesis/visualizations/snell_9000_30_10k.mp4"
+OUTPUT_FILENAME = "D:/PostThesis/visualizations/snell_1000_10_2m.mp4"
 
 # Data saving
 
 SAVE_DATA = True
-LIGHT_NPZ = True                                                    # If True, save only data needed by render_final_frame.py (much smaller)
-DATA_OUTPUT_PATH = "data/snell_9000_30_2m.npz"                    # If None, uses timestamp. Otherwise specify path.
+LIGHT_NPZ = False                                                    # If True, save only data needed by render_final_frame.py (much smaller)
+DATA_OUTPUT_PATH = "data/snell_250_5.npz"                    # If None, uses timestamp. Otherwise specify path.
 
 
 #####################

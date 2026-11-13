@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=polarityFAABPs
+#SBATCH --job-name=FAABPsPolarity
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=5:00:00
@@ -51,15 +51,21 @@ RESULT_FILE="$PROJECT_HOME/benchmarks.txt"
 # ---------------------------
 # SEQUENTIAL BENCHMARK RUNS
 # ---------------------------
-for N in 250 500 1000 2000 4000; do
-    echo "--- Running N=$N ---"
-    start=$(date +%s.%N)
-    python main.py "$N" "results_${N}"
-    end=$(date +%s.%N)
-    elapsed=$(awk "BEGIN {print $end - $start}")
-    echo "N=${N}: cpus=${SLURM_CPUS_PER_TASK}, time=${elapsed}" >> "$RESULT_FILE"
-    echo "N=${N} elapsed: $elapsed seconds"
-done
+start=$(date +%s.%N)
+
+python continue_sim.py
+
+end=$(date +%s.%N)
+
+elapsed=$(awk "BEGIN {print $end - $start}")
+
+# ---------------------------
+# SAVE RESULT
+# ---------------------------
+RESULT_FILE="$PROJECT_HOME/benchmarks.txt"
+echo "cpus=${SLURM_CPUS_PER_TASK}, time=${elapsed}" >> "$RESULT_FILE"
+
+echo "Elapsed time: $elapsed seconds"
 
 # ---------------------------
 # COPY OUTPUT BACK

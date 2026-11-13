@@ -2,12 +2,12 @@
 #SBATCH --job-name=FAABPs_wallprune
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=16
 #SBATCH --time=10:00:00
 #SBATCH --partition=rome
 # G=20 perfect maze: M = (G-1)^2 = 361 interior walls.
 # Pruning schedule doubles each run: 0,1,2,4,8,16,32,64,128,256,361 → 11 tasks.
-#SBATCH --array=0-10
+#SBATCH --array=0-10%1
 
 set -euo pipefail
 

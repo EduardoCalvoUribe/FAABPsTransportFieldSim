@@ -67,7 +67,7 @@ echo "Task $SLURM_ARRAY_TASK_ID: G=$G run=$RUN_ID output=$OUTPUT_NAME" | tee -a 
 echo "Running from: $(pwd)"
 
 start=$(date +%s.%N)
-python main.py "$G" "$OUTPUT_NAME" >> "$LOG_FILE" 2>&1
+python main2.py "$G" "$OUTPUT_NAME" >> "$LOG_FILE" 2>&1
 end=$(date +%s.%N)
 elapsed=$(awk "BEGIN {print $end - $start}")
 

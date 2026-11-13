@@ -81,3 +81,128 @@ cpus=16, time=336.511
 
 2m 30x30
 cpus=16, time=8332.3
+cpus=16, time=2195.24
+cpus=16, time=676.83
+
+experiments on 10x10 maze
+cpus=32, time=71.131 #end
+cpus=32, time=20.7504 #20ksteps
+cpus=32, time=53.005
+cpus=32, time=78.0403
+cpus=32, time=181.857
+cpus=32, time=139.451
+cpus=32, time=158.291
+cpus=32, time=62.3337
+cpus=32, time=64.799
+cpus=32, time=142.135
+cpus=32, time=143.519
+cpus=32, time=198.169
+N=250: cpus=32, time=187.416
+N=500: cpus=32, time=136.436
+N=1000: cpus=32, time=46.8429
+N=2000: cpus=32, time=66.2292
+N=4000: cpus=32, time=150.518
+
+experiments on 10x10 maze
+N=1000: run=1, cpus=32, output=results_1000_run1, time=55.2054
+N=1000: run=4, cpus=32, output=results_1000_run4, time=59.0434
+N=1000: run=5, cpus=32, output=results_1000_run5, time=61.7341
+N=2000: run=2, cpus=32, output=results_2000_run2, time=70.6923
+N=2000: run=3, cpus=32, output=results_2000_run3, time=70.6605
+N=2000: run=4, cpus=32, output=results_2000_run4, time=72.4711
+N=2000: run=5, cpus=32, output=results_2000_run5, time=67.1085
+N=2000: run=1, cpus=32, output=results_2000_run1, time=76.8397
+N=1000: run=2, cpus=32, output=results_1000_run2, time=89.1795
+N=1000: run=3, cpus=32, output=results_1000_run3, time=89.3359
+N=4000: run=1, cpus=32, output=results_4000_run1, time=144.708
+N=4000: run=4, cpus=32, output=results_4000_run4, time=147.526
+N=4000: run=3, cpus=32, output=results_4000_run3, time=149.83
+N=4000: run=2, cpus=32, output=results_4000_run2, time=153.529
+N=4000: run=5, cpus=32, output=results_4000_run5, time=153.825
+N=500: run=3, cpus=32, output=results_500_run3, time=169.367
+N=500: run=1, cpus=32, output=results_500_run1, time=223.147
+N=500: run=2, cpus=32, output=results_500_run2, time=385.532
+N=250: run=4, cpus=32, output=results_250_run4, time=507.771
+N=500: run=4, cpus=32, output=results_500_run4, time=597.572
+N=250: run=2, cpus=32, output=results_250_run2, time=600.21
+N=250: run=5, cpus=32, output=results_250_run5, time=681.238
+N=500: run=5, cpus=32, output=results_500_run5, time=1047.67
+N=250: run=1, cpus=32, output=results_250_run1, time=1216.68
+N=250: run=3, cpus=32, output=results_250_run3, time=1422.85
+N=8000: run=5, cpus=32, output=results_8000_run5, time=414.178
+N=8000: run=2, cpus=32, output=results_8000_run2, time=435.18
+N=8000: run=3, cpus=32, output=results_8000_run3, time=442.427
+N=8000: run=1, cpus=32, output=results_8000_run1, time=448.113
+N=8000: run=4, cpus=32, output=results_8000_run4, time=458.878
+N=8000: run=2, cpus=32, output=results_8000_run2, time=584.047
+N=250: run=1, cpus=32, output=results_250_run1, time=1057.78
+N=1500: run=2, cpus=32, output=results_1500_run2, time=51.8104
+N=1500: run=1, cpus=32, output=results_1500_run1, time=53.0857
+N=1500: run=3, cpus=32, output=results_1500_run3, time=57.2216
+N=750: run=3, cpus=32, output=results_750_run3, time=54.6784
+N=1500: run=4, cpus=32, output=results_1500_run4, time=56.8959
+N=1500: run=6, cpus=32, output=results_1500_run6, time=56.8952
+N=1500: run=5, cpus=32, output=results_1500_run5, time=56.9506
+N=750: run=6, cpus=32, output=results_750_run6, time=62.9095
+N=750: run=5, cpus=32, output=results_750_run5, time=57.8231
+N=750: run=2, cpus=32, output=results_750_run2, time=74.8417
+N=750: run=1, cpus=32, output=results_750_run1, time=80.6096
+N=750: run=4, cpus=32, output=results_750_run4, time=96.4356
+N=3000: run=5, cpus=32, output=results_3000_run5, time=96.278
+N=3000: run=4, cpus=32, output=results_3000_run4, time=98.9871
+N=3000: run=1, cpus=32, output=results_3000_run1, time=107.429
+N=3000: run=2, cpus=32, output=results_3000_run2, time=104.417
+N=3000: run=3, cpus=32, output=results_3000_run3, time=100.597
+N=6000: run=1, cpus=32, output=results_6000_run1, time=267.563
+N=6000: run=2, cpus=32, output=results_6000_run2, time=265.028
+N=6000: run=5, cpus=32, output=results_6000_run5, time=277.706
+N=6000: run=6, cpus=32, output=results_6000_run6, time=285.733
+N=375: run=4, cpus=32, output=results_375_run4, time=292.814
+N=6000: run=4, cpus=32, output=results_6000_run4, time=291.954
+N=3000: run=6, cpus=32, output=results_3000_run6, time=327.032
+N=375: run=1, cpus=32, output=results_375_run1, time=398.409
+N=6000: run=3, cpus=32, output=results_6000_run3, time=514.239
+N=375: run=5, cpus=32, output=results_375_run5, time=611.301
+N=375: run=3, cpus=32, output=results_375_run3, time=689.165
+N=375: run=2, cpus=32, output=results_375_run2, time=728.078
+N=12000: run=3, cpus=32, output=results_12000_run3, time=757.823
+N=12000: run=5, cpus=32, output=results_12000_run5, time=784.847
+N=12000: run=4, cpus=32, output=results_12000_run4, time=783.455
+N=12000: run=2, cpus=32, output=results_12000_run2, time=794.84
+N=12000: run=6, cpus=32, output=results_12000_run6, time=830.196
+N=12000: run=1, cpus=32, output=results_12000_run1, time=847.777
+N=375: run=6, cpus=32, output=results_375_run6, time=907.744
+N=16000: run=2, cpus=32, output=results_16000_run2, time=1254.72
+N=16000: run=1, cpus=32, output=results_16000_run1, time=1277
+N=16000: run=4, cpus=32, output=results_16000_run4, time=1324.61
+N=16000: run=5, cpus=32, output=results_16000_run5, time=1367.9
+N=16000: run=3, cpus=32, output=results_16000_run3, time=1569.8
+N=16000: run=6, cpus=32, output=results_16000_run6, time=1635.28
+
+
+maze scaling experiments
+G=2: run=2, cpus=32, output=maze_G2_run2, time=17.8753
+G=2: run=5, cpus=32, output=maze_G2_run5, time=17.9739
+G=2: run=1, cpus=32, output=maze_G2_run1, time=18.764
+G=2: run=3, cpus=32, output=maze_G2_run3, time=21.1625
+G=5: run=3, cpus=32, output=maze_G5_run3, time=23.1372
+G=5: run=2, cpus=32, output=maze_G5_run2, time=23.7034
+G=2: run=4, cpus=32, output=maze_G2_run4, time=17.6006
+G=5: run=5, cpus=32, output=maze_G5_run5, time=21.2609
+G=5: run=1, cpus=32, output=maze_G5_run1, time=22.5847
+G=5: run=4, cpus=32, output=maze_G5_run4, time=28.3828
+G=10: run=1, cpus=32, output=maze_G10_run1, time=49.4263
+G=10: run=2, cpus=32, output=maze_G10_run2, time=55.8085
+G=10: run=5, cpus=32, output=maze_G10_run5, time=54.2063
+G=10: run=4, cpus=32, output=maze_G10_run4, time=58.417
+G=10: run=3, cpus=32, output=maze_G10_run3, time=54.6643
+G=20: run=5, cpus=32, output=maze_G20_run5, time=397.84
+G=20: run=2, cpus=32, output=maze_G20_run2, time=524.566
+G=20: run=4, cpus=32, output=maze_G20_run4, time=627.338
+G=20: run=3, cpus=32, output=maze_G20_run3, time=681.771
+G=20: run=1, cpus=32, output=maze_G20_run1, time=777.917
+G=30: run=5, cpus=32, output=maze_G30_run5, time=4939.06
+G=30: run=1, cpus=32, output=maze_G30_run1, time=4937.92
+G=30: run=2, cpus=32, output=maze_G30_run2, time=7634.23
+G=30: run=4, cpus=32, output=maze_G30_run4, time=7890.05
+G=30: run=3, cpus=32, output=maze_G30_run3, time=20209.1

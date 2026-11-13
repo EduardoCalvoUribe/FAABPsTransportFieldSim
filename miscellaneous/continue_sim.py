@@ -41,7 +41,7 @@ OUTPUT_NPZ   = "data/snell_9000_30_cont2.npz"        # combined-path NPZ to writ
 OUTPUT_IMAGE = "visualizations/snell_9000_30_cont2_final.png"
 
 # ─── How many additional steps ────────────────────────────────────────────────
-N_STEPS_CONT = 500_000
+N_STEPS_CONT = 1_000_000
 
 # ─── Save combined NPZ ────────────────────────────────────────────────────────
 SAVE_DATA = True
