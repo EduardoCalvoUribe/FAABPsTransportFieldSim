@@ -127,17 +127,17 @@ DATASETS = [
                      r'($t^* = t\,v_0/r$,  10×10 maze, seed=42, 6 trials each)'),
         ylim      = (1e3, 1e6),
     ),
-        dict(
-        raw       = raw_data_G20,
-        grid_size = 20,
-        L         = SOLUTION_PATH_LENGTH_G20,
-        color     = '#7B68EE',
-        label     = '20×20 maze',
-        outfile   = 'swarm_scaling_plot_G20.png',
-        title     = ('Time to Reach Goal vs Swarm Size\n'
-                     r'($t^* = t\,v_0/r$,  20×20 maze, seed=42, 6 trials each)'),
-        ylim      = None #(1e3, 1e6),
-    ),
+    #     dict(
+    #     raw       = raw_data_G20,
+    #     grid_size = 20,
+    #     L         = SOLUTION_PATH_LENGTH_G20,
+    #     color     = '#7B68EE',
+    #     label     = '20×20 maze',
+    #     outfile   = 'swarm_scaling_plot_G20.png',
+    #     title     = ('Time to Reach Goal vs Swarm Size\n'
+    #                  r'($t^* = t\,v_0/r$,  20×20 maze, seed=42, 6 trials each)'),
+    #     ylim      = None #(1e3, 1e6),
+    # ),
 ]
 
 
@@ -219,6 +219,7 @@ def plot_combined():
 
     ax.set_xscale('log')
     ax.set_yscale('log')
+    ax.set_xlim(1,None)
     ax.set_xlabel('Particle Density (particles per cell)')
     ax.set_ylabel(r'Normalised Time  ($t^{**} = t\, v_0 / L$)')
     ax.set_title('Swarm Size Scaling across Maze Sizes\n'
@@ -228,13 +229,12 @@ def plot_combined():
     ax.xaxis.set_minor_formatter(ticker.NullFormatter())
     ax.yaxis.set_minor_formatter(ticker.NullFormatter())
     plt.tight_layout()
-    plt.savefig('swarm_scaling_plot_combined_g20.png', dpi=150)
+    plt.savefig('swarm_scaling_plot_combined_.png', dpi=150)
     plt.show()
-    print("Saved swarm_scaling_plot_combined_g20.png")
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────
-for ds in DATASETS:
-    plot_individual(ds)
+# for ds in DATASETS:
+#     plot_individual(ds)
 
 plot_combined()
