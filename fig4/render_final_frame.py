@@ -320,7 +320,7 @@ if __name__ == "__main__":
     else:
         # Fallback: re-derive from grid geometry + seed=42 (matches main.py default)
         try:
-            import optimal_path as _op
+            import fig1e.optimal_path as _op
             from src import wilson as _wil
             _gs = int(round(box_size / 60.0))
             if abs(_gs * 60.0 - box_size) < 0.5 and _gs >= 2:
