@@ -143,7 +143,7 @@ if __name__ == "__main__":
             opened_wall_seg = ows
     else:
         try:
-            import optimal_path as _op
+            import adaptable_fig.optimal_path as _op
             from src import wilson as _wil
             _gs = int(round(box_size / 60.0))
             if abs(_gs * 60.0 - box_size) < 0.5 and _gs >= 2:
