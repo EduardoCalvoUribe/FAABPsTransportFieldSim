@@ -2,7 +2,7 @@
 
 Shows the simulation environment from a reference NPZ, then overlays all 5
 default and 5 optimal payload trajectories together with their per-group DTW
-Barycenter Average (DBA) paths.  A legend is placed below the inset.
+Barycenter Average (DBA) paths.  A legend is placed in the top-left corner (no inset).
 
 All other rendering logic (walls, particles, inset, goal, etc.) is identical
 to render_final_frame.py.
@@ -61,10 +61,20 @@ RED_COLOR     = '#D62728'
 PAYLOAD_COLOR = '#737BA8'
 GOAL_COLOR    = '#008F25'   # dark green
 
+# Payload texture: Perlin noise mapped from light to dark grey
+PAYLOAD_GRAY_LIGHT  = (0.86, 0.86, 0.86)
+PAYLOAD_GRAY_DARK   = (0.20, 0.20, 0.20)
+PAYLOAD_NOISE_CELLS = 3      # base noise cells across the payload diameter
+PAYLOAD_NOISE_OCTAVES = 3
+PAYLOAD_NOISE_SEED  = 7
+
 PARTICLE_RADIUS_SCALE = 1.5   # display-size multiplier for particle circles (main view + inset)
-DISCONNECTED_SCORE = 1000    # clipped to the worst colour
-SCORE_CMAP_LOW  = '#F4D03F'   # warm amber  — best (score 0)
-SCORE_CMAP_HIGH = '#8E44AD'   # deep purple — worst (highest score)
+# Particle score colouring: MINCOLOR_SCORE -> yellow, MAXCOLOR_SCORE -> purple.
+# Scores outside [MIN, MAX] (incl. disconnected particles) clip to the end colours.
+MINCOLOR_SCORE  = 0
+MAXCOLOR_SCORE  = 50
+SCORE_CMAP_LOW  = '#F4D03F'   # warm amber  — MINCOLOR_SCORE
+SCORE_CMAP_HIGH = "#50106B"   # deep purple — MAXCOLOR_SCORE and above
 
 
 # ── Helper functions (unchanged from render_final_frame.py) ──────────────────
@@ -91,6 +101,35 @@ def _arc_points(x1, y1, x2, y2, c, n_pts=64):
         span_cw = 2 * np.pi - span_ccw
         thetas = np.linspace(theta1, theta1 - span_cw, n_pts)
     return (center[0] + R * np.cos(thetas)).tolist(), (center[1] + R * np.sin(thetas)).tolist()
+
+
+def perlin_noise(size, cells, octaves=1, seed=0):
+    """Fractal 2D Perlin noise, (size, size) array normalised to [0, 1]."""
+    rng = np.random.default_rng(seed)
+    out = np.zeros((size, size))
+    amp, total = 1.0, 0.0
+    for o in range(octaves):
+        n = cells * 2**o
+        ang = rng.uniform(0, 2 * np.pi, (n + 1, n + 1))
+        gx, gy = np.cos(ang), np.sin(ang)
+        t = np.linspace(0, n, size, endpoint=False)
+        xi = t.astype(int)
+        f = t - xi
+        u = f * f * f * (f * (f * 6 - 15) + 10)           # smootherstep fade
+        X, Y = np.meshgrid(f, f)                           # X varies along columns
+        U, V = np.meshgrid(u, u)
+        ix, iy = np.meshgrid(xi, xi)
+
+        def dot(dx, dy):
+            return gx[iy + dy, ix + dx] * (X - dx) + gy[iy + dy, ix + dx] * (Y - dy)
+
+        n00, n10, n01, n11 = dot(0, 0), dot(1, 0), dot(0, 1), dot(1, 1)
+        val = (n00 * (1 - U) + n10 * U) * (1 - V) + (n01 * (1 - U) + n11 * U) * V
+        out += amp * val
+        total += amp
+        amp *= 0.5
+    out /= total
+    return (out - out.min()) / (out.max() - out.min())
 
 
 def curvity_color(c):
@@ -125,8 +164,6 @@ if __name__ == "__main__":
     last_positions   = np.array(data['positions'][-1])       # (N, 2)
     last_curvity     = np.array(data['curvity_values'][-1])  # (N,)
     last_scores      = np.array(data['particle_scores'][-1]) # (N,)
-    _valid_scores = last_scores[last_scores < DISCONNECTED_SCORE]
-    score_max_global = max(int(_valid_scores.max()) if _valid_scores.size else 0, 1)
     ref_payload_traj = np.array(data['payload_positions'])   # (T, 2) — for inset
 
     box_size        = float(data['box_size'])
@@ -230,7 +267,7 @@ if __name__ == "__main__":
         wall_lw = 1.3 if box_size > 1200 else 1.8
         for i in range(walls.shape[0]):
             xs, ys = _arc_points(walls[i,0], walls[i,1], walls[i,2], walls[i,3], walls[i,4])
-            ax.plot(xs, ys, color='#505050', linewidth=wall_lw, solid_capstyle='round', zorder=10)
+            ax.plot(xs, ys, color='#282828', linewidth=wall_lw, solid_capstyle='round', zorder=10)
 
         # Opened wall — red solid line where the shortcut wall was removed
         if draw_opened_wall and opened_wall_seg is not None:
@@ -271,7 +308,7 @@ if __name__ == "__main__":
         if COLOR_BY_SCORE:
             score_cmap = LinearSegmentedColormap.from_list(
                 'score', [SCORE_CMAP_LOW, SCORE_CMAP_HIGH])
-            score_norm = Normalize(vmin=0, vmax=60, clip=True) #score_max_global, clip=True)
+            score_norm = Normalize(vmin=MINCOLOR_SCORE, vmax=MAXCOLOR_SCORE, clip=True)
             colors = [score_cmap(score_norm(s))[:3] for s in last_scores]
         else:
             colors = [curvity_color(c) for c in last_curvity]
@@ -297,113 +334,33 @@ if __name__ == "__main__":
                         str(i), fontsize=8, ha='right', va='center',
                         color='black', zorder=9)
 
-        # 5. Payload markers — one per group, at the final point of each average path
-        if draw_default:
-            ax.add_patch(mpatches.Circle(
-                (default_avg_end[0], default_avg_end[1]), radius=payload_radius,
-                facecolor=DARK_BLUE, edgecolor='none',
-                alpha=0.5, zorder=7,
-            ))
+        # 5. Payload marker — adapted run only, Perlin-noise grey texture
         if draw_optimal:
-            ax.add_patch(mpatches.Circle(
-                (optimal_avg_end[0], optimal_avg_end[1]), radius=payload_radius,
-                facecolor=RED_COLOR, edgecolor='none',
-                alpha=0.5, zorder=7,
-            ))
+            cx, cy = float(optimal_avg_end[0]), float(optimal_avg_end[1])
+            noise = perlin_noise(256, PAYLOAD_NOISE_CELLS, PAYLOAD_NOISE_OCTAVES,
+                                 PAYLOAD_NOISE_SEED)
+            lo = np.array(PAYLOAD_GRAY_LIGHT); hi = np.array(PAYLOAD_GRAY_DARK)
+            tex = lo + (hi - lo) * noise[..., None]
+            xlim, ylim = ax.get_xlim(), ax.get_ylim()
+            im = ax.imshow(tex, extent=(cx - payload_radius, cx + payload_radius,
+                                        cy - payload_radius, cy + payload_radius),
+                           origin='lower', interpolation='bilinear', alpha=1.0, zorder=10.5)
+            clip = mpatches.Circle((cx, cy), radius=payload_radius, transform=ax.transData)
+            im.set_clip_path(clip)
+            ax.set_xlim(xlim); ax.set_ylim(ylim); ax.set_aspect('equal')
+            ax.add_patch(mpatches.Circle((cx, cy), radius=payload_radius,
+                                         facecolor='none', edgecolor='#282828',
+                                         linewidth=1.0, zorder=10.6))
 
         # Goal
         ax.plot(goal_position[0], goal_position[1],
                 '*', color=GOAL_COLOR, markersize=18, markeredgewidth=0.8,
                 markeredgecolor='#003A0E', zorder=11)
 
-        # ── Fill figure exactly, then place inset ─────────────────────────────
+        # ── Fill figure exactly ───────────────────────────────────────────────
         ax.set_position([0, 0, 1, 1])
 
-        # ── Inset: zoomed payload view — only for G10+ (box_size > 300) ───────
-        if box_size > 300:
-            zoom_half = 40
-            _ap = ax.get_position()
-            inset_ax = fig.add_axes([
-                _ap.x0 + 0.02 * _ap.width,
-                _ap.y0 + 0.73 * _ap.height,
-                0.25 * _ap.width,
-                0.25 * _ap.height,
-            ])
-            inset_ax.set_xlim(-zoom_half, zoom_half)
-            inset_ax.set_ylim(-zoom_half, zoom_half)
-            inset_ax.set_aspect('equal')
-            inset_ax.set_xticks([])
-            inset_ax.set_yticks([])
-            inset_ax.set_title('Payload zoom', fontsize=7, pad=2)
-            for spine in inset_ax.spines.values():
-                spine.set_linewidth(3)
-            inset_ax.set_facecolor('white')
-
-            # Particle positions relative to final payload centre (reference file)
-            rel_x = last_positions[:, 0] - px_final
-            rel_y = last_positions[:, 1] - py_final
-            inset_circles = [mpatches.Circle((dx, dy), radius=ri * PARTICLE_RADIUS_SCALE)
-                             for dx, dy, ri in zip(rel_x, rel_y, particle_radius)]
-            inset_pc = PatchCollection(inset_circles, facecolors=colors, alpha=0.7, linewidths=0, zorder=6)
-            inset_ax.add_collection(inset_pc)
-
-            # Particle ID labels — shown only for particles inside the visible zoom window
-            label_offset = r * 1.4
-            for i in range(n_particles):
-                if abs(rel_x[i]) < zoom_half and abs(rel_y[i]) < zoom_half:
-                    inset_ax.text(rel_x[i] - label_offset, rel_y[i],
-                                  str(i), fontsize=6, ha='right', va='center',
-                                  color='black', zorder=9)
-
-            # Payload markers for each group average — relative to reference px_final/py_final
-            if draw_default:
-                inset_ax.add_patch(mpatches.Circle(
-                    (default_avg_end[0] - px_final, default_avg_end[1] - py_final),
-                    radius=payload_radius,
-                    facecolor=DARK_BLUE, edgecolor='none',
-                    alpha=0.5, zorder=7,
-                ))
-            if draw_optimal:
-                inset_ax.add_patch(mpatches.Circle(
-                    (optimal_avg_end[0] - px_final, optimal_avg_end[1] - py_final),
-                    radius=payload_radius,
-                    facecolor=RED_COLOR, edgecolor='none',
-                    alpha=0.5, zorder=7,
-                ))
-
-            # Goal in payload-relative coordinates
-            gx_rel = goal_position[0] - px_final
-            gy_rel = goal_position[1] - py_final
-            inset_ax.plot(gx_rel, gy_rel, '*', color=GOAL_COLOR, markersize=24,
-                          markeredgewidth=0.8, markeredgecolor='#003A0E', zorder=100)
-
-            # Walls in payload-relative coordinates
-            for i in range(walls.shape[0]):
-                wx1 = walls[i, 0] - px_final
-                wy1 = walls[i, 1] - py_final
-                wx2 = walls[i, 2] - px_final
-                wy2 = walls[i, 3] - py_final
-                xs, ys = _arc_points(wx1, wy1, wx2, wy2, walls[i, 4])
-                inset_ax.plot(xs, ys, color='#505050', linewidth=1.5, solid_capstyle='round', zorder=10)
-
-            # Opened wall in payload-relative coordinates
-            if draw_opened_wall and opened_wall_seg is not None:
-                inset_ax.plot(
-                    [opened_wall_seg[0] - px_final, opened_wall_seg[2] - px_final],
-                    [opened_wall_seg[1] - py_final, opened_wall_seg[3] - py_final],
-                    color=GOAL_COLOR, linewidth=2.5, linestyle='-',
-                    solid_capstyle='round', zorder=11,
-                    path_effects=[mpe.Stroke(linewidth=4.0, foreground='black'), mpe.Normal()])
-
-            # Average paths relative to reference px_final/py_final
-            if draw_default:
-                inset_ax.plot(default_avg[:, 0] - px_final, default_avg[:, 1] - py_final,
-                              color=DARK_BLUE, alpha=1.0, linewidth=2.5, linestyle='-', zorder=4)
-            if draw_optimal:
-                inset_ax.plot(optimal_avg[:, 0] - px_final, optimal_avg[:, 1] - py_final,
-                              color=RED_COLOR, alpha=1.0, linewidth=2.5, linestyle='-', zorder=5)
-
-        # ── Legend — placed below the inset (top-left quadrant) ───────────────
+        # ── Legend — top-left corner ───────────────
         legend_handles = []
         if draw_default:
             legend_handles += [
@@ -422,14 +379,55 @@ if __name__ == "__main__":
         leg = ax.legend(
             handles=legend_handles,
             loc='upper left',
-            bbox_to_anchor=(0.02, 1.71),
-            fontsize=12,
+            bbox_to_anchor=(0.02, 0.98),
+            fontsize=18,
             frameon=True,
             edgecolor='#aaaaaa',
         )
         leg.get_frame().set_facecolor('white')
         leg.get_frame().set_alpha(1.0)
         leg.set_zorder(20)
+
+        # ── Inset colorbar for particle score (inside the legend box) ─────────
+        # The legend's own frame is replaced by one white box that also
+        # covers the colorbar, so legend + colorbar read as a single panel.
+        if COLOR_BY_SCORE:
+            fig.canvas.draw()
+            renderer = fig.canvas.get_renderer()
+            inv = fig.transFigure.inverted()
+            lb = leg.get_window_extent(renderer).transformed(inv)
+            fw, fh = fig.get_size_inches()
+            pad_x = leg.borderpad * 18 / 72 / fw      # legend interior padding
+            pad_y = leg.borderpad * 18 / 72 / fh
+            cb_h = 0.018
+            BOX_GAP = 0.007   # extra white space on all four sides of the legend + colorbar content
+            cax = fig.add_axes([lb.x0 + pad_x, lb.y0 - 0.022 - cb_h,
+                                lb.width - 2 * pad_x, cb_h])
+            cax.set_zorder(25)
+            sm = plt.cm.ScalarMappable(norm=score_norm, cmap=score_cmap)
+            cb = fig.colorbar(sm, cax=cax, orientation='horizontal', alpha=0.7)
+            _mid = (MINCOLOR_SCORE + MAXCOLOR_SCORE) / 2
+            cb.set_ticks([MINCOLOR_SCORE, _mid, MAXCOLOR_SCORE])
+            cb.set_ticklabels([f'{MINCOLOR_SCORE:g}', f'{_mid:g}', f'≥{MAXCOLOR_SCORE:g}'])
+            cb.ax.tick_params(labelsize=14)
+            cb.set_label('Particle score', fontsize=16)
+            cb.outline.set_linewidth(0.8)
+            tl = cb.ax.get_xticklabels()
+            tl[0].set_ha('left')
+            tl[-1].set_ha('right')
+
+            # Extend a single white box from the legend top to below the colorbar label
+            fig.canvas.draw()
+            tb = cb.ax.get_tightbbox(renderer).transformed(inv)
+            leg.set_frame_on(False)
+            box = mpatches.FancyBboxPatch(
+                (lb.x0 - BOX_GAP / (fw / fh), tb.y0 - pad_y - BOX_GAP),
+                lb.width + 2 * BOX_GAP / (fw / fh),
+                (lb.y1 + BOX_GAP) - (tb.y0 - pad_y - BOX_GAP),
+                boxstyle='round,pad=0,rounding_size=0.004',
+                transform=fig.transFigure, facecolor='white',
+                edgecolor='#282828', linewidth=wall_lw, joinstyle='round', zorder=19, clip_on=False)
+            ax.add_artist(box)
 
         plt.savefig(output_path, dpi=150, bbox_inches='tight', pad_inches=0)
         plt.close()
