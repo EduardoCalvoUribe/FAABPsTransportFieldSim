@@ -3,13 +3,14 @@ import numpy as np
 import argparse
 import sys
 import os
+from paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
 import matplotlib.pyplot as plt
 import re
 import random
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from payload_analysis import unravel_trajectory
+from analysis import unravel_trajectory
 
 def parse_filename_parameters_velocity(filename):
     if filename.endswith('.npz'):
@@ -160,8 +161,8 @@ def main_curvity():
     
     file_size_dict = {}
     
-    for file in os.listdir("D:/ThesisData/data/dynamic_curvity"):
-        filename = f"D:/ThesisData/data/dynamic_curvity/{file}"
+    for file in os.listdir(f"{DATA_DIR}/dynamic_curvity"):
+        filename = f"{DATA_DIR}/dynamic_curvity/{file}"
         # read size of file and save to a dictionary
         file_size = os.path.getsize(filename)
         cOn, cOff, pradius = parse_filename_parameters_curvity(file)
@@ -229,7 +230,7 @@ def main_velocity():
     }
     
     # Check both folders
-    folders = ["D:/ThesisData/data/dynamic_v0", "D:/ThesisData/data/dynamic_v0_2"]
+    folders = [f"{DATA_DIR}/dynamic_v0", f"{DATA_DIR}/dynamic_v0_2"]
     
     for folder in folders:
         for file in os.listdir(folder):

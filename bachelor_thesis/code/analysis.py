@@ -1,11 +1,12 @@
 import numpy as np
 import os
+from paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
 import matplotlib.pyplot as plt
 from faabp_sim import create_payload_animation
 
 def dynamic_v0_payloadspeed():
-    data_dir = 'D:/ThesisData/data/dynamic_v0'
-    data_dir_2 = 'D:/ThesisData/data/dynamic_v0_2'
+    data_dir = f'{DATA_DIR}/dynamic_v0'
+    data_dir_2 = f'{DATA_DIR}/dynamic_v0_2'
     
     files = os.listdir(data_dir) + os.listdir(data_dir_2)
     
@@ -79,12 +80,12 @@ def dynamic_v0_payloadspeed():
         plt.xticks(ticks=[0, 1, 2], labels=unique_vOn)
         plt.yticks(ticks=[0, 1, 2], labels=unique_vOff)
         plt.tight_layout()
-        plt.savefig(f'C:/Users/educa/Pictures/thesis/dynamic_v0/payload_speed_3/dynamicvO_heatmap_curvity_{c}.png')
+        plt.savefig(out_path(f'{FIG_DIR}/dynamic_v0/payload_speed_3/dynamicvO_heatmap_curvity_{c}.png'))
         plt.show()
     
 
 def dynamic_curvity_payloadspeed():
-    data_dir = 'D:/ThesisData/data/dynamic_curvity'
+    data_dir = f'{DATA_DIR}/dynamic_curvity'
     
     files = os.listdir(data_dir)
     
@@ -163,7 +164,7 @@ def dynamic_curvity_payloadspeed():
         plt.xticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], labels=unique_cOn)
         plt.yticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], labels=unique_cOff)
         plt.tight_layout()
-        plt.savefig(f'C:/Users/educa/Pictures/thesis/dynamiccurviy_heatmap_pradius_{c}.png')
+        plt.savefig(out_path(f'{FIG_DIR}/dynamiccurviy_heatmap_pradius_{c}.png'))
         plt.show()
 
 
@@ -213,8 +214,8 @@ def unravel_trajectory(trajectory, box_size=350):
     return unraveled
 
 def graph_pathway():
-    data_dir = 'D:/ThesisData/data/dynamic_v0'
-    data_dir_2 = 'D:/ThesisData/data/dynamic_v0_2'
+    data_dir = f'{DATA_DIR}/dynamic_v0'
+    data_dir_2 = f'{DATA_DIR}/dynamic_v0_2'
     
     files = os.listdir(data_dir) + os.listdir(data_dir_2)
     
@@ -274,13 +275,13 @@ def graph_pathway():
     plt.colorbar(sm, ax=ax, label='Curvity')
     
     plt.tight_layout()
-    plt.savefig('C:/Users/educa/Pictures/thesis/paths/payload_pathway_full.png', dpi=300)
+    plt.savefig(out_path(f'{FIG_DIR}/paths/payload_pathway_full.png'), dpi=300)
     plt.show()
 
 if __name__ == "__main__":
     # graph_pathway()
     dynamic_v0_payloadspeed()
-    # data = np.load(f'D:/ThesisData/data/dynamic_v0/sim_data_vOn_{3.75}_vOff_{10}_curvity_{0.6}.npz')
+    # data = np.load(f'{DATA_DIR}/dynamic_v0/sim_data_vOn_{3.75}_vOff_{10}_curvity_{0.6}.npz')
     # n_saved_states = len(data['positions'])
     # original_steps = (n_saved_states - 1) * 10
     # print(f"Original simulation ran for {original_steps} steps")

@@ -5,6 +5,7 @@ from matplotlib.animation import FuncAnimation, PillowWriter, FFMpegWriter
 from matplotlib.patches import Circle
 import time
 import os
+from paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
 import math
 from numba import njit, float64, int64
 
@@ -476,7 +477,7 @@ def run_payload_simulation(params):
     )
 
 def create_payload_animation(positions, orientations, velocities, payload_positions, params, 
-                            curvity_values, output_file='visualizations/payload_animation_00.mp4'):
+                            curvity_values, output_file=f'{VIS_DIR}/payload_animation_00.mp4'):
     """Create an animation of the payload transport simulation."""
     print("Creating animation...")
     
@@ -607,6 +608,7 @@ def create_payload_animation(positions, orientations, velocities, payload_positi
     #writer = PillowWriter(fps=target_fps) # for gifs, but its slower
     writer = FFMpegWriter(fps=target_fps, bitrate=1000) # mp4
     
+    os.makedirs(os.path.dirname(os.path.abspath(output_file)), exist_ok=True)
     anim.save(output_file, writer=writer)
     plt.close()
     
@@ -655,6 +657,7 @@ def heterogeneous_curvity(params):
 def save_simulation_data(filename, positions, orientations, velocities, payload_positions, 
                         payload_velocities, params, curvity_values):
     """Save simulation data including individual particle parameters."""
+    os.makedirs(os.path.dirname(os.path.abspath(filename)), exist_ok=True)
     np.savez(
         filename,
         # Frame-specific data
@@ -703,13 +706,13 @@ if __name__ == "__main__":
     
     # Save simulation data
     # save_simulation_data(
-    #     f'D:/ThesisData/data/tests/sim_data_vOn_{3.75}_vOff_{10}_curvity_{0}_payloadinertia.npz',
+    #     f'{DATA_DIR}/tests/sim_data_vOn_{3.75}_vOff_{10}_curvity_{0}_payloadinertia.npz',
     #     positions, orientations, velocities, payload_positions, payload_velocities, params, curvity_values
     # )
     
     # # Create animation
     # create_payload_animation(positions, orientations, velocities, payload_positions, params, 
-    #                             curvity_values, f'D:/ThesisData/visualizations/tests/sim_animation_vOn_{3.75}_vOff_{10}_curvity_{0}_pinertia.mp4')
+    #                             curvity_values, f'{VIS_DIR}/tests/sim_animation_vOn_{3.75}_vOff_{10}_curvity_{0}_pinertia.mp4')
 
     # Run simulations
    
@@ -727,12 +730,12 @@ if __name__ == "__main__":
             
             # Save simulation data
             save_simulation_data(
-                f'D:/ThesisData/data/dynamic_v0_2/sim_data_vOn_{pair[0]}_vOff_{pair[1]}_curvity_{curvity}.npz',
+                f'{DATA_DIR}/dynamic_v0_2/sim_data_vOn_{pair[0]}_vOff_{pair[1]}_curvity_{curvity}.npz',
                 positions, orientations, velocities, payload_positions, payload_velocities, params, curvity_values
             )
             # Create animation
             # create_payload_animation(positions, orientations, velocities, payload_positions, params, 
-            #                             curvity_values, f'D:/ThesisData/visualizations/dynamic_v0_2/sim_animation_vOn_{pair[0]}_vOff_{pair[1]}_curvity_{curvity}.mp4')
+            #                             curvity_values, f'{VIS_DIR}/dynamic_v0_2/sim_animation_vOn_{pair[0]}_vOff_{pair[1]}_curvity_{curvity}.mp4')
 
                 
     
@@ -758,6 +761,6 @@ if __name__ == "__main__":
     
     # Create animation with frame-specific curvity values
     # create_payload_animation(positions, orientations, velocities, payload_positions, params, 
-    #                          curvity_values, 'visualizations/sim_animation_{timestamp}.mp4'.format(timestamp=T))
+    #                          curvity_values, f'{VIS_DIR}/sim_animation_{timestamp}.mp4'.format(timestamp=T))
     
     print("Payload simulation and animation completed successfully!")

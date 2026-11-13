@@ -1,16 +1,17 @@
 from faabp_sim import extract_simulation_data, create_payload_animation, default_payload_params
 import os
+from paths import DATA_DIR, VIS_DIR, FIG_DIR, out_path
 
 params = default_payload_params(curvity_on=0.4, curvity_off=-0.4, payload_radius=18.7)
-# # data = extract_simulation_data('D:/ThesisData/data/dynamic_curvity/sim_data_cOn_1_cOff_0_pradius_18.7.npz')
-# data = extract_simulation_data('D:/ThesisData/data/dynamic_v0/sim_data_vOn_10_vOff_3.75_curvity_0.6.npz')
+# # data = extract_simulation_data(f'{DATA_DIR}/dynamic_curvity/sim_data_cOn_1_cOff_0_pradius_18.7.npz')
+# data = extract_simulation_data(f'{DATA_DIR}/dynamic_v0/sim_data_vOn_10_vOff_3.75_curvity_0.6.npz')
 # print(data)
 # create_payload_animation(data['positions'], data['orientations'], data['velocities'], data['payload_positions'], params, 
-#                          data['curvity_values'], f'D:/ThesisData/visualizations/dynamic_v0/sim_animation_vOn_10_vOff_3.75_curvity_0.6.mp4')
+#                          data['curvity_values'], f'{VIS_DIR}/dynamic_v0/sim_animation_vOn_10_vOff_3.75_curvity_0.6.mp4')
 
 def query_data():
     count = 0
-    root_dir = 'D:/ThesisData/data/dynamic_curvity'
+    root_dir = f'{DATA_DIR}/dynamic_curvity'
     for file in os.listdir(root_dir):
         # get the file name without the extension
         file_name = os.path.splitext(file)[0]
@@ -25,11 +26,11 @@ def query_data():
             count += 1
             # data = extract_simulation_data(os.path.join(root_dir, file))
             # create_payload_animation(data['positions'], data['orientations'], data['velocities'], data['payload_positions'], params, 
-            #              data['curvity_values'], f'D:/ThesisData/visualizations/dynamic_curvity/sim_animation_cOn_{curvity_on}_cOff_{curvity_off}_pradius_{payload_radius}.mp4')
+            #              data['curvity_values'], f'{VIS_DIR}/dynamic_curvity/sim_animation_cOn_{curvity_on}_cOff_{curvity_off}_pradius_{payload_radius}.mp4')
     print(count)
 
-target = 'D:/ThesisData/data/dynamic_curvity/sim_data_cOn_-0.2_cOff_-0.4_pradius_18.7.npz'
-result = 'D:/ThesisData/visualizations/dynamic_curvity/sim_animation_cOn_-0.2_cOff_-0.4_pradius_18.7.mp4'
+target = f'{DATA_DIR}/dynamic_curvity/sim_data_cOn_-0.2_cOff_-0.4_pradius_18.7.npz'
+result = f'{VIS_DIR}/dynamic_curvity/sim_animation_cOn_-0.2_cOff_-0.4_pradius_18.7.mp4'
 
 data = extract_simulation_data(target)
 create_payload_animation(data['positions'], data['orientations'], data['velocities'], data['payload_positions'], params, 
