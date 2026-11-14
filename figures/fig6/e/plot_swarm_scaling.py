@@ -1,6 +1,13 @@
+import os
+import re
+import sys
+
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
+
+# ── System constants ────────────────────────────────────────────────────────
+_HERE = os.path.dirname(os.path.abspath(__file__))
 
 # ── Physical constants ────────────────────────────────────────────────────────
 DT = 0.01   # simulation timestep
@@ -184,7 +191,7 @@ def plot_individual(ds):
     ax.set_xlabel('Swarm Size (number of particles)')
     ax.set_ylabel(r'Time to Reach Goal  ($t^* = t\, v_0 / r$)')
     ax.set_title(ds['title'])
-    ax.legend(fontsize=9)
+    ax.legend(fontsize=18)
     ax.grid(True, which='both', linestyle='--', alpha=0.4)
     plt.tight_layout()
     plt.savefig(ds['outfile'], dpi=150)
@@ -214,22 +221,27 @@ def plot_combined():
                     color=ds['color'], label=ds['label'])
 
     # Theoretical optimum: t** = 1
-    ax.axhline(1.0, color='gray', linestyle=':', linewidth=1.5,
-               label=r'theoretical optimum ($t^{**} = 1$)')
+    #ax.axhline(1.0, color='gray', linestyle=':', linewidth=1.5,
+    #           label=r'theoretical optimum ($t^{**} = 1$)')
 
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_xlim(1,None)
-    ax.set_xlabel('Particle Density (particles per cell)')
-    ax.set_ylabel(r'Normalised Time  ($t^{**} = t\, v_0 / L$)')
+    ax.set_ylim(1,2.5E2)
+    ax.tick_params(axis='both', labelsize=16)
+
+    ax.set_xlabel(r'Mean Particle Density ($N/C^2$)',fontsize=18)
+    ax.set_ylabel(r'Time to Target  ($L/v_0$)',fontsize=18)
     ax.set_title('Swarm Size Scaling across Maze Sizes\n'
                  r'$t^{**} = t\,v_0/L$;  density $= N/G^2$;  optimum at $t^{**}=1$')
-    ax.legend(fontsize=9)
+    ax.legend(fontsize=18)
     ax.grid(True, which='both', linestyle='--', alpha=0.4)
     ax.xaxis.set_minor_formatter(ticker.NullFormatter())
     ax.yaxis.set_minor_formatter(ticker.NullFormatter())
     plt.tight_layout()
-    plt.savefig('swarm_scaling_plot_combined_.png', dpi=150)
+    outfile = os.path.join(_HERE, 'swarm_scaling_plot_combined_.png')
+    plt.savefig(outfile, dpi=300)
+    print(f"Saved {outfile}")
     plt.show()
 
 
