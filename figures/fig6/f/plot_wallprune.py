@@ -122,7 +122,7 @@ ax.xaxis.set_minor_formatter(ticker.NullFormatter())
 
 ax.set_xlabel('# Walls pruned',fontsize=18)
 #ax.set_ylabel(r'Time to Reach Goal  ($t^* = t\, v_0 / r$)')
-ax.set_ylabel(r'Time to Target $(rC\sqrt{2}/v_0 )$',fontsize=18)#Time to Reach Goal  ($t^* = t\, v_0 / r$)')
+ax.set_ylabel(r'Time to Target $(r\sqrt{2C}/v_0 )$',fontsize=18)#Time to Reach Goal  ($t^* = t\, v_0 / r$)')
 n_min, n_max = counts.min(), counts.max()
 trials = f'{n_max}' if n_min == n_max else f'{n_min}-{n_max}'
 ax.set_title('Navigation Time vs Wall Density\n'
