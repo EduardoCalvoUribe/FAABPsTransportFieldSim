@@ -10,3 +10,5 @@ __pycache__
 *.mp4
 *.npz
 *.txt
+# Keep fig6/abc source data
+!figures/fig6/abc/*.npz
