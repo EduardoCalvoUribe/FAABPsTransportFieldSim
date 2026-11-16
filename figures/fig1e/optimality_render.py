@@ -18,6 +18,8 @@ import matplotlib.lines as mlines
 import matplotlib.patheffects as mpe
 from matplotlib.collections import PatchCollection
 from matplotlib.colors import LinearSegmentedColormap, Normalize
+from matplotlib import colormaps as colormaps
+
 import numpy as np
 from tslearn.barycenters import dtw_barycenter_averaging
 
@@ -74,7 +76,7 @@ PARTICLE_RADIUS_SCALE = 1.5   # display-size multiplier for particle circles (ma
 # Particle score colouring: MINCOLOR_SCORE -> yellow, MAXCOLOR_SCORE -> purple.
 # Scores outside [MIN, MAX] (incl. disconnected particles) clip to the end colours.
 MINCOLOR_SCORE  = 0
-MAXCOLOR_SCORE  = 50
+MAXCOLOR_SCORE  = 35
 SCORE_CMAP_LOW  = '#F4D03F'   # warm amber  — MINCOLOR_SCORE
 SCORE_CMAP_HIGH = "#50106B"   # deep purple — MAXCOLOR_SCORE and above
 
@@ -308,8 +310,14 @@ if __name__ == "__main__":
 
         # ── Particles (final frame of reference file) ──────────────────────────
         if COLOR_BY_SCORE:
-            score_cmap = LinearSegmentedColormap.from_list(
-                'score', [SCORE_CMAP_LOW, SCORE_CMAP_HIGH])
+            #score_cmap = LinearSegmentedColormap.from_list(
+            #    'score', [SCORE_CMAP_LOW, SCORE_CMAP_HIGH])
+            #score_norm = Normalize(vmin=MINCOLOR_SCORE, vmax=MAXCOLOR_SCORE, clip=True)
+            score_cmap =  colormaps['viridis']#['gist_rainbow']
+            #score_cmap = LinearSegmentedColormap.from_list('particle_scores',
+            #        ["#FF0000", "#00FF00","#0000FF"])
+            #LinearSegmentedColormap.from_list(
+            #                'score', [SCORE_CMAP_LOW, SCORE_CMAP_HIGH])
             score_norm = Normalize(vmin=MINCOLOR_SCORE, vmax=MAXCOLOR_SCORE, clip=True)
             colors = [score_cmap(score_norm(s))[:3] for s in last_scores]
         else:
@@ -325,7 +333,7 @@ if __name__ == "__main__":
         display_radii = np.maximum(particle_radius, min_r) * PARTICLE_RADIUS_SCALE
         circles = [mpatches.Circle((x, y), radius=ri)
                    for (x, y), ri in zip(last_positions, display_radii)]
-        pc = PatchCollection(circles, facecolors=colors, alpha=0.7, linewidths=0, zorder=6)
+        pc = PatchCollection(circles, facecolors=colors, edgecolor='k', alpha=1, linewidths=0.2, zorder=6)
         ax.add_collection(pc)
 
         # For small maps (G2) label every particle in the main view
@@ -403,7 +411,7 @@ if __name__ == "__main__":
                                 lb.width - 2 * pad_x, cb_h])
             cax.set_zorder(25)
             sm = plt.cm.ScalarMappable(norm=score_norm, cmap=score_cmap)
-            cb = fig.colorbar(sm, cax=cax, orientation='horizontal', alpha=0.7)
+            cb = fig.colorbar(sm, cax=cax, orientation='horizontal', alpha=1)
             _mid = (MINCOLOR_SCORE + MAXCOLOR_SCORE) / 2
             cb.set_ticks([MINCOLOR_SCORE, _mid, MAXCOLOR_SCORE])
             cb.set_ticklabels([f'{MINCOLOR_SCORE:g}', f'{_mid:g}', f'≥{MAXCOLOR_SCORE:g}'])
