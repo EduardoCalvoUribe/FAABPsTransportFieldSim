@@ -267,8 +267,14 @@ if __name__ == "__main__":  # simulation runner
     parser.add_argument("output_name", type=str)
     parser.add_argument("--no-shortcut", action="store_true",
                         help="Use the original perfect maze (no wall removed)")
+    parser.add_argument("--maze-seed", type=int, default=42,
+                        help="Seed for Wilson maze generation (default 42, the original)")
+    parser.add_argument("--n-steps", type=int, default=None,
+                        help="Override N_STEPS (max simulation steps)")
     args = parser.parse_args()
 
+    if args.n_steps is not None:
+        N_STEPS = args.n_steps
     MAZE_GRID_SIZE = args.maze_grid_size
     BOX_SIZE = 60.0 * MAZE_GRID_SIZE
     N_PARTICLES = 10 * MAZE_GRID_SIZE ** 2
@@ -282,12 +288,12 @@ if __name__ == "__main__":  # simulation runner
     OUTPUT_FILENAME = f"visualizations/{args.output_name}.mp4"
 
     if args.no_shortcut:
-        _passages  = wilson.generate(MAZE_GRID_SIZE, seed=42)
+        _passages  = wilson.generate(MAZE_GRID_SIZE, seed=args.maze_seed)
         _path_info = {}
     else:
         _passages, _path_info = optimal_path.open_best_shortcut(
             grid_size     = MAZE_GRID_SIZE,
-            seed          = 42,
+            seed          = args.maze_seed,
             start_cell    = (0, 0),
             goal_cell     = (MAZE_GRID_SIZE - 1, MAZE_GRID_SIZE - 1),
             box_size      = BOX_SIZE,
