@@ -81,3 +81,8 @@ cpus=16, time=336.511
 
 2m 30x30
 cpus=16, time=8332.3
+G=35: run=1, cpus=32, output=maze_G35_run1, time=2645.58
+G=35: run=4, cpus=32, output=maze_G35_run4, time=3935.5
+G=35: run=2, cpus=32, output=maze_G35_run2, time=4960.61
+G=35: run=3, cpus=32, output=maze_G35_run3, time=5099.71
+G=35: run=5, cpus=32, output=maze_G35_run5, time=7320.63
