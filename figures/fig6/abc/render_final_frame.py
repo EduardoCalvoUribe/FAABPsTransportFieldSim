@@ -20,7 +20,7 @@ SOURCE_FILE      = os.path.join(_HERE, "maze_G5_run1.npz")
 OUTPUT_IMAGE     = os.path.join(_HERE, "maze_G5_run1.png")
 COLOR_BY_SCORE   = False   # True = rainbow by score, False = curvity blue/red
 DRAW_OPENED_WALL = False   # True = draw red line where shortcut wall was removed
-DRAW_SCORE_EDGES = True    # True = draw one directed edge per particle (score graph)
+DRAW_SCORE_EDGES = False    # True = draw one directed edge per particle (score graph)
 VIEW_RANGE       = 90.0    # Particle observation range r; overridden by NPZ if stored
 
 import sys as _sys
