@@ -65,7 +65,7 @@ N_STEPS=${MAX_STEPS[$G]}
 
 PROJECT_HOME="$HOME/FAABPsTransportFieldSim"
 OUTPUT_NAME="mazescale_G${G}_run${RUN_ID}_seed${MAZE_SEED}"
-CMD=(python main.py "$G" "$OUTPUT_NAME" --maze-seed "$MAZE_SEED" --n-steps "$N_STEPS")
+CMD=(python main.py "$G" "$OUTPUT_NAME" --maze-seed "$MAZE_SEED" --n-steps "$N_STEPS" --no-shortcut)
 LOG_DIR="$PROJECT_HOME/logsMazeScale"
 DESC="maze G=$G run=$RUN_ID maze_seed=$MAZE_SEED n_steps=$N_STEPS"
 
