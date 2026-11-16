@@ -14,33 +14,12 @@ raw_data = {
     100: [103190, 118197, 113178, 128281, 117503], # 138170
     400: [720429, 503865, 631420, 567655, 392383], # 635820
     900: [2196953, 2222580, 3315073, 3452369, 5826395], # 2645760
+    1225: [865693, 1119207, 1536524, 1552937, 2203070],  # G=35
     # 1600: [],
 }
 
-# ── New runs from Snellius ────────────────────────────────────────────────────
-# Copy maze_results.txt (written by snellius_extra_runs.sh) next to this script,
-# or pass its path(s) as arguments. Lines look like:
-#   MAZE_RESULT: G=35 run=1 final_step=1234567 output=maze_G35_run1
-# Keys are maze AREA (G^2). Runs are de-duplicated by output name, and a run
-# that did not reach the goal (final_step == N_STEPS) is dropped.
-import os, re, sys
-N_STEPS = 20000000
+import os
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_new = {}
-for _path in [os.path.join(_HERE, 'maze_results.txt')] + sys.argv[1:]:
-    if not os.path.exists(_path):
-        continue
-    with open(_path) as _f:
-        for _line in _f:
-            if not _line.startswith('MAZE_RESULT:'):
-                continue
-            kv = dict(re.findall(r'(\w+)=(\S+)', _line))
-            if kv['final_step'] == 'NA' or int(kv['final_step']) >= N_STEPS:
-                print(f"Skipping unfinished run: {_line.strip()}")
-                continue
-            _new[kv['output']] = (int(kv['G']) ** 2, int(kv['final_step']))
-for _area, _steps in _new.values():
-    raw_data.setdefault(_area, []).append(_steps)
 print({a: len(v) for a, v in sorted(raw_data.items())}, "trials per maze area")
 
 data ={s: [v * DT * V0 / R for v in vals] for s, vals in raw_data.items()}
