@@ -11,6 +11,7 @@ import time
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.collections import PatchCollection
+from matplotlib.colors import Normalize
 import numpy as np
 
 
@@ -27,6 +28,12 @@ if len(_sys.argv) > 1:
     SOURCE_FILE = _sys.argv[1]
     _stem = os.path.splitext(os.path.basename(SOURCE_FILE))[0]
     OUTPUT_IMAGE = os.path.join(_HERE, f"{_stem}.png")
+
+# Per-maze score at which the colormap saturates (yellow); keyed by G number.
+MAXCOLOR_SCORE_BY_G = {5: 5, 10: 15, 20: 22, 30: 30}
+import re as _re
+_m = _re.search(r"_G(\d+)_", os.path.basename(SOURCE_FILE))
+MAXCOLOR_SCORE = MAXCOLOR_SCORE_BY_G.get(int(_m.group(1)) if _m else None, 35)
 if "--no-marker" in _sys.argv:
     DRAW_OPENED_WALL = False
 if "--no-edges" in _sys.argv:
@@ -235,8 +242,14 @@ def curvity_color(c):
                 gray[2] + t * (0.250 - gray[2]))
 
 
+# Scores outside [MIN, MAX] clip to the end colours.
+MINCOLOR_SCORE = 0
+SCORE_CMAP = plt.get_cmap('viridis')
+SCORE_NORM = Normalize(vmin=MINCOLOR_SCORE, vmax=MAXCOLOR_SCORE, clip=True)
+
+
 def score_color(s):
-    return plt.get_cmap('viridis')(min(max(float(s), 0.0) / 35.0, 1.0))[:3]
+    return SCORE_CMAP(SCORE_NORM(float(s)))[:3]
 
 
 PAYLOAD_COLOR  = '#737BA8'
@@ -529,6 +542,43 @@ if __name__ == "__main__":
         traj_x = payload_trajectory[:, 0] - px_final
         traj_y = payload_trajectory[:, 1] - py_final
         inset_ax.plot(traj_x, traj_y, color=PATH_COLOR, linewidth=4.0, linestyle='-', alpha=0.75, zorder=8)
+
+    # ── Particle-score colorbar (same style as fig 1e), below the inset ───
+    if COLOR_BY_SCORE:
+        # Axes fill the figure, so axes fractions == figure fractions here.
+        # Inset occupies x 0.02–0.27, y 0.73–0.98; without an inset, take its slot.
+        box_x0, box_w = 0.02, 0.25
+        box_top = (0.73 - 0.012) if box_size > 300 else 0.98
+        pad_y, cb_h = 0.012, 0.018
+        fig.canvas.draw()
+        renderer = fig.canvas.get_renderer()
+        inv = fig.transFigure.inverted()
+        cax = fig.add_axes([box_x0 + 0.03, box_top - pad_y - cb_h,
+                            box_w - 0.06, cb_h])
+        cax.set_zorder(25)
+        sm = plt.cm.ScalarMappable(norm=SCORE_NORM, cmap=SCORE_CMAP)
+        cb = fig.colorbar(sm, cax=cax, orientation='horizontal', alpha=1)
+        _mid = (MINCOLOR_SCORE + MAXCOLOR_SCORE) / 2
+        cb.set_ticks([MINCOLOR_SCORE, _mid, MAXCOLOR_SCORE])
+        cb.set_ticklabels([f'{MINCOLOR_SCORE:g}', f'{_mid:g}', f'≥{MAXCOLOR_SCORE:g}'])
+        cb.ax.tick_params(labelsize=14)
+        cb.set_label('Particle score', fontsize=16)
+        cb.outline.set_linewidth(0.8)
+        tl = cb.ax.get_xticklabels()
+        tl[0].set_ha('left')
+        tl[-1].set_ha('right')
+
+        # White rounded box around the colorbar + label
+        fig.canvas.draw()
+        tb = cb.ax.get_tightbbox(renderer).transformed(inv)
+        box_bottom = tb.y0 - pad_y
+        box = mpatches.FancyBboxPatch(
+            (box_x0, box_bottom), box_w, box_top - box_bottom,
+            boxstyle='round,pad=0,rounding_size=0.004',
+            transform=fig.transFigure, facecolor='white',
+            edgecolor='#282828', linewidth=wall_lw, joinstyle='round',
+            zorder=19, clip_on=False)
+        ax.add_artist(box)
 
     plt.savefig(OUTPUT_IMAGE, dpi=150, bbox_inches='tight', pad_inches=0)
     plt.close()
