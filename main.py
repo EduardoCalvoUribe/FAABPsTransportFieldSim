@@ -265,8 +265,10 @@ if __name__ == "__main__":  # simulation runner
     parser = argparse.ArgumentParser()
     parser.add_argument("maze_grid_size", type=int)
     parser.add_argument("output_name", type=str)
+    parser.add_argument("--shortcut", action="store_true",
+                        help="Open the best shortcut wall (non-perfect maze). Default: perfect maze")
     parser.add_argument("--no-shortcut", action="store_true",
-                        help="Use the original perfect maze (no wall removed)")
+                        help="Deprecated no-op: perfect maze is now the default")
     parser.add_argument("--maze-seed", type=int, default=42,
                         help="Seed for Wilson maze generation (default 42, the original)")
     parser.add_argument("--n-steps", type=int, default=None,
@@ -287,7 +289,7 @@ if __name__ == "__main__":  # simulation runner
     DATA_OUTPUT_PATH = f"data/{args.output_name}.npz"
     OUTPUT_FILENAME = f"visualizations/{args.output_name}.mp4"
 
-    if args.no_shortcut:
+    if not args.shortcut:
         _passages  = wilson.generate(MAZE_GRID_SIZE, seed=args.maze_seed)
         _path_info = {}
     else:
