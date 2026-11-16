@@ -4,7 +4,7 @@ import os
 # Ensure project root is in sys.path regardless of invocation directory,
 # and that fig6/ is in sys.path so maze_pruning can be imported directly.
 _FIG6_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_ROOT = os.path.dirname(_FIG6_DIR)
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(_FIG6_DIR)))  # figures/fig6/f -> repo root
 for _p in (_PROJECT_ROOT, _FIG6_DIR):
     if _p not in sys.path:
         sys.path.insert(0, _p)

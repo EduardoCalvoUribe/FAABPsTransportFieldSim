@@ -6,7 +6,9 @@
 #SBATCH --time=48:00:00
 #SBATCH --partition=rome
 # 5 (maze G=35, runs 1-5) + 44 (wall-pruning: 11 steps x 4 extra runs) = 49 tasks
-#SBATCH --array=0-48
+# Maze G=35 tasks (0-4) already completed -> only wall-pruning tasks 5-48 are submitted.
+# (To rerun everything: --array=0-48, or override: sbatch --array=5-48 ...)
+#SBATCH --array=5-48
 
 set -euo pipefail
 
@@ -27,7 +29,7 @@ export NUMBA_THREADING_LAYER=omp
 # TASK MAPPING
 #   0-4   : maze scaling, G=35, run_id 1-5          (main.py)
 #   5-48  : wall pruning, G=20, runs 2-5 (run 1 = existing data)
-#           ordered run-major: 11 prune steps per run  (fig6/main_fig6.py)
+#           ordered run-major: 11 prune steps per run  (figures/fig6/f/main_fig6.py)
 # ---------------------------
 T=$SLURM_ARRAY_TASK_ID
 N_MAZE_TASKS=5
@@ -51,7 +53,7 @@ else
   PRUNE_STEP=${PRUNE_STEPS[$(( W % 11 ))]}
   RUN_ID=$(( W / 11 + 2 ))           # runs 2..5
   OUTPUT_NAME="wallprune_G${G}_step$(printf '%03d' "$PRUNE_STEP")_run${RUN_ID}"
-  CMD=(python fig6/main_fig6.py "$G" "$PRUNE_STEP" "$OUTPUT_NAME" --prune-seed "$PRUNE_SEED")
+  CMD=(python figures/fig6/f/main_fig6.py"$G" "$PRUNE_STEP" "$OUTPUT_NAME" --prune-seed "$PRUNE_SEED")
   LOG_DIR="$PROJECT_HOME/logsWallPrune"
   DESC="wallprune G=$G step=$PRUNE_STEP run=$RUN_ID"
 fi
