@@ -5,7 +5,6 @@ walls, and the goal marker. Much faster than rendering a full video because
 only the last frame of particle data is read from disk.
 """
 
-import colorsys
 import os
 import time
 
@@ -18,7 +17,7 @@ import numpy as np
 _HERE            = os.path.dirname(os.path.abspath(__file__))
 SOURCE_FILE      = os.path.join(_HERE, "maze_G5_run1.npz")
 OUTPUT_IMAGE     = os.path.join(_HERE, "maze_G5_run1.png")
-COLOR_BY_SCORE   = False   # True = rainbow by score, False = curvity blue/red
+COLOR_BY_SCORE   = True   # True = viridis by score, False = curvity blue/red
 DRAW_OPENED_WALL = False   # True = draw red line where shortcut wall was removed
 DRAW_SCORE_EDGES = False    # True = draw one directed edge per particle (score graph)
 VIEW_RANGE       = 90.0    # Particle observation range r; overridden by NPZ if stored
@@ -237,8 +236,7 @@ def curvity_color(c):
 
 
 def score_color(s):
-    hue = (0.75 + (float(s) % 50) / 50.0) % 1.0
-    return colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+    return plt.get_cmap('viridis')(min(max(float(s), 0.0) / 35.0, 1.0))[:3]
 
 
 PAYLOAD_COLOR  = '#737BA8'
