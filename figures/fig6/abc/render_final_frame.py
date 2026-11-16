@@ -30,7 +30,7 @@ if len(_sys.argv) > 1:
     OUTPUT_IMAGE = os.path.join(_HERE, f"{_stem}.png")
 
 # Per-maze score at which the colormap saturates (yellow); keyed by G number.
-MAXCOLOR_SCORE_BY_G = {5: 5, 10: 15, 20: 22, 30: 30}
+MAXCOLOR_SCORE_BY_G = {5: 5, 10: 10, 20: 20, 30: 35}
 import re as _re
 _m = _re.search(r"_G(\d+)_", os.path.basename(SOURCE_FILE))
 MAXCOLOR_SCORE = MAXCOLOR_SCORE_BY_G.get(int(_m.group(1)) if _m else None, 35)
@@ -254,7 +254,7 @@ def score_color(s):
 
 PAYLOAD_COLOR  = '#737BA8'
 GOAL_COLOR     = '#008F25'   # dark green
-PATH_COLOR     = '#4682B4'   # steel blue
+PATH_COLOR     = '#00008B'   # dark blue (same as fig1e default payload path)
 
 # Payload texture: Perlin noise mapped from light to dark grey (as in fig1e)
 PAYLOAD_GRAY_LIGHT    = (0.86, 0.86, 0.86)
@@ -416,7 +416,7 @@ if __name__ == "__main__":
     display_radii = np.maximum(particle_radius, min_r) * radius_scale
     circles = [mpatches.Circle((x, y), radius=ri)
                for (x, y), ri in zip(last_positions, display_radii)]
-    pc = PatchCollection(circles, facecolors=colors, alpha=0.7, linewidths=0, zorder=6)
+    pc = PatchCollection(circles, facecolors=colors, alpha=0.7, linewidths=0, zorder=9)
     ax.add_collection(pc)
 
     # Payload (final position) — Perlin-noise grey texture
@@ -509,7 +509,7 @@ if __name__ == "__main__":
         rel_y = last_positions[:, 1] - py_final
         inset_circles = [mpatches.Circle((dx, dy), radius=ri * radius_scale)
                          for dx, dy, ri in zip(rel_x, rel_y, particle_radius)]
-        inset_pc = PatchCollection(inset_circles, facecolors=colors, alpha=0.7, linewidths=0, zorder=6)
+        inset_pc = PatchCollection(inset_circles, facecolors=colors, alpha=0.7, linewidths=0, zorder=9)
         inset_ax.add_collection(inset_pc)
 
         # Payload at origin — Perlin-noise grey texture
