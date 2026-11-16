@@ -230,10 +230,10 @@ def curvity_color(c):
                 t * gray[2] + (1 - t) * 0.000)
     else:
         t = c       # 0 at c=0, 1 at c=+1
-        # #00AAFF = (0.0, 0.667, 1.0) — neon azure
+        # #00C040 = (0.0, 0.753, 0.25) — green
         return (gray[0] + t * (0.000 - gray[0]),
-                gray[1] + t * (0.667 - gray[1]),
-                gray[2] + t * (1.000 - gray[2]))
+                gray[1] + t * (0.753 - gray[1]),
+                gray[2] + t * (0.250 - gray[2]))
 
 
 def score_color(s):
@@ -243,7 +243,60 @@ def score_color(s):
 
 PAYLOAD_COLOR  = '#737BA8'
 GOAL_COLOR     = '#008F25'   # dark green
-PATH_COLOR     = '#D62728'   # red
+PATH_COLOR     = '#4682B4'   # steel blue
+
+# Payload texture: Perlin noise mapped from light to dark grey (as in fig1e)
+PAYLOAD_GRAY_LIGHT    = (0.86, 0.86, 0.86)
+PAYLOAD_GRAY_DARK     = (0.40, 0.40, 0.40)
+PAYLOAD_NOISE_CELLS   = 4
+PAYLOAD_NOISE_OCTAVES = 6
+PAYLOAD_NOISE_PERSIST = 0.65   # >0.5 gives higher octaves more weight (finer detail)
+PAYLOAD_NOISE_SIZE    = 768
+PAYLOAD_NOISE_SEED    = 7
+
+
+def perlin_noise(size, cells, octaves=1, seed=0, persistence=0.5):
+    """Fractal 2D Perlin noise, (size, size) array normalised to [0, 1]."""
+    rng = np.random.default_rng(seed)
+    out = np.zeros((size, size))
+    amp, total = 1.0, 0.0
+    for o in range(octaves):
+        n = cells * 2**o
+        ang = rng.uniform(0, 2 * np.pi, (n + 1, n + 1))
+        gx, gy = np.cos(ang), np.sin(ang)
+        t = np.linspace(0, n, size, endpoint=False)
+        xi = t.astype(int)
+        f = t - xi
+        u = f * f * f * (f * (f * 6 - 15) + 10)
+        X, Y = np.meshgrid(f, f)
+        U, V = np.meshgrid(u, u)
+        ix, iy = np.meshgrid(xi, xi)
+
+        def dot(dx, dy):
+            return gx[iy + dy, ix + dx] * (X - dx) + gy[iy + dy, ix + dx] * (Y - dy)
+
+        n00, n10, n01, n11 = dot(0, 0), dot(1, 0), dot(0, 1), dot(1, 1)
+        val = (n00 * (1 - U) + n10 * U) * (1 - V) + (n01 * (1 - U) + n11 * U) * V
+        out += amp * val
+        total += amp
+        amp *= persistence
+    out /= total
+    return (out - out.min()) / (out.max() - out.min())
+
+
+def draw_textured_payload(axis, cx, cy, radius):
+    """Draw the payload as a circle filled with a Perlin-noise grey texture."""
+    noise = perlin_noise(PAYLOAD_NOISE_SIZE, PAYLOAD_NOISE_CELLS, PAYLOAD_NOISE_OCTAVES,
+                         PAYLOAD_NOISE_SEED, PAYLOAD_NOISE_PERSIST)
+    lo = np.array(PAYLOAD_GRAY_LIGHT); hi = np.array(PAYLOAD_GRAY_DARK)
+    tex = lo + (hi - lo) * noise[..., None]
+    xlim, ylim = axis.get_xlim(), axis.get_ylim()
+    im = axis.imshow(tex, extent=(cx - radius, cx + radius, cy - radius, cy + radius),
+                     origin='lower', interpolation='bilinear', alpha=1.0, zorder=7)
+    im.set_clip_path(mpatches.Circle((cx, cy), radius=radius, transform=axis.transData))
+    axis.set_xlim(xlim); axis.set_ylim(ylim); axis.set_aspect('equal')
+    axis.add_patch(mpatches.Circle((cx, cy), radius=radius, facecolor='none',
+                                   edgecolor='#282828', linewidth=1.0, zorder=7.1))
 
 # Per-maze minimum visual particle size (set after box_size is known, inside __main__)
 # G10/G20 → G5 reference (box/300);  G30 → G10 reference (box/600)
@@ -347,27 +400,17 @@ if __name__ == "__main__":
         min_r = box_size / 400.0
     else:
         min_r = box_size / 300.0
-    display_radii = np.maximum(particle_radius, min_r)
+    # 1.5x larger particles for G5 and above (box_size > 120 → G > 2)
+    radius_scale = 1.5 if box_size > 120 else 1.0
+    display_radii = np.maximum(particle_radius, min_r) * radius_scale
     circles = [mpatches.Circle((x, y), radius=ri)
                for (x, y), ri in zip(last_positions, display_radii)]
     pc = PatchCollection(circles, facecolors=colors, alpha=0.7, linewidths=0, zorder=6)
     ax.add_collection(pc)
 
-    # For small maps (G2) label every particle in the main view
-    if box_size <= 120:
-        label_offset_main = float(display_radii[0]) * 1.4
-        for i in range(n_particles):
-            ax.text(last_positions[i, 0] - label_offset_main, last_positions[i, 1],
-                    str(i), fontsize=8, ha='right', va='center',
-                    color='black', zorder=9)
-
-    # Payload (final position) — solid gold disk
+    # Payload (final position) — Perlin-noise grey texture
     px_final, py_final = payload_trajectory[-1, 0], payload_trajectory[-1, 1]
-    ax.add_patch(mpatches.Circle(
-        (px_final, py_final), radius=payload_radius,
-        facecolor=PAYLOAD_COLOR, edgecolor='none',
-        alpha=1.0, zorder=7,
-    ))
+    draw_textured_payload(ax, px_final, py_final, payload_radius)
 
     # Goal
     ax.plot(goal_position[0], goal_position[1],
@@ -453,25 +496,13 @@ if __name__ == "__main__":
         # Particle positions relative to final payload centre — no periodic wrapping
         rel_x = last_positions[:, 0] - px_final
         rel_y = last_positions[:, 1] - py_final
-        inset_circles = [mpatches.Circle((dx, dy), radius=ri)
+        inset_circles = [mpatches.Circle((dx, dy), radius=ri * radius_scale)
                          for dx, dy, ri in zip(rel_x, rel_y, particle_radius)]
         inset_pc = PatchCollection(inset_circles, facecolors=colors, alpha=0.7, linewidths=0, zorder=6)
         inset_ax.add_collection(inset_pc)
 
-        # Particle ID labels — shown only for particles inside the visible zoom window
-        label_offset = r * 1.4   # nudge label to the left of each particle (true radius)
-        for i in range(n_particles):
-            if abs(rel_x[i]) < zoom_half and abs(rel_y[i]) < zoom_half:
-                inset_ax.text(rel_x[i] - label_offset, rel_y[i],
-                              str(i), fontsize=6, ha='right', va='center',
-                              color='black', zorder=9)
-
-        # Payload at origin — solid gold disk
-        inset_ax.add_patch(mpatches.Circle(
-            (0, 0), radius=payload_radius,
-            facecolor=PAYLOAD_COLOR, edgecolor='none',
-            alpha=1.0, zorder=7,
-        ))
+        # Payload at origin — Perlin-noise grey texture
+        draw_textured_payload(inset_ax, 0.0, 0.0, payload_radius)
 
         # Goal in payload-relative coordinates — no periodic wrapping
         gx_rel = goal_position[0] - px_final
@@ -499,7 +530,7 @@ if __name__ == "__main__":
         # Payload trajectory relative to final payload position — no periodic wrapping
         traj_x = payload_trajectory[:, 0] - px_final
         traj_y = payload_trajectory[:, 1] - py_final
-        inset_ax.plot(traj_x, traj_y, color=PATH_COLOR, linewidth=3.0, linestyle='-', alpha=0.75, zorder=8)
+        inset_ax.plot(traj_x, traj_y, color=PATH_COLOR, linewidth=4.0, linestyle='-', alpha=0.75, zorder=8)
 
     plt.savefig(OUTPUT_IMAGE, dpi=150, bbox_inches='tight', pad_inches=0)
     plt.close()
