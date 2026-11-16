@@ -60,23 +60,27 @@ ax.plot(x_fit, y_fit, '--', color='steelblue', alpha=0.5,
 ax.errorbar(sizes, means, yerr=stds, fmt='o', markersize=8,
             color='steelblue', capsize=4,) # label='mean ± std'
 
-offsets = [(8, 0)] * (len(sizes) - 1) + [(-55, 0)]
-for x, y, (dx, dy) in zip(sizes, means, offsets):
-    ax.annotate(f'{y:,.0f}', (x, y), textcoords='offset points',
-                xytext=(dx, dy), va='center', fontsize=9)
+#offsets = [(8, 0)] * (len(sizes) - 1) + [(-55, 0)]
+#for x, y, (dx, dy) in zip(sizes, means, offsets):
+#    ax.annotate(f'{y:,.0f}', (x, y), textcoords='offset points',
+#                xytext=(dx, dy), va='center', fontsize=9)
+
+ax.tick_params(axis='both', labelsize=16)
 
 ax.set_xscale('log')
 ax.set_yscale('log')
-ax.set_xticks(sizes)
-ax.set_xticklabels([str(s) for s in sizes])
+#ax.set_xticks(sizes)
+#ax.set_xticklabels([str(s) for s in sizes])
 ax.xaxis.set_minor_formatter(ticker.NullFormatter())
 ax.set_ylim(100, 1000000)
-ax.set_xlabel('Maze Area')
-ax.set_ylabel(r'Time to Reach Goal  ($t^* = t\, v_0 / r$)')
-ax.set_title(r'Time to Reach Goal vs Maze Area ($t^* = t\, v_0 / r$)')
-ax.legend(fontsize=9)
+ax.set_xlabel('Maze Area (# Cells)',fontsize=18)
+ax.set_ylabel(r'Time to Target  ($t^* = t\, v_0 / r$)',fontsize=18)
+#ax.set_title(r'Time to Reach Goal vs Maze Area ($t^* = t\, v_0 / r$)')
+ax.legend(fontsize=16)
+
+
 ax.grid(True, which='both', linestyle='--', alpha=0.4)
-ax.set_xlim(sizes[0] * 0.85, sizes[-1] * 1.15)
+ax.set_xlim(1,1500)
 plt.tight_layout()
-plt.savefig(os.path.join(_HERE, 'maze_scaling_plot.png'), dpi=150)
+plt.savefig(os.path.join(_HERE, 'maze_scaling_plot.png'), dpi=300) 
 plt.show()
